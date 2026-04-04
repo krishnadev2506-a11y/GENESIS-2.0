@@ -83,11 +83,13 @@ export const Register = () => {
       if (authErr) throw authErr
       const uid = authData.user.id
 
-      // Update profile with extra fields
-      await supabase.from('profiles').update({
+      // Update profile with extra fields (Wait a bit for trigger to finish or use upsert)
+      await new Promise(r => setTimeout(r, 500))
+      const { error: profErr } = await supabase.from('profiles').update({
         phone: identityData.phone, college: identityData.college,
         year_desig: identityData.year_desig, ...prefs
       }).eq('id', uid)
+      if (profErr) console.warn('Profile update warning:', profErr.message)
 
       let tId = null
       if (isTeam) {

@@ -189,9 +189,18 @@ ALTER TABLE event_settings ENABLE ROW LEVEL SECURITY;
 -- ─────────────────────────────────────────────
 
 -- Profiles
-CREATE POLICY "Users can view own profile or admins" 
+CREATE POLICY "Users can view own profile" 
 ON profiles FOR SELECT TO authenticated 
-USING (id = auth.uid() OR get_user_role(auth.uid()) IN ('admin', 'judge') OR role = 'admin');
+USING (id = auth.uid());
+
+CREATE POLICY "Admins can view all profiles" 
+ON profiles FOR SELECT TO authenticated 
+USING (public.get_user_role(auth.uid()) = 'admin');
+
+CREATE POLICY "Anyone can view admin profiles" 
+ON profiles FOR SELECT TO authenticated 
+USING (role = 'admin');
+
 CREATE POLICY "users_own_profile_update" ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "admin_all_profiles" ON profiles FOR ALL USING (public.get_user_role(auth.uid()) = 'admin');
 

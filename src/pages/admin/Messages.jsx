@@ -9,7 +9,7 @@ import { Send, Radio, MessageSquare } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 export const AdminMessages = () => {
-  const { profile } = useAuthStore()
+  const { user, profile } = useAuthStore()
   const [tab, setTab] = useState('broadcast')
   const [announcements, setAnnouncements] = useState([])
   const [msgs, setMsgs] = useState([])
@@ -42,14 +42,14 @@ export const AdminMessages = () => {
 
   const loadDMs = async (userId) => {
     const { data } = await supabase.from('messages').select('*, profiles!messages_sender_id_fkey(full_name)')
-      .or(`and(sender_id.eq.${profile.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${profile.id})`)
+      .or(`and(sender_id.eq.${user.id},receiver_id.eq.${userId}),and(sender_id.eq.${userId},receiver_id.eq.${user.id})`)
       .order('created_at')
     setMsgs(data || [])
   }
 
   const sendAnnouncement = async () => {
     if (!annTitle.trim() || !annBody.trim()) return toast.error('Title and body required')
-    const { error } = await supabase.from('announcements').insert({ title: annTitle, body: annBody, priority: annPriority, created_by: profile.id })
+    const { error } = await supabase.from('announcements').insert({ title: annTitle, body: annBody, priority: annPriority, created_by: user.id })
     if (error) toast.error(error.message)
     else { toast.success('ANNOUNCEMENT SENT'); setAnnTitle(''); setAnnBody(''); loadAnnouncements() }
   }
@@ -62,7 +62,7 @@ export const AdminMessages = () => {
 
   const sendDM = async () => {
     if (!dmContent.trim() || !selectedUser) return
-    const { error } = await supabase.from('messages').insert({ sender_id: profile.id, receiver_id: selectedUser.id, content: dmContent, is_broadcast: false })
+    const { error } = await supabase.from('messages').insert({ sender_id: user.id, receiver_id: selectedUser.id, content: dmContent, is_broadcast: false })
     if (error) toast.error(error.message)
     else { setDmContent(''); loadDMs(selectedUser.id) }
   }
@@ -152,6 +152,12 @@ export const AdminMessages = () => {
                 className="w-full bg-cp-dark border border-cp-border px-3 py-2 font-mono text-xs text-cp-text outline-none focus:border-cp-cyan placeholder:text-cp-muted" />
             </div>
             <div className="overflow-y-auto h-[420px]">
+              {filteredParticipants.length === 0 && (
+                <div className="p-8 text-center text-cp-muted font-mono text-[10px]">
+                  NO PARTICIPANTS FOUND.<br/>
+                  Ensure users have registered correctly.
+                </div>
+              )}
               {filteredParticipants.map(p => (
                 <button key={p.id} onClick={() => selectUser(p)}
                   className={`w-full text-left px-4 py-3 font-mono text-xs border-b border-cp-border/30 transition-colors ${selectedUser?.id === p.id ? 'bg-cp-cyan/10 text-cp-cyan' : 'text-cp-text hover:bg-cp-card'}`}>
