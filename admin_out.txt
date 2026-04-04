@@ -1,0 +1,6 @@
+Error fetching admin profiles: {
+  code: 'PGRST205',
+  details: null,
+  hint: "Perhaps you meant the table 'public.hackfit_test'",
+  message: "Could not find the table 'public.profiles' in the schema cache"
+}
