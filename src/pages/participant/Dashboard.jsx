@@ -52,7 +52,7 @@ export const ParticipantDashboard = () => {
   )
 
   return (
-    <div className="p-8 space-y-8 max-w-5xl">
+    <div className="p-4 md:p-8 space-y-8 max-w-5xl">
       {/* Header */}
       <div>
         <h1 className="font-orbitron font-bold text-3xl text-cp-cyan mb-1">

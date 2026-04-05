@@ -11,7 +11,8 @@ import { Footer } from '../components/layout/Footer'
 import { motion } from 'framer-motion'
 
 // ─── Data Generation ──────────────────────────────────────────────────────────
-const BUILDING_COUNT = 180
+const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+const BUILDING_COUNT = isMobile ? 80 : 180
 const BUILDING_DATA = Array.from({ length: BUILDING_COUNT }, (_, i) => {
   const xSide = i % 2 === 0 ? 1 : -1
   const x = xSide * (18 + ((i * 137.5) % 50))
@@ -206,11 +207,17 @@ const DynamicCamera = () => {
 
   useEffect(() => {
     const handleMove = (e) => {
-      pointer.x = (e.clientX / window.innerWidth) * 2 - 1
-      pointer.y = -(e.clientY / window.innerHeight) * 2 + 1
+      const x = e.touches ? e.touches[0].clientX : e.clientX
+      const y = e.touches ? e.touches[0].clientY : e.clientY
+      pointer.x = (x / window.innerWidth) * 2 - 1
+      pointer.y = -(y / window.innerHeight) * 2 + 1
     }
     window.addEventListener('mousemove', handleMove)
-    return () => window.removeEventListener('mousemove', handleMove)
+    window.addEventListener('touchmove', handleMove)
+    return () => {
+      window.removeEventListener('mousemove', handleMove)
+      window.removeEventListener('touchmove', handleMove)
+    }
   }, [pointer])
 
   useFrame((state, delta) => {
@@ -313,22 +320,22 @@ const HTMLContent = () => {
       {/* PRIZES */}
       <section className="h-[100vh] flex flex-col justify-center items-center px-4 pointer-events-auto pb-40">
         <motion.div style={sPrizes} className="text-center w-full max-w-3xl will-change-transform">
-          <h2 className="font-orbitron font-bold text-5xl mb-12 drop-shadow-[0_0_20px_rgba(245,230,66,0.3)]">THE LOOT</h2>
-          <div className="flex flex-col md:flex-row justify-center gap-8 items-center">
-            <div className="border border-[#00F5FF]/40 bg-black/50 p-8 pt-12 mt-8 md:mt-12 backdrop-blur-md relative transform hover:scale-105 transition-all w-full md:w-1/3">
-               <div className="text-[#00F5FF] font-mono mb-2">2ND</div>
-               <div className="text-3xl font-orbitron">₹25K</div>
+          <h2 className="font-orbitron font-bold text-3xl md:text-5xl mb-12 drop-shadow-[0_0_20px_rgba(245,230,66,0.3)]">THE LOOT</h2>
+          <div className="flex flex-col md:flex-row justify-center gap-8 items-center px-4">
+            <div className="border border-[#00F5FF]/40 bg-black/50 p-6 pt-10 mt-8 md:mt-12 backdrop-blur-md relative transform hover:scale-105 transition-all w-full md:w-1/3">
+               <div className="text-[#00F5FF] font-mono mb-2 text-xs">2ND</div>
+               <div className="text-2xl md:text-3xl font-orbitron">₹25K</div>
             </div>
-            <div className="border border-[#F5E642] bg-[#F5E642]/10 p-10 pt-16 backdrop-blur-md relative transform scale-110 hover:scale-125 transition-all w-full md:w-1/3 shadow-[0_0_40px_rgba(245,230,66,0.2)]">
-               <div className="text-[#F5E642] font-mono mb-2 font-bold">1ST</div>
-               <div className="text-4xl font-orbitron font-bold">₹50K</div>
+            <div className="border border-[#F5E642] bg-[#F5E642]/10 p-8 pt-14 backdrop-blur-md relative transform scale-105 md:scale-110 hover:scale-125 transition-all w-full md:w-1/3 shadow-[0_0_40px_rgba(245,230,66,0.2)]">
+               <div className="text-[#F5E642] font-mono mb-2 font-bold text-xs">1ST</div>
+               <div className="text-3xl md:text-4xl font-orbitron font-bold">₹50K</div>
             </div>
-            <div className="border border-[#FF2D78]/40 bg-black/50 p-8 pt-12 mt-8 md:mt-12 backdrop-blur-md relative transform hover:scale-105 transition-all w-full md:w-1/3">
-               <div className="text-[#FF2D78] font-mono mb-2">3RD</div>
-               <div className="text-3xl font-orbitron">₹10K</div>
+            <div className="border border-[#FF2D78]/40 bg-black/50 p-6 pt-10 mt-8 md:mt-12 backdrop-blur-md relative transform hover:scale-105 transition-all w-full md:w-1/3">
+               <div className="text-[#FF2D78] font-mono mb-2 text-xs">3RD</div>
+               <div className="text-2xl md:text-3xl font-orbitron">₹10K</div>
             </div>
           </div>
-          <NeonButton variant="primary" onClick={() => window.location.href='/register'} className="text-xl px-12 py-4 mt-20">BOOT SEQUENCE</NeonButton>
+          <NeonButton variant="primary" onClick={() => window.location.href='/register'} className="text-lg md:text-xl px-12 py-4 mt-16 md:mt-20">BOOT SEQUENCE</NeonButton>
         </motion.div>
       </section>
 

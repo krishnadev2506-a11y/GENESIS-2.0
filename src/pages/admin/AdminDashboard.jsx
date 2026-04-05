@@ -52,7 +52,7 @@ export const AdminDashboard = () => {
   if (loading) return <div className="p-8 font-mono text-cp-cyan animate-pulse">LOADING METRICS...</div>
 
   return (
-    <div className="p-8 space-y-8 max-w-6xl">
+    <div className="p-4 md:p-8 space-y-8 max-w-6xl">
       <div>
         <h1 className="font-orbitron font-bold text-3xl text-cp-magenta mb-1"><GlitchText text="ADMIN_OVERVIEW" /></h1>
         <p className="font-mono text-cp-muted text-sm">REAL-TIME EVENT METRICS</p>
