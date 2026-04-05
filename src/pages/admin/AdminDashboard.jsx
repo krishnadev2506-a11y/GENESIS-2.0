@@ -24,7 +24,7 @@ export const AdminDashboard = () => {
         supabase.from('teams').select('*', { count: 'exact', head: true }),
         supabase.from('attendance').select('*', { count: 'exact', head: true }),
         supabase.from('submissions').select('*', { count: 'exact', head: true }),
-        supabase.from('registrations').select('*, profiles(full_name, email, college)').order('created_at', { ascending: false }).limit(5)
+        supabase.from('registrations').select('*, profiles!registrations_user_id_fkey(full_name, email, college)').order('created_at', { ascending: false }).limit(5)
       ])
       setMetrics({
         totalUsers: users || 0,
@@ -77,9 +77,9 @@ export const AdminDashboard = () => {
           <Megaphone size={14} className="text-cp-magenta" /> LATEST REGISTRATIONS
         </h2>
         <div className="overflow-x-auto">
-          <table className="w-full font-mono text-xs">
+          <table className="w-full font-mono text-xs min-w-[500px]">
             <thead>
-              <tr className="border-b border-cp-border text-cp-muted">
+              <tr className="border-b border-cp-border text-cp-muted whitespace-nowrap">
                 <th className="text-left py-2 pr-4">NAME</th>
                 <th className="text-left py-2 pr-4">EMAIL</th>
                 <th className="text-left py-2 pr-4">COLLEGE</th>

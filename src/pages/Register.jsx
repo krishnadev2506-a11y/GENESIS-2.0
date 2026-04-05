@@ -130,7 +130,7 @@ export const Register = () => {
       <div className="w-full max-w-[600px] flex flex-col gap-6">
 
         {/* Step tracker */}
-        <HoloPanel className="flex justify-between items-center px-8 relative overflow-hidden">
+        <HoloPanel className="flex justify-between items-center px-4 md:px-8 relative overflow-hidden">
           <div className="absolute top-1/2 left-8 right-8 h-[1px] bg-[#2A2A3F] -translate-y-1/2 z-0" />
           {steps.map((label, idx) => {
             const num = idx + 1
@@ -248,7 +248,7 @@ export const Register = () => {
           {step === 4 && (
             <div className="flex flex-col gap-6">
               <div className="bg-[#0A0A0F] border border-[#2A2A3F] p-6 font-mono text-xs space-y-3">
-                <div className="grid grid-cols-2 gap-2 text-[#6B6B8A]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[#6B6B8A]">
                   <div>NAME: <span className="text-white">{identityData.full_name}</span></div>
                   <div>EMAIL: <span className="text-white">{identityData.email}</span></div>
                   <div>PHONE: <span className="text-white">{identityData.phone}</span></div>

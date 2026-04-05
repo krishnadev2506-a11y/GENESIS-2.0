@@ -17,7 +17,7 @@ export const Registrations = () => {
 
   const load = async () => {
     setLoading(true)
-    let q = supabase.from('registrations').select('*, profiles(full_name, email, phone, college, year_desig, tshirt_size, dietary), teams(name, track)')
+    let q = supabase.from('registrations').select('*, profiles!registrations_user_id_fkey(full_name, email, phone, college, year_desig, tshirt_size, dietary), teams(name, track)')
       .order('created_at', { ascending: false })
     if (filter !== 'all') q = q.eq('status', filter)
     const { data } = await q
@@ -25,6 +25,7 @@ export const Registrations = () => {
     setLoading(false)
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { load() }, [filter])
 
   const updateStatus = async (id, status) => {
@@ -66,9 +67,9 @@ export const Registrations = () => {
 
       {/* Table */}
       <HoloPanel className="overflow-x-auto p-0">
-        <table className="w-full font-mono text-xs">
+        <table className="w-full font-mono text-xs min-w-[800px]">
           <thead>
-            <tr className="border-b border-cp-border text-cp-muted">
+            <tr className="border-b border-cp-border text-cp-muted whitespace-nowrap">
               <th className="text-left p-4">NAME / EMAIL</th>
               <th className="text-left p-4">REG NO</th>
               <th className="text-left p-4">COLLEGE</th>
@@ -112,12 +113,12 @@ export const Registrations = () => {
       {/* Detail modal */}
       {selected && (
         <div className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setSelected(null)}>
-          <div className="bg-[#12121A] border border-cp-border max-w-lg w-full p-6" onClick={e => e.stopPropagation()}>
+          <div className="bg-[#12121A] border border-cp-border max-w-lg w-full max-h-[90vh] overflow-y-auto p-4 md:p-6" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-start mb-4">
               <h2 className="font-orbitron text-white">{selected.profiles?.full_name}</h2>
               <button onClick={() => setSelected(null)} className="text-cp-muted hover:text-white"><X size={20} /></button>
             </div>
-            <div className="grid grid-cols-2 gap-3 font-mono text-xs">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 font-mono text-xs">
               {[
                 ['REG NO', selected.registration_no],
                 ['STATUS', selected.status?.toUpperCase()],

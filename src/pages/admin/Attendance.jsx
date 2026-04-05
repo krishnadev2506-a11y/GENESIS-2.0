@@ -19,14 +19,11 @@ export const Attendance = () => {
   const [recentScans, setRecentScans] = useState([])
   const [stats, setStats] = useState({})
 
-  useEffect(() => {
-    loadRecentScans()
-    loadStats()
-  }, [checkpoint])
+
 
   const loadRecentScans = async () => {
     const { data } = await supabase.from('attendance')
-      .select('*, profiles(full_name), registrations(registration_no)')
+      .select('*, profiles!attendance_user_id_fkey(full_name), registrations(registration_no)')
       .eq('checkpoint', checkpoint)
       .order('scanned_at', { ascending: false })
       .limit(10)
@@ -42,13 +39,19 @@ export const Attendance = () => {
     setStats(counts)
   }
 
+  useEffect(() => {
+    loadRecentScans()
+    loadStats()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [checkpoint])
+
   const processCheckIn = async (regNo) => {
     setScanError(''); setScanResult(null)
     if (!regNo?.trim()) { setScanError('No registration number'); return }
 
     // Find registration
     const { data: reg } = await supabase.from('registrations')
-      .select('*, profiles(full_name, email)')
+      .select('*, profiles!attendance_user_id_fkey(full_name, email)')
       .eq('registration_no', regNo.trim().toUpperCase())
       .maybeSingle()
 
