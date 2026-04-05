@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import useAuthStore from '../../store/authStore'
 import { HoloPanel } from '../../components/ui/HoloPanel'
@@ -78,53 +78,51 @@ export const TeamPage = () => {
     setTeam(null); setMembers([]); load()
   }
 
-  if (loading) return <div className="p-8 font-mono text-cp-cyan animate-pulse">LOADING...</div>
+  if (loading) return <div className="p-6 font-mono text-cp-cyan animate-pulse md:p-8">LOADING...</div>
 
   return (
-    <div className="p-8 max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 p-6 md:p-8">
       <div>
-        <h1 className="font-orbitron font-bold text-3xl text-cp-magenta mb-1"><GlitchText text="TEAM_MODULE" /></h1>
-        <p className="font-mono text-cp-muted text-sm">MANAGE YOUR SQUAD</p>
+        <h1 className="mb-1 font-orbitron text-3xl font-bold tracking-[0.08em] text-cp-magenta"><GlitchText text="TEAM_MODULE" /></h1>
+        <p className="font-mono text-sm tracking-[0.2em] text-cp-muted">MANAGE YOUR SQUAD</p>
       </div>
 
       {team ? (
         <>
-          {/* Team info */}
-          <HoloPanel className="border-l-4 border-cp-magenta">
-            <div className="flex justify-between items-start mb-4">
+          <HoloPanel className="border-l-4 border-cp-magenta/60">
+            <div className="mb-4 flex items-start justify-between">
               <div>
                 <h2 className="font-orbitron text-xl text-white">{team.name}</h2>
-                <p className="font-mono text-cp-magenta text-xs mt-1">{team.track}</p>
+                <p className="mt-1 font-mono text-xs text-cp-magenta">{team.track}</p>
               </div>
-              <NeonButton variant="danger" onClick={handleLeave} className="text-xs !py-1 !px-3">LEAVE</NeonButton>
+              <NeonButton variant="danger" onClick={handleLeave} className="text-xs !px-3 !py-1">LEAVE</NeonButton>
             </div>
-            <div className="flex items-center gap-3 bg-cp-dark border border-cp-border p-3 rounded-sm">
+            <div className="panel-muted flex items-center gap-3 p-4">
               <div className="flex-1">
-                <p className="font-mono text-[10px] text-cp-muted mb-1">INVITE CODE</p>
-                <p className="font-orbitron text-2xl text-cp-cyan tracking-[0.3em] font-bold">{team.invite_code}</p>
+                <p className="mb-1 font-mono text-[10px] tracking-[0.18em] text-cp-muted">INVITE CODE</p>
+                <p className="font-orbitron text-2xl font-bold tracking-[0.3em] text-cp-cyan">{team.invite_code}</p>
               </div>
-              <button onClick={copyCode} className="text-cp-cyan hover:text-white transition-colors p-2">
+              <button onClick={copyCode} className="rounded-xl border border-cp-cyan/18 bg-cp-cyan/[0.05] p-2.5 text-cp-cyan transition-all duration-200 hover:border-cp-cyan/34 hover:text-white">
                 {copied ? <Check size={20} /> : <Copy size={20} />}
               </button>
             </div>
-            <p className="font-mono text-[10px] text-cp-muted mt-2">Share this code with teammates to join your team</p>
+            <p className="mt-2 font-mono text-[10px] text-cp-muted">Share this code with teammates to join your team</p>
           </HoloPanel>
 
-          {/* Members */}
           <HoloPanel>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-orbitron text-sm text-white tracking-widest flex items-center gap-2">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="flex items-center gap-2 font-orbitron text-sm tracking-widest text-white">
                 <Users size={16} className="text-cp-magenta" /> MEMBERS ({members.length}/{team.max_members})
               </h2>
             </div>
             <div className="space-y-2">
               {members.map(m => (
-                <div key={m.id} className="flex items-center gap-3 p-3 bg-cp-dark border border-cp-border">
-                  <div className="w-8 h-8 rounded-full bg-[rgba(255,45,120,0.2)] flex items-center justify-center font-mono text-cp-magenta text-sm">
+                <div key={m.id} className="panel-muted flex items-center gap-3 p-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full bg-cp-magenta/[0.18] font-mono text-sm text-cp-magenta">
                     {m.profiles?.full_name?.[0]?.toUpperCase() || '?'}
                   </div>
                   <div className="flex-1">
-                    <p className="font-mono text-sm text-white flex items-center gap-2">
+                    <p className="flex items-center gap-2 font-mono text-sm text-white">
                       {m.profiles?.full_name}
                       {m.user_id === team.leader_id && <Crown size={12} className="text-cp-yellow" />}
                     </p>
@@ -133,18 +131,17 @@ export const TeamPage = () => {
                 </div>
               ))}
               {members.length < team.max_members && (
-                <div className="p-3 border border-dashed border-cp-border text-center font-mono text-xs text-cp-muted">
-                  {team.max_members - members.length} SLOT(S) OPEN — SHARE INVITE CODE
+                <div className="rounded-2xl border border-dashed border-cp-border p-3 text-center font-mono text-xs tracking-[0.16em] text-cp-muted">
+                  {team.max_members - members.length} SLOT(S) OPEN - SHARE INVITE CODE
                 </div>
               )}
             </div>
           </HoloPanel>
         </>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Join team */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           <HoloPanel>
-            <h2 className="font-orbitron text-sm text-cp-cyan mb-4 tracking-widest">JOIN A TEAM</h2>
+            <h2 className="mb-4 font-orbitron text-sm tracking-widest text-cp-cyan">JOIN A TEAM</h2>
             <div className="space-y-4">
               <TerminalInput label="INVITE CODE://" value={joinCode} onChange={e => setJoinCode(e.target.value)} placeholder="8-char code" />
               <NeonButton variant="primary" onClick={handleJoin} disabled={submitting} className="w-full">
@@ -153,15 +150,13 @@ export const TeamPage = () => {
             </div>
           </HoloPanel>
 
-          {/* Create team */}
           <HoloPanel>
-            <h2 className="font-orbitron text-sm text-cp-magenta mb-4 tracking-widest">CREATE A TEAM</h2>
+            <h2 className="mb-4 font-orbitron text-sm tracking-widest text-cp-magenta">CREATE A TEAM</h2>
             <div className="space-y-4">
               <TerminalInput label="TEAM NAME://" value={createName} onChange={e => setCreateName(e.target.value)} />
               <div>
-                <label className="font-mono text-xs text-cp-muted tracking-widest mb-2 block">TRACK://</label>
-                <select value={createTrack} onChange={e => setCreateTrack(e.target.value)}
-                  className="w-full bg-cp-dark border border-cp-border p-3 text-white font-mono text-sm outline-none focus:border-cp-magenta">
+                <label className="mb-2 block font-mono text-[11px] tracking-[0.22em] text-cp-muted">TRACK://</label>
+                <select value={createTrack} onChange={e => setCreateTrack(e.target.value)} className="field-shell w-full px-4 py-3 text-sm text-white outline-none">
                   {tracks.map(t => <option key={t}>{t}</option>)}
                 </select>
               </div>

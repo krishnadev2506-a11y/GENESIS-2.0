@@ -1,203 +1,420 @@
-import React, { useRef, useMemo, useEffect } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { ScrollControls, Scroll, useScroll, Environment, MeshReflectorMaterial, CameraShake, Float } from '@react-three/drei'
-import { EffectComposer, Bloom, Scanline, Noise, Vignette, ChromaticAberration } from '@react-three/postprocessing'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Environment, Float, MeshReflectorMaterial, Scroll, ScrollControls, useScroll } from '@react-three/drei'
+import { Bloom, EffectComposer, Noise, Vignette } from '@react-three/postprocessing'
 import { BlendFunction } from 'postprocessing'
 import * as THREE from 'three'
-import { NeonButton } from '../components/ui/NeonButton'
-import { GlitchText } from '../components/ui/GlitchText'
+import { motion } from 'framer-motion'
 import { Navbar } from '../components/layout/Navbar'
 import { Footer } from '../components/layout/Footer'
-import { motion } from 'framer-motion'
+import { GlitchText } from '../components/ui/GlitchText'
+import { NeonButton } from '../components/ui/NeonButton'
 
-// ─── Data Generation ──────────────────────────────────────────────────────────
 const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-const BUILDING_COUNT = isMobile ? 80 : 180
-const BUILDING_DATA = Array.from({ length: BUILDING_COUNT }, (_, i) => {
-  const xSide = i % 2 === 0 ? 1 : -1
-  const x = xSide * (18 + ((i * 137.5) % 50))
-  const z = -(((i + 1) * 1.11) % 200) - 10
-  const height = 6 + ((i * 73.1) % 22)
-  const w = 1.2 + ((i * 31.7) % 5)
-  const d = 1.2 + ((i * 19.3) % 5)
-  const colorIdx = i % 3
-  const color = colorIdx === 0 ? '#00F5FF' : colorIdx === 1 ? '#FF2D78' : '#7B61FF'
-  return { position: [x, height / 2 - 4, z], scale: [w, height, d], color }
+const BUILDING_COUNT = isMobile ? 156 : 336
+const BUILDING_DATA = Array.from({ length: BUILDING_COUNT }, (_, index) => {
+  const xDirection = index % 2 === 0 ? 1 : -1
+  const lane = index % 3
+  const x = xDirection * (17 + lane * 7 + ((index * 21.7) % 32))
+  const z = -(((index + 1) * 0.96) % 236) - 12
+  const height = 7 + ((index * 11.7) % 20)
+  const width = 1.5 + ((index * 3.1) % 2.9)
+  const depth = 1.5 + ((index * 2.7) % 2.8)
+  const accent = index % 4 === 0 ? '#8b5cf6' : '#6ee7f9'
+  const edgeColor = index % 3 === 0 ? '#8b5cf6' : '#6ee7f9'
+  const edgeEnabled = index % 5 !== 1
+
+  return {
+    accent,
+    edgeColor,
+    edgeEnabled,
+    position: [x, height / 2 - 4, z],
+    scale: [width, height, depth],
+  }
 })
+const EDGE_BUILDINGS = BUILDING_DATA.filter((building) => building.edgeEnabled)
+const EDGE_LONG_COUNT = EDGE_BUILDINGS.length * 2
+const EDGE_SHORT_COUNT = EDGE_BUILDINGS.length * 2
+const PARTICLE_COUNT = isMobile ? 650 : 1400
 
 const JET_DATA = [
-  { id: 0, x: -30, y: 18, z: -20,  speed: 28, dir:  1 },
-  { id: 1, x:  40, y: 22, z: -55,  speed: 35, dir: -1 },
-  { id: 2, x: -10, y: 14, z: -90,  speed: 22, dir:  1 },
-  { id: 3, x:  20, y: 26, z: -130, speed: 40, dir: -1 },
-  { id: 4, x: -50, y: 20, z: -170, speed: 30, dir:  1 },
+  { dir: 1, id: 0, speed: 16, x: -28, y: 16, z: -22 },
+  { dir: -1, id: 1, speed: 20, x: 38, y: 20, z: -62 },
+  { dir: 1, id: 2, speed: 14, x: -14, y: 12, z: -118 },
 ]
 
-// ─── Constants ──────────────────────────────────────────────────────────────
-const CAR_START_Z = 20
-const CAR_END_Z = -180
-const TROPHY_Z = -185
-const BUILDING_SPACING = 15
+const timelineItems = [
+  { accent: 'text-cp-magenta/85', date: '08.15', title: 'HACKING COMMENCES' },
+  { accent: 'text-cp-cyan/85', date: '08.16', title: 'CHECKPOINTS & DEPLOYS' },
+  { accent: 'text-cp-muted', date: '08.17', title: 'SUBMISSION DEADLINE' },
+]
 
-// ─── Instanced City (Massive Performance Boost) ───────────────────────────────
-const InstancedCity = () => {
-  const meshRef = useRef()
-  const roofRef = useRef()
-  
-  useEffect(() => {
-    const dummy = new THREE.Object3D()
-    const roofDummy = new THREE.Object3D()
-    const color = new THREE.Color()
-    
-    BUILDING_DATA.forEach((b, i) => {
-      // Main Building
-      dummy.position.set(b.position[0], b.position[1], b.position[2])
-      dummy.scale.set(b.scale[0], b.scale[1], b.scale[2])
-      dummy.updateMatrix()
-      meshRef.current.setMatrixAt(i, dummy.matrix)
-      
-      // Neon Roof
-      roofDummy.position.set(b.position[0], b.position[1] + b.scale[1] / 2 + 0.02, b.position[2])
-      roofDummy.scale.set(b.scale[0], 0.04, b.scale[2])
-      roofDummy.updateMatrix()
-      roofRef.current.setMatrixAt(i, roofDummy.matrix)
-      roofRef.current.setColorAt(i, color.set(b.color))
+const prizeItems = [
+  {
+    amount: '\u20b925K',
+    amountClassName: 'text-cp-text',
+    cardClassName: 'border-cp-cyan/28 bg-black/28 md:mt-10',
+    label: '2ND',
+    labelClassName: 'text-cp-cyan',
+  },
+  {
+    amount: '\u20b950K',
+    amountClassName: 'text-cp-text',
+    cardClassName: 'border-cp-yellow/45 bg-cp-yellow/[0.07] md:-mt-3',
+    label: '1ST',
+    labelClassName: 'text-cp-yellow',
+  },
+  {
+    amount: '\u20b910K',
+    amountClassName: 'text-cp-text',
+    cardClassName: 'border-cp-magenta/28 bg-black/28 md:mt-10',
+    label: '3RD',
+    labelClassName: 'text-cp-magenta',
+  },
+]
+
+const CAR_START_Z = 18
+const CAR_END_Z = -178
+const TROPHY_Z = -186
+
+const useScrollStyle = (enterRange, exitRange) => {
+  const scroll = useScroll()
+  const [style, setStyle] = useState({ opacity: 0, transform: 'translate3d(0,32px,0) scale(0.99)' })
+
+  useFrame(() => {
+    const offset = scroll.offset
+    let opacity = 0
+    let y = 32
+    let scale = 0.99
+
+    if (offset >= enterRange[0] && offset <= exitRange[1]) {
+      if (offset < enterRange[1]) {
+        const progress = (offset - enterRange[0]) / (enterRange[1] - enterRange[0])
+        opacity = progress
+        y = 32 * (1 - progress)
+        scale = 0.99 + progress * 0.01
+      } else if (offset > exitRange[0]) {
+        const progress = (offset - exitRange[0]) / (exitRange[1] - exitRange[0])
+        opacity = 1 - progress
+        y = -24 * progress
+        scale = 1 - progress * 0.01
+      } else {
+        opacity = 1
+        y = 0
+        scale = 1
+      }
+    }
+
+    setStyle({
+      opacity,
+      transform: `translate3d(0, ${y}px, 0) scale(${scale})`,
     })
-    
-    meshRef.current.instanceMatrix.needsUpdate = true
-    roofRef.current.instanceMatrix.needsUpdate = true
-    roofRef.current.instanceColor.needsUpdate = true
+  })
+
+  return style
+}
+
+const useHeroScrollStyle = (exitRange) => {
+  const scroll = useScroll()
+  const [style, setStyle] = useState({ opacity: 1, transform: 'translate3d(0,0,0) scale(1)' })
+
+  useFrame(() => {
+    const offset = scroll.offset
+    let opacity = 1
+    let y = 0
+    let scale = 1
+
+    if (offset > exitRange[0]) {
+      const progress = Math.min(1, Math.max(0, (offset - exitRange[0]) / (exitRange[1] - exitRange[0])))
+      opacity = 1 - progress
+      y = -24 * progress
+      scale = 1 - progress * 0.01
+    }
+
+    setStyle({
+      opacity,
+      transform: `translate3d(0, ${y}px, 0) scale(${scale})`,
+    })
+  })
+
+  return style
+}
+
+const RendererSetup = () => {
+  const { gl } = useThree()
+
+  useEffect(() => {
+    gl.toneMapping = THREE.ACESFilmicToneMapping
+    gl.toneMappingExposure = 1.08
+    gl.outputColorSpace = THREE.SRGBColorSpace
+  }, [gl])
+
+  return null
+}
+
+const InstancedCity = () => {
+  const shellRef = useRef()
+  const edgeLongRef = useRef()
+  const edgeShortRef = useRef()
+
+  useEffect(() => {
+    const shell = new THREE.Object3D()
+    const edge = new THREE.Object3D()
+    const color = new THREE.Color()
+
+    BUILDING_DATA.forEach((building, index) => {
+      shell.position.set(...building.position)
+      shell.scale.set(...building.scale)
+      shell.updateMatrix()
+      shellRef.current.setMatrixAt(index, shell.matrix)
+
+    })
+
+    let longIndex = 0
+    let shortIndex = 0
+
+    EDGE_BUILDINGS.forEach((building) => {
+      const roofY = building.position[1] + building.scale[1] / 2 + 0.04
+      const halfWidth = building.scale[0] / 2
+      const halfDepth = building.scale[2] / 2
+
+      ;[-halfDepth, halfDepth].forEach((offsetZ) => {
+        edge.position.set(building.position[0], roofY, building.position[2] + offsetZ)
+        edge.scale.set(building.scale[0], 0.03, 0.05)
+        edge.updateMatrix()
+        edgeLongRef.current.setMatrixAt(longIndex, edge.matrix)
+        edgeLongRef.current.setColorAt(longIndex, color.set(building.edgeColor))
+        longIndex += 1
+      })
+
+      ;[-halfWidth, halfWidth].forEach((offsetX) => {
+        edge.position.set(building.position[0] + offsetX, roofY, building.position[2])
+        edge.scale.set(0.05, 0.03, building.scale[2])
+        edge.updateMatrix()
+        edgeShortRef.current.setMatrixAt(shortIndex, edge.matrix)
+        edgeShortRef.current.setColorAt(shortIndex, color.set(building.edgeColor))
+        shortIndex += 1
+      })
+    })
+
+    shellRef.current.instanceMatrix.needsUpdate = true
+    edgeLongRef.current.instanceMatrix.needsUpdate = true
+    edgeLongRef.current.instanceColor.needsUpdate = true
+    edgeShortRef.current.instanceMatrix.needsUpdate = true
+    edgeShortRef.current.instanceColor.needsUpdate = true
   }, [])
 
   return (
     <group>
-      <instancedMesh ref={meshRef} args={[null, null, BUILDING_COUNT]} frustumCulled={false}>
+      <instancedMesh ref={shellRef} args={[null, null, BUILDING_COUNT]} frustumCulled={false}>
         <boxGeometry />
-        <meshStandardMaterial color="#020205" metalness={0.9} roughness={0.1} />
+        <meshStandardMaterial color="#08101a" metalness={0.86} roughness={0.24} />
       </instancedMesh>
-      <instancedMesh ref={roofRef} args={[null, null, BUILDING_COUNT]} frustumCulled={false}>
+      <instancedMesh ref={edgeLongRef} args={[null, null, EDGE_LONG_COUNT]} frustumCulled={false}>
         <boxGeometry />
-        <meshBasicMaterial toneMapped={false} color="#ffffff" />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} transparent opacity={0.72} />
+      </instancedMesh>
+      <instancedMesh ref={edgeShortRef} args={[null, null, EDGE_SHORT_COUNT]} frustumCulled={false}>
+        <boxGeometry />
+        <meshBasicMaterial color="#ffffff" toneMapped={false} transparent opacity={0.72} />
       </instancedMesh>
     </group>
   )
 }
 
-// ─── Jets ─────────────────────────────────────────────────────────────────────
+const DustParticles = () => {
+  const pointsRef = useRef()
+  const particles = useMemo(() => {
+    const positions = new Float32Array(PARTICLE_COUNT * 3)
+    const colors = new Float32Array(PARTICLE_COUNT * 3)
+    const color = new THREE.Color()
+
+    for (let i = 0; i < PARTICLE_COUNT; i += 1) {
+      positions[i * 3] = (Math.random() - 0.5) * 120
+      positions[i * 3 + 1] = Math.random() * 22 - 2
+      positions[i * 3 + 2] = -Math.random() * 240 + 24
+
+      color.set(i % 5 === 0 ? '#8b5cf6' : '#6ee7f9').multiplyScalar(0.4 + Math.random() * 0.3)
+      colors[i * 3] = color.r
+      colors[i * 3 + 1] = color.g
+      colors[i * 3 + 2] = color.b
+    }
+
+    return { colors, positions }
+  }, [])
+
+  useFrame((state, delta) => {
+    if (!pointsRef.current) return
+    pointsRef.current.rotation.y = state.clock.elapsedTime * 0.01
+    pointsRef.current.position.z += delta * 1.5
+    if (pointsRef.current.position.z > 8) pointsRef.current.position.z = 0
+  })
+
+  return (
+    <points ref={pointsRef}>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[particles.positions, 3]} />
+        <bufferAttribute attach="attributes-color" args={[particles.colors, 3]} />
+      </bufferGeometry>
+      <pointsMaterial
+        size={isMobile ? 0.09 : 0.12}
+        sizeAttenuation
+        transparent
+        opacity={0.32}
+        depthWrite={false}
+        vertexColors
+        blending={THREE.AdditiveBlending}
+      />
+    </points>
+  )
+}
+
+const NeonLightRig = () => {
+  const underRef = useRef()
+  const backRef = useRef()
+  const fillRef = useRef()
+
+  useFrame((state) => {
+    const t = state.clock.elapsedTime
+    if (underRef.current) underRef.current.intensity = 1.2 + Math.sin(t * 1.7) * 0.05 + Math.sin(t * 13) * 0.015
+    if (backRef.current) backRef.current.intensity = 0.95 + Math.sin(t * 1.2 + 1.4) * 0.06 + Math.sin(t * 11) * 0.02
+    if (fillRef.current) fillRef.current.intensity = 0.72 + Math.sin(t * 1.5 + 2.2) * 0.04 + Math.sin(t * 9) * 0.015
+  })
+
+  return (
+    <>
+      <pointLight ref={underRef} position={[0, -1.8, 22]} color="#46d7ff" intensity={1.4} distance={44} decay={2} />
+      <pointLight ref={backRef} position={[0, 12, -120]} color="#5b2dff" intensity={0.95} distance={84} decay={2} />
+      <pointLight ref={fillRef} position={[24, 10, -10]} color="#7bbdff" intensity={0.72} distance={62} decay={2} />
+    </>
+  )
+}
+
 const Jet = ({ data }) => {
   const groupRef = useRef()
+
   useFrame((_, delta) => {
     if (!groupRef.current) return
     groupRef.current.position.x += data.dir * data.speed * delta
-    if (data.dir ===  1 && groupRef.current.position.x >  120) groupRef.current.position.x = -120
-    if (data.dir === -1 && groupRef.current.position.x < -120) groupRef.current.position.x =  120
+    if (data.dir === 1 && groupRef.current.position.x > 100) groupRef.current.position.x = -100
+    if (data.dir === -1 && groupRef.current.position.x < -100) groupRef.current.position.x = 100
   })
+
   return (
     <group ref={groupRef} position={[data.x, data.y, data.z]} rotation={[0, data.dir === 1 ? 0 : Math.PI, 0]}>
-      <mesh><cylinderGeometry args={[0.12, 0.05, 3.5, 8]} /><meshStandardMaterial color="#0A0A15" metalness={1} roughness={0.1} /></mesh>
-      <mesh position={[0, 0, -1.9]}><cylinderGeometry args={[0.08, 0.14, 0.2, 8]} /><meshBasicMaterial color="#FF2D78" toneMapped={false} /></mesh>
-      <mesh position={[-1.7, -0.05, -0.2]}><sphereGeometry args={[0.05]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
+      <mesh>
+        <cylinderGeometry args={[0.12, 0.05, 3.1, 8]} />
+        <meshStandardMaterial color="#101722" metalness={1} roughness={0.2} />
+      </mesh>
+      <mesh position={[0, 0, -1.72]}>
+        <cylinderGeometry args={[0.07, 0.12, 0.18, 8]} />
+        <meshBasicMaterial color="#6ee7f9" toneMapped={false} transparent opacity={0.75} />
+      </mesh>
     </group>
   )
 }
 
-// ─── Cyberpunk Car ────────────────────────────────────────────────────────────
 const CyberCar = () => {
   const groupRef = useRef()
   const scroll = useScroll()
   const exhaustRef = useRef()
-  const headlightsRef = useRef()
+  const spotlightRef = useRef()
+  const spotlightTargetRef = useRef()
+
+  useEffect(() => {
+    if (spotlightRef.current && spotlightTargetRef.current) {
+      spotlightRef.current.target = spotlightTargetRef.current
+    }
+  }, [])
 
   useFrame((state, delta) => {
     const targetZ = THREE.MathUtils.lerp(CAR_START_Z, CAR_END_Z, scroll.offset)
+
     if (groupRef.current) {
-      // Smooth gliding with slightly slower damping for a more "cinematic" feel
-      groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetZ, 6, delta)
-      
-      // Slight tilt based on movement speed
-      const speed = (targetZ - groupRef.current.position.z)
-      // Clamp the tilt to prevent the car from doing a flip/jump on fast scrolls
-      const tilt = THREE.MathUtils.clamp(speed * 0.015, -0.15, 0.15)
-      groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, tilt, 5, delta)
+      groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetZ, 4.2, delta)
+      const tilt = THREE.MathUtils.clamp((targetZ - groupRef.current.position.z) * 0.01, -0.07, 0.07)
+      groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, tilt, 4.2, delta)
     }
+
     if (exhaustRef.current) {
-      exhaustRef.current.scale.z = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.2
-      exhaustRef.current.scale.x = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.1
+      const pulse = 1 + Math.sin(state.clock.elapsedTime * 12) * 0.06
+      exhaustRef.current.scale.setScalar(pulse)
     }
   })
 
   return (
-    <group ref={groupRef} position={[0, -2.8, CAR_START_Z]}>
-      <Float speed={3} rotationIntensity={0.05} floatIntensity={0.5} floatingRange={[-0.04, 0.04]}>
-        {/* Main Body */}
+    <group ref={groupRef} position={[0, -2.85, CAR_START_Z]}>
+      <Float speed={2} rotationIntensity={0.018} floatIntensity={0.28} floatingRange={[-0.025, 0.025]}>
         <mesh position={[0, 0.4, 0]}>
-          <boxGeometry args={[3.8, 0.5, 7.5]} />
-          <meshStandardMaterial color="#05050A" metalness={1} roughness={0.1} />
-        </mesh>
-        
-        {/* Cockpit / Cab */}
-        <mesh position={[0, 0.9, 0.2]}>
-          <boxGeometry args={[2.6, 0.6, 3.5]} />
-          <meshStandardMaterial color="#0A0A15" metalness={1} roughness={0.05} />
+          <boxGeometry args={[3.5, 0.45, 7.2]} />
+          <meshStandardMaterial color="#09111c" metalness={0.95} roughness={0.18} />
         </mesh>
 
-        {/* Windshield */}
-        <mesh position={[0, 1.1, 1.8]} rotation={[0.4, 0, 0]}>
-          <boxGeometry args={[2.2, 0.8, 0.05]} />
-          <meshStandardMaterial color="#00F5FF" emissive="#00F5FF" emissiveIntensity={1.5} transparent opacity={0.4} />
+        <mesh position={[0, 0.9, 0.16]}>
+          <boxGeometry args={[2.35, 0.58, 3.3]} />
+          <meshStandardMaterial color="#111a28" metalness={0.88} roughness={0.16} />
         </mesh>
 
-        {/* Side Neon Strips */}
-        {[-1.92, 1.92].map(x => (
-          <mesh key={`strip-${x}`} position={[x, 0.3, 0]}>
-            <boxGeometry args={[0.05, 0.2, 6.5]} />
-            <meshBasicMaterial color="#00F5FF" />
+        <mesh position={[0, 1.08, 1.65]} rotation={[0.4, 0, 0]}>
+          <boxGeometry args={[2.05, 0.74, 0.05]} />
+          <meshStandardMaterial color="#6ee7f9" emissive="#6ee7f9" emissiveIntensity={0.22} transparent opacity={0.18} />
+        </mesh>
+
+        {[-1.76, 1.76].map((x) => (
+          <mesh key={x} position={[x, 0.33, 0]}>
+            <boxGeometry args={[0.04, 0.12, 6.25]} />
+            <meshBasicMaterial color="#6ee7f9" transparent opacity={0.38} />
           </mesh>
         ))}
 
-        {/* Headlights */}
-        {[-1.4, 1.4].map(x => (
-          <group key={`headlight-${x}`} position={[x, 0.45, 3.76]}>
+        {[-1.2, 1.2].map((x) => (
+          <group key={x} position={[x, 0.44, 3.6]}>
             <mesh>
-              <boxGeometry args={[0.6, 0.15, 0.05]} />
-              <meshBasicMaterial color="#00F5FF" />
+              <boxGeometry args={[0.5, 0.12, 0.05]} />
+              <meshBasicMaterial color="#6ee7f9" transparent opacity={0.62} />
             </mesh>
-            <pointLight distance={5} intensity={5} color="#00F5FF" />
+            <pointLight distance={4} intensity={1.1} color="#6ee7f9" />
           </group>
         ))}
 
-        {/* Taillights */}
-        {[-1.2, 1.2].map(x => (
-          <mesh key={`tail-${x}`} position={[x, 0.5, -3.76]}>
-            <boxGeometry args={[0.8, 0.1, 0.05]} />
-            <meshBasicMaterial color="#FF2D78" />
+        <spotLight
+          ref={spotlightRef}
+          position={[0, 0.56, 3.7]}
+          angle={0.18}
+          penumbra={0.65}
+          intensity={3.2}
+          distance={34}
+          color="#73dcff"
+          decay={1.6}
+        />
+        <object3D ref={spotlightTargetRef} position={[0, 0.35, 18]} />
+
+        {[-1.05, 1.05].map((x) => (
+          <mesh key={x} position={[x, 0.46, -3.62]}>
+            <boxGeometry args={[0.7, 0.08, 0.05]} />
+            <meshBasicMaterial color="#8b5cf6" transparent opacity={0.46} />
           </mesh>
         ))}
 
-        {/* Underglow */}
-        <mesh position={[0, -0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
-          <planeGeometry args={[4, 7]} />
-          <meshBasicMaterial color="#00F5FF" transparent opacity={0.3} />
+        <mesh position={[0, -0.08, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[3.8, 6.8]} />
+          <meshBasicMaterial color="#6ee7f9" transparent opacity={0.06} />
         </mesh>
 
-        {/* Exhausts */}
-        {[-0.6, 0.6].map(x => (
-          <mesh key={`exhaust-${x}`} ref={x === -0.6 ? exhaustRef : undefined} position={[x, 0.3, -3.8]} rotation={[Math.PI / 2, 0, 0]}>
-            <cylinderGeometry args={[0.15, 0.05, 1.2, 8]} />
-            <meshBasicMaterial color="#FF2D78" transparent opacity={0.8} blending={THREE.AdditiveBlending} />
-          </mesh>
-        ))}
+        <mesh ref={exhaustRef} position={[0, 0.22, -3.84]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.15, 0.05, 1.05, 10]} />
+          <meshBasicMaterial color="#8b5cf6" transparent opacity={0.28} blending={THREE.AdditiveBlending} />
+        </mesh>
 
-        {/* Wheels */}
-        {[[-2, 0, 2.4], [2, 0, 2.4], [-2, 0, -2.4], [2, 0, -2.4]].map((p, i) => (
-          <group key={i} position={p} rotation={[0, 0, Math.PI / 2]}>
+        {[[-1.84, 0, 2.25], [1.84, 0, 2.25], [-1.84, 0, -2.25], [1.84, 0, -2.25]].map((position, index) => (
+          <group key={index} position={position} rotation={[0, 0, Math.PI / 2]}>
             <mesh>
-              <cylinderGeometry args={[0.65, 0.65, 0.5, 24]} />
-              <meshStandardMaterial color="#020205" roughness={0.5} />
+              <cylinderGeometry args={[0.6, 0.6, 0.42, 22]} />
+              <meshStandardMaterial color="#05070b" roughness={0.52} />
             </mesh>
-            <mesh position={[0, 0.26, 0]}>
-              <cylinderGeometry args={[0.4, 0.4, 0.05, 16]} />
-              <meshBasicMaterial color={i < 2 ? "#00F5FF" : "#FF2D78"} />
+            <mesh position={[0, 0.22, 0]}>
+              <cylinderGeometry args={[0.34, 0.34, 0.05, 16]} />
+              <meshBasicMaterial color={index < 2 ? '#6ee7f9' : '#8b5cf6'} transparent opacity={0.42} />
             </mesh>
           </group>
         ))}
@@ -206,219 +423,216 @@ const CyberCar = () => {
   )
 }
 
-// ─── Trophy ───────────────────────────────────────────────────────────────────
 const CyberTrophy = () => {
   const trophyRef = useRef()
+
   useFrame((state) => {
-    if (trophyRef.current) trophyRef.current.rotation.y = state.clock.elapsedTime * 0.5
+    if (!trophyRef.current) return
+    trophyRef.current.rotation.y = state.clock.elapsedTime * 0.3
   })
+
   return (
-    <group ref={trophyRef} position={[0, -1.5, TROPHY_Z]}>
-      <mesh position={[0, 0, 0]}><boxGeometry args={[3, 0.5, 3]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} /></mesh>
-      <mesh position={[0, 0.9, 0]}><boxGeometry args={[1.8, 0.8, 1.8]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} emissive="#00F5FF" emissiveIntensity={0.2} /></mesh>
-      <mesh position={[0, 3.55, 0]}><octahedronGeometry args={[0.35]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
-      <mesh position={[0, -0.24, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[2.0, 2.3, 32]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} side={THREE.DoubleSide} transparent opacity={0.6} /></mesh>
+    <group ref={trophyRef} position={[0, -1.45, TROPHY_Z]}>
+      <mesh>
+        <boxGeometry args={[3.2, 0.42, 3.2]} />
+        <meshStandardMaterial color="#09111c" metalness={0.92} roughness={0.24} />
+      </mesh>
+      <mesh position={[0, 0.95, 0]}>
+        <boxGeometry args={[1.65, 0.8, 1.65]} />
+        <meshStandardMaterial color="#111a28" metalness={0.88} roughness={0.16} emissive="#6ee7f9" emissiveIntensity={0.04} />
+      </mesh>
+      <mesh position={[0, 3.4, 0]}>
+        <octahedronGeometry args={[0.34]} />
+        <meshBasicMaterial color="#6ee7f9" toneMapped={false} />
+      </mesh>
+      <mesh position={[0, -0.2, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[1.95, 2.22, 48]} />
+        <meshBasicMaterial color="#8b5cf6" toneMapped={false} side={THREE.DoubleSide} transparent opacity={0.18} />
+      </mesh>
     </group>
   )
 }
 
-// ─── Environment & Scene ──────────────────────────────────────────────────────
 const CyberCity = () => {
   const gridRef = useRef()
+
   useFrame((_, delta) => {
-    if (gridRef.current) gridRef.current.position.z = (gridRef.current.position.z + delta * 15) % 2.5
+    if (!gridRef.current) return
+    gridRef.current.position.z = (gridRef.current.position.z + delta * 6) % 2
   })
 
   return (
     <group>
-      <fog attach="fog" args={['#020205', 10, 100]} />
-      
-      {/* High Quality Wet Road with Realistic Reflections */}
+      <fogExp2 attach="fog" args={['#05070c', 0.018]} />
+
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -4, 0]}>
         <planeGeometry args={[300, 300]} />
         <MeshReflectorMaterial
-          blur={[400, 100]}
-          resolution={1024}
-          mixBlur={1}
-          mixStrength={15}
-          depthScale={1}
-          minDepthThreshold={0.85}
-          color="#020205"
+          blur={[220, 80]}
+          resolution={isMobile ? 512 : 1024}
+          mixBlur={0.6}
+          mixStrength={6.5}
+          depthScale={0.65}
+          minDepthThreshold={0.78}
+          color="#0b1320"
           metalness={0.9}
-          roughness={1}
-          mirror={1}
+          roughness={0.68}
+          mirror={0.52}
         />
       </mesh>
 
-      {/* Moving Grid Lines layered over the reflection */}
       <mesh ref={gridRef} rotation={[-Math.PI / 2, 0, 0]} position={[0, -3.99, 0]}>
-        <planeGeometry args={[300, 300, 120, 120]} />
-        <meshBasicMaterial color="#00F5FF" wireframe transparent opacity={0.05} />
+        <planeGeometry args={[300, 300, 80, 80]} />
+        <meshBasicMaterial color="#6ee7f9" wireframe transparent opacity={0.018} />
       </mesh>
 
       <InstancedCity />
-      {JET_DATA.map(j => <Jet key={`jet-${j.id}`} data={j} />)}
+      <DustParticles />
+      {JET_DATA.map((jet) => <Jet key={jet.id} data={jet} />)}
       <CyberCar />
       <CyberTrophy />
     </group>
   )
 }
 
-// ─── Camera Dynamics ──────────────────────────────────────────────────────────
 const DynamicCamera = () => {
   const scroll = useScroll()
-  const camZ = useRef(30)
-  const camY = useRef(2)
   const pointer = useMemo(() => new THREE.Vector2(), [])
 
   useEffect(() => {
-    const handleMove = (e) => {
-      const x = e.touches ? e.touches[0].clientX : e.clientX
-      const y = e.touches ? e.touches[0].clientY : e.clientY
+    const handlePointerMove = (event) => {
+      const x = event.touches ? event.touches[0].clientX : event.clientX
+      const y = event.touches ? event.touches[0].clientY : event.clientY
       pointer.x = (x / window.innerWidth) * 2 - 1
       pointer.y = -(y / window.innerHeight) * 2 + 1
     }
-    window.addEventListener('mousemove', handleMove)
-    window.addEventListener('touchmove', handleMove)
+
+    window.addEventListener('mousemove', handlePointerMove)
+    window.addEventListener('touchmove', handlePointerMove)
+
     return () => {
-      window.removeEventListener('mousemove', handleMove)
-      window.removeEventListener('touchmove', handleMove)
+      window.removeEventListener('mousemove', handlePointerMove)
+      window.removeEventListener('touchmove', handlePointerMove)
     }
   }, [pointer])
 
   useFrame((state, delta) => {
-    const offset = scroll.offset
-    // Camera moves behind the car with a longer path
-    const targetZ = THREE.MathUtils.lerp(45, -170, offset)
-    const targetY = THREE.MathUtils.lerp(1.5, 4.5, offset)
-    
-    // Synchronized damping with the car
-    state.camera.position.z = THREE.MathUtils.damp(state.camera.position.z, targetZ, 6, delta)
-    state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, targetY, 6, delta)
-    
-    // Smooth Mouse Parallax
-    const targetX = pointer.x * 1.5
-    const targetYLook = 2 + pointer.y * 1
-    state.camera.position.x = THREE.MathUtils.damp(state.camera.position.x, targetX, 3, delta)
-    
-    // Look ahead of the car, focusing on the trophy at the end
-    const lookAtZ = THREE.MathUtils.lerp(CAR_START_Z - 50, TROPHY_Z, offset)
-    state.camera.lookAt(0, targetYLook, lookAtZ)
-    
-    // Dynamic FOV for speed effect
-    const fovTarget = 70 + (Math.sin(offset * Math.PI) * 10)
-    state.camera.fov = THREE.MathUtils.damp(state.camera.fov, fovTarget, 3, delta)
+    const targetZ = THREE.MathUtils.lerp(42, -170, scroll.offset)
+    const targetY = THREE.MathUtils.lerp(1.5, 4.2, scroll.offset)
+    const targetX = pointer.x * 1.05
+    const lookAtZ = THREE.MathUtils.lerp(CAR_START_Z - 40, TROPHY_Z, scroll.offset)
+
+    state.camera.position.z = THREE.MathUtils.damp(state.camera.position.z, targetZ, 3.8, delta)
+    state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, targetY, 3.8, delta)
+    state.camera.position.x = THREE.MathUtils.damp(state.camera.position.x, targetX, 2.1, delta)
+    state.camera.lookAt(0, 1.8 + pointer.y * 0.55, lookAtZ)
+
+    const targetFov = 67 + Math.sin(scroll.offset * Math.PI) * 2.4
+    state.camera.fov = THREE.MathUtils.damp(state.camera.fov, targetFov, 2.1, delta)
     state.camera.updateProjectionMatrix()
   })
-  return null // Removed CameraShake for smoother gliding
+
+  return null
 }
 
-// ─── Next-Gen HTML Overlay ────────────────────────────────────────────────────
 const HTMLContent = () => {
-  const scroll = useScroll()
-  
-  // Custom hook to tie Framer Motion to R3F Scroll offset
-  const useScrollTransform = (rangeIn, rangeOut) => {
-    const [style, setStyle] = React.useState({ opacity: 0, y: 50, scale: 0.9 })
-    useFrame(() => {
-      const o = scroll.offset
-      let opacity = 0, y = 50, scale = 0.9
-      if (o >= rangeIn[0] && o <= rangeOut[1]) {
-        if (o < rangeIn[1]) {
-          // fades in
-          const p = (o - rangeIn[0]) / (rangeIn[1] - rangeIn[0])
-          opacity = p; y = 50 * (1 - p); scale = 0.9 + 0.1 * p
-        } else if (o > rangeOut[0]) {
-          // fades out
-          const p = (o - rangeOut[0]) / (rangeOut[1] - rangeOut[0])
-          opacity = 1 - p; y = -50 * p; scale = 1 - 0.1 * p
-        } else {
-          // fully visible
-          opacity = 1; y = 0; scale = 1
-        }
-      }
-      setStyle({ opacity, transform: `translateY(${y}px) scale(${scale})` })
-    })
-    return style
-  }
-
-  const sHero = useScrollTransform([-0.1, 0.0], [0.1, 0.2])
-  const sAbout = useScrollTransform([0.15, 0.25], [0.4, 0.5])
-  const sTimeline = useScrollTransform([0.45, 0.55], [0.75, 0.85])
-  const sPrizes = useScrollTransform([0.75, 0.85], [1.1, 1.2])
+  const heroStyle = useHeroScrollStyle([0.16, 0.24])
+  const aboutStyle = useScrollStyle([0.14, 0.24], [0.4, 0.48])
+  const timelineStyle = useScrollStyle([0.4, 0.5], [0.68, 0.76])
+  const prizeStyle = useScrollStyle([0.7, 0.8], [1.02, 1.1])
 
   return (
-    <div className="w-full pointer-events-none text-white">
-      {/* HERO */}
-      <section className="h-[100vh] flex flex-col justify-center items-center text-center px-4 pointer-events-auto">
-        <motion.div style={sHero} className="will-change-transform">
-          <p className="font-mono text-xs tracking-[0.4em] text-[#00F5FF]/60 mb-4 uppercase">[ GENESIS 2.0 :: SYSTEM BOOT ]</p>
-          <h1 className="font-orbitron font-black text-6xl md:text-8xl lg:text-9xl tracking-[0.2em] text-[#E0E0FF] mb-4 mix-blend-screen drop-shadow-[0_0_30px_rgba(0,245,255,0.5)]">
+    <div className="pointer-events-none w-full text-cp-text">
+      <section className="relative flex h-[100vh] items-center justify-center overflow-hidden px-4 sm:px-8">
+        <div className="absolute inset-0 bg-cp-radial opacity-48" />
+        <div className="absolute inset-0 bg-cp-grid bg-[size:48px_48px] opacity-[0.02] sm:opacity-[0.03]" />
+        <motion.div style={heroStyle} className="pointer-events-auto relative z-10 mx-auto flex max-w-6xl flex-col items-center text-center will-change-transform">
+          <p className="mb-4 font-mono text-[11px] uppercase tracking-[0.34em] text-cp-cyan/62">
+            [ GENESIS 2.0 :: SYSTEM BOOT ]
+          </p>
+          <h1 className="max-w-5xl font-orbitron text-6xl font-semibold uppercase tracking-[0.16em] text-cp-text sm:text-7xl lg:text-[7.6rem] lg:leading-[0.96]">
             <GlitchText text="GENESIS" />
           </h1>
-          <p className="font-mono text-sm md:text-lg tracking-widest text-[#00F5FF] mb-10">THE 48-HOUR HACKATHON THAT REWRITES THE FUTURE</p>
-          <div className="flex justify-center gap-6">
-            <NeonButton variant="primary" onClick={() => window.location.href='/register'} className="text-xl px-10 py-4">REGISTER</NeonButton>
-          </div>
-        </motion.div>
-      </section>
-
-      {/* ABOUT */}
-      <section className="h-[100vh] flex flex-col justify-center items-start px-8 md:px-24 pointer-events-auto">
-        <motion.div style={sAbout} className="max-w-xl bg-black/60 p-8 border-l-2 border-[#00F5FF] backdrop-blur-xl relative will-change-transform">
-          <p className="font-mono text-xs text-[#00F5FF] tracking-widest mb-3">// BRIEFING</p>
-          <h2 className="font-orbitron font-bold text-4xl mb-5">ENTER THE MATRIX</h2>
-          <p className="font-mono text-gray-300 leading-relaxed text-sm">
-            Genesis is a high-octane 48-hour development marathon. Build decentralized apps, train AI models, and secure your place in the neo-future.
+          <p className="mt-4 max-w-3xl font-mono text-xs uppercase tracking-[0.28em] text-cp-cyan/78 sm:text-sm">
+            THE 48-HOUR HACKATHON THAT REWRITES THE FUTURE
           </p>
-        </motion.div>
-      </section>
-
-      {/* TIMELINE */}
-      <section className="h-[100vh] flex flex-col justify-center items-end px-8 md:px-24 pointer-events-auto">
-        <motion.div style={sTimeline} className="max-w-xl bg-black/60 p-8 border-r-2 border-[#FF2D78] backdrop-blur-xl relative will-change-transform text-right">
-          <p className="font-mono text-xs text-[#FF2D78] tracking-widest mb-3">// TIMELINE</p>
-          <h2 className="font-orbitron font-bold text-4xl mb-5">LOGISTICS</h2>
-          <div className="font-mono space-y-4">
-            <div className="border-b border-white/10 pb-2"><div className="text-[#FF2D78] text-xs">08.15</div><div>HACKING COMMENCES</div></div>
-            <div className="border-b border-white/10 pb-2"><div className="text-[#00F5FF] text-xs">08.16</div><div>CHECKPOINTS & DEPLOYS</div></div>
-            <div className="border-b border-white/10 pb-2"><div className="text-gray-400 text-xs">08.17</div><div>SUBMISSION DEADLINE</div></div>
+          <div className="mt-10 flex items-center justify-center gap-4">
+            <NeonButton variant="primary" onClick={() => { window.location.href = '/register' }} className="min-w-[220px]">
+              REGISTER
+            </NeonButton>
           </div>
         </motion.div>
       </section>
 
-      {/* PRIZES */}
-      <section className="h-[100vh] flex flex-col justify-center items-center px-4 pointer-events-auto pb-40">
-        <motion.div style={sPrizes} className="text-center w-full max-w-3xl will-change-transform">
-          <h2 className="font-orbitron font-bold text-3xl md:text-5xl mb-12 drop-shadow-[0_0_20px_rgba(245,230,66,0.3)]">THE LOOT</h2>
-          <div className="flex flex-col md:flex-row justify-center gap-8 items-center px-4">
-            <div className="border border-[#00F5FF]/40 bg-black/50 p-6 pt-10 mt-8 md:mt-12 backdrop-blur-md relative transform hover:scale-105 transition-all w-full md:w-1/3">
-               <div className="text-[#00F5FF] font-mono mb-2 text-xs">2ND</div>
-               <div className="text-2xl md:text-3xl font-orbitron">₹25K</div>
-            </div>
-            <div className="border border-[#F5E642] bg-[#F5E642]/10 p-8 pt-14 backdrop-blur-md relative transform scale-105 md:scale-110 hover:scale-125 transition-all w-full md:w-1/3 shadow-[0_0_40px_rgba(245,230,66,0.2)]">
-               <div className="text-[#F5E642] font-mono mb-2 font-bold text-xs">1ST</div>
-               <div className="text-3xl md:text-4xl font-orbitron font-bold">₹50K</div>
-            </div>
-            <div className="border border-[#FF2D78]/40 bg-black/50 p-6 pt-10 mt-8 md:mt-12 backdrop-blur-md relative transform hover:scale-105 transition-all w-full md:w-1/3">
-               <div className="text-[#FF2D78] font-mono mb-2 text-xs">3RD</div>
-               <div className="text-2xl md:text-3xl font-orbitron">₹10K</div>
-            </div>
+      <section id="about" className="flex min-h-[100vh] items-center px-4 py-20 sm:px-8 lg:px-16">
+        <motion.div style={aboutStyle} className="pointer-events-auto mx-auto w-full max-w-6xl will-change-transform">
+          <div className="glass-panel max-w-xl rounded-[30px] border-l-2 border-l-cp-cyan/55 bg-black/24 px-7 py-8 sm:px-9">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cp-cyan/72">// BRIEFING</p>
+            <h2 className="mt-5 font-orbitron text-3xl font-semibold uppercase tracking-[0.12em] text-cp-text sm:text-4xl">
+              ENTER THE MATRIX
+            </h2>
+            <p className="mt-5 max-w-lg font-mono text-sm leading-7 text-cp-muted">
+              Genesis is a high-octane 48-hour development marathon. Build decentralized apps, train AI models, and secure your place in the neo-future.
+            </p>
           </div>
-          <NeonButton variant="primary" onClick={() => window.location.href='/register'} className="text-lg md:text-xl px-12 py-4 mt-16 md:mt-20">BOOT SEQUENCE</NeonButton>
         </motion.div>
       </section>
 
-      {/* FOOTER CTA */}
-      <section className="h-[100vh] flex flex-col justify-end pointer-events-auto bg-gradient-to-t from-transparent to-[#020205] relative z-10 pt-40">
-        <div className="flex flex-col items-center mb-32 mix-blend-screen px-4 text-center">
-          <p className="font-mono text-xs text-white/40 tracking-[0.3em] mb-4 uppercase">// READY TO COMPILE YOUR LEGACY?</p>
-          <h2 className="font-orbitron font-black text-3xl md:text-5xl mb-8 text-[#00F5FF]/80 drop-shadow-[0_0_20px_rgba(0,245,255,0.3)]">
-            <GlitchText text="GENESIS" />
+      <section id="timeline" className="flex min-h-[100vh] items-center px-4 py-20 sm:px-8 lg:px-16">
+        <motion.div style={timelineStyle} className="pointer-events-auto mx-auto flex w-full max-w-6xl justify-end will-change-transform">
+          <div className="glass-panel w-full max-w-xl rounded-[30px] border-r-2 border-r-cp-magenta/52 bg-black/24 px-7 py-8 text-right sm:px-9">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-cp-magenta/72">// TIMELINE</p>
+            <h2 className="mt-5 font-orbitron text-3xl font-semibold uppercase tracking-[0.12em] text-cp-text sm:text-4xl">
+              LOGISTICS
+            </h2>
+            <div className="mt-10 space-y-4 font-mono">
+              {timelineItems.map((item) => (
+                <div key={item.title} className="border-b border-white/7 pb-3 last:border-b-0">
+                  <p className={`text-[11px] uppercase tracking-[0.28em] ${item.accent}`}>{item.date}</p>
+                  <h3 className="mt-2 text-sm font-medium uppercase tracking-[0.16em] text-cp-text sm:text-base">
+                    {item.title}
+                  </h3>
+                </div>
+              ))}
+            </div>
+          </div>
+        </motion.div>
+      </section>
+
+      <section id="prizes" className="flex min-h-[100vh] items-center px-4 py-20 sm:px-8 lg:px-16">
+        <motion.div style={prizeStyle} className="pointer-events-auto mx-auto w-full max-w-5xl text-center will-change-transform">
+          <h2 className="font-orbitron text-3xl font-semibold uppercase tracking-[0.12em] text-cp-text sm:text-5xl">
+            THE LOOT
           </h2>
-          <NeonButton variant="primary" onClick={() => window.location.href='/register'} className="text-xl px-10 py-5 bg-black/50 backdrop-blur-md">
-            JOIN GENESIS 2.0
+          <div className="mt-12 grid gap-5 px-2 md:grid-cols-3 md:items-end">
+            {prizeItems.map((item) => (
+              <motion.div key={item.label} whileHover={{ y: -4 }} transition={{ duration: 0.2, ease: [0.22, 1, 0.36, 1] }}>
+                <div className={`glass-panel h-full rounded-[28px] border px-7 py-10 text-left ${item.cardClassName}`}>
+                  <p className={`font-mono text-[11px] uppercase tracking-[0.3em] ${item.labelClassName}`}>{item.label}</p>
+                  <p className={`mt-8 font-orbitron text-4xl font-semibold tracking-[0.08em] sm:text-[2.8rem] ${item.amountClassName}`}>{item.amount}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+          <NeonButton variant="primary" onClick={() => { window.location.href = '/register' }} className="mt-16 min-w-[240px]">
+            BOOT SEQUENCE
           </NeonButton>
+        </motion.div>
+      </section>
+
+      <section className="pointer-events-auto flex min-h-[100vh] flex-col justify-end pt-32">
+        <div className="mx-auto flex w-full max-w-5xl flex-col items-center px-4 pb-20 text-center sm:px-8">
+          <div className="w-full rounded-[32px] bg-gradient-to-t from-transparent to-[#05070c] px-6 py-12 sm:px-10">
+            <p className="font-mono text-[10px] uppercase tracking-[0.3em] text-white/40">
+              // READY TO COMPILE YOUR LEGACY?
+            </p>
+            <h2 className="mt-6 font-orbitron text-3xl font-semibold uppercase tracking-[0.14em] text-cp-cyan/76 sm:text-5xl">
+              <GlitchText text="GENESIS" />
+            </h2>
+            <NeonButton variant="primary" onClick={() => { window.location.href = '/register' }} className="mt-10 min-w-[240px] bg-black/20">
+              JOIN GENESIS 2.0
+            </NeonButton>
+          </div>
         </div>
         <Footer />
       </section>
@@ -426,30 +640,31 @@ const HTMLContent = () => {
   )
 }
 
-// ─── App Root ─────────────────────────────────────────────────────────────────
 export const Home = () => {
   return (
-    <main className="w-full h-screen bg-[#020205] relative cursor-crosshair overflow-hidden">
+    <main className="relative h-screen w-full overflow-hidden bg-cp-black">
       <Navbar />
+
       <div className="absolute inset-0 z-0">
-        <Canvas camera={{ position: [0, 2, 30], fov: 70 }} dpr={[1, 2]}>
-          <color attach="background" args={['#020205']} />
+        <Canvas camera={{ position: [0, 2, 28], fov: 67 }} dpr={[1, 1.4]}>
+          <RendererSetup />
+          <color attach="background" args={['#05070c']} />
           <Environment preset="city" />
-          <ambientLight intensity={0.5} />
-          <pointLight position={[0, 10, 10]} color="#00F5FF" intensity={2} decay={2} distance={30} />
-          
-          <ScrollControls pages={5} damping={0.5}>
+          <ambientLight intensity={0.28} />
+          <NeonLightRig />
+
+          <ScrollControls pages={5} damping={0.2}>
             <DynamicCamera />
             <CyberCity />
-            <Scroll html style={{ width: '100vw' }}><HTMLContent /></Scroll>
+            <Scroll html style={{ width: '100vw' }}>
+              <HTMLContent />
+            </Scroll>
           </ScrollControls>
 
           <EffectComposer disableNormalPass>
-            <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.9} intensity={1.5} mipmapBlur />
-            <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={[0.0005, 0.0005]} />
-            <Vignette eskil={false} offset={0.1} darkness={1.1} />
-            <Noise opacity={0.02} />
-            <Scanline density={1.2} opacity={0.03} />
+            <Bloom luminanceThreshold={0.95} luminanceSmoothing={0.99} intensity={0.22} mipmapBlur />
+            <Vignette eskil={false} offset={0.12} darkness={0.8} blendFunction={BlendFunction.NORMAL} />
+            <Noise opacity={0.005} />
           </EffectComposer>
         </Canvas>
       </div>

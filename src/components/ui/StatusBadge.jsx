@@ -9,7 +9,7 @@ const config = {
 export const StatusBadge = ({ status }) => {
   const cfg = config[status] || config['not registered']
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 border font-mono text-[10px] tracking-widest uppercase ${cfg.color} ${cfg.bg}`}>
+    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 border font-mono text-[10px] tracking-[0.22em] uppercase ${cfg.color} ${cfg.bg}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
       {status}
     </span>

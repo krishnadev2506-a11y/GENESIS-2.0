@@ -31,6 +31,7 @@ import { Attendance }      from './pages/admin/Attendance'
 import { AdminMessages }   from './pages/admin/Messages'
 import { Submissions }     from './pages/admin/Submissions'
 import { Settings }        from './pages/admin/Settings'
+import { AdminEmails }     from './pages/admin/Emails'
 
 function App() {
   const { setSession, setUser, setProfile, setLoading } = useAuthStore()
@@ -95,6 +96,7 @@ function App() {
             <Route path="registrations"  element={<Registrations />} />
             <Route path="attendance"     element={<Attendance />} />
             <Route path="messages"       element={<AdminMessages />} />
+            <Route path="emails"         element={<AdminEmails />} />
             <Route path="submissions"    element={<Submissions />} />
             <Route path="settings"       element={<Settings />} />
           </Route>

@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react'
+﻿import { useEffect, useState } from 'react'
 import { supabase } from '../../lib/supabase'
 import useAuthStore from '../../store/authStore'
-import { HoloPanel } from '../../components/ui/HoloPanel'
 import { GlitchText } from '../../components/ui/GlitchText'
 import { Clock, Megaphone, AlertTriangle } from 'lucide-react'
 
 const priorityConfig = {
   critical: { icon: AlertTriangle, border: 'border-[#FF2D78]', text: 'text-[#FF2D78]', bg: 'bg-[rgba(255,45,120,0.05)]', badge: 'bg-[#FF2D78]/20 text-[#FF2D78]' },
-  urgent:   { icon: AlertTriangle, border: 'border-cp-yellow',  text: 'text-cp-yellow',  bg: 'bg-[rgba(245,230,66,0.05)]', badge: 'bg-cp-yellow/20 text-cp-yellow' },
-  normal:   { icon: Megaphone,     border: 'border-cp-cyan',    text: 'text-cp-cyan',    bg: 'bg-[rgba(0,245,255,0.05)]',  badge: 'bg-cp-cyan/20 text-cp-cyan' },
+  urgent: { icon: AlertTriangle, border: 'border-cp-yellow', text: 'text-cp-yellow', bg: 'bg-[rgba(245,230,66,0.05)]', badge: 'bg-cp-yellow/20 text-cp-yellow' },
+  normal: { icon: Megaphone, border: 'border-cp-cyan', text: 'text-cp-cyan', bg: 'bg-[rgba(0,245,255,0.05)]', badge: 'bg-cp-cyan/20 text-cp-cyan' },
 }
 
 export const MessagesPage = () => {
@@ -35,14 +34,13 @@ export const MessagesPage = () => {
       if (adm) {
         setAdminId(adm.id)
       } else {
-        setAdminId('df1ed7cc-8b43-4f9e-a0e2-66ccfb1a0bb6') // Fallback to System Admin
+        setAdminId('df1ed7cc-8b43-4f9e-a0e2-66ccfb1a0bb6')
       }
 
       setLoading(false)
     }
     load()
 
-    // Realtime subscription
     const channel = supabase.channel('participant-messages')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'announcements' }, payload => {
         setAnnouncements(prev => [payload.new, ...prev])
@@ -54,11 +52,6 @@ export const MessagesPage = () => {
 
     return () => supabase.removeChannel(channel)
   }, [profile])
-
-  const markRead = async (id) => {
-    await supabase.from('messages').update({ is_read: true }).eq('id', id)
-    setMessages(prev => prev.map(m => m.id === id ? { ...m, is_read: true } : m))
-  }
 
   const sendMessage = async () => {
     if (!composeText.trim() || !adminId) return
@@ -72,10 +65,6 @@ export const MessagesPage = () => {
       alert(error.message)
     } else {
       setComposeText('')
-      // Message will auto-insert via realtime subscription if it's sent to self?
-      // Wait, realtime filter is receiver_id=eq.profile.id, so it won't catch outgoing.
-      // We manually add it or let a wider realtime filter catch it.
-      // Let's manually trigger a reload or append.
       const newMsg = {
         id: crypto.randomUUID(),
         sender_id: profile.id,
@@ -89,20 +78,22 @@ export const MessagesPage = () => {
     }
   }
 
-  if (loading) return <div className="p-8 font-mono text-cp-cyan animate-pulse">LOADING...</div>
+  if (loading) return <div className="p-6 font-mono text-cp-cyan animate-pulse md:p-8">LOADING...</div>
 
   return (
-    <div className="p-8 max-w-3xl space-y-6">
+    <div className="max-w-3xl space-y-6 p-6 md:p-8">
       <div>
-        <h1 className="font-orbitron font-bold text-3xl text-cp-cyan mb-1"><GlitchText text="COMMS_CENTER" /></h1>
-        <p className="font-mono text-cp-muted text-sm">INCOMING TRANSMISSIONS</p>
+        <h1 className="mb-1 font-orbitron text-3xl font-bold tracking-[0.08em] text-cp-cyan"><GlitchText text="COMMS_CENTER" /></h1>
+        <p className="font-mono text-sm tracking-[0.2em] text-cp-muted">INCOMING TRANSMISSIONS</p>
       </div>
 
-      {/* Tabs */}
-      <div className="flex border-b border-cp-border">
+      <div className="flex flex-wrap gap-2 border-b border-white/8 pb-2">
         {[['announcements', `ANNOUNCEMENTS (${announcements.length})`], ['messages', `MESSAGES (${messages.filter(m => !m.is_read).length} unread)`]].map(([key, label]) => (
-          <button key={key} onClick={() => setTab(key)}
-            className={`px-6 py-3 font-mono text-xs tracking-widest transition-colors ${tab === key ? 'border-b-2 border-cp-cyan text-cp-cyan' : 'text-cp-muted hover:text-cp-text'}`}>
+          <button
+            key={key}
+            onClick={() => setTab(key)}
+            className={`rounded-2xl px-4 py-2.5 font-mono text-[11px] tracking-[0.18em] transition-all duration-200 ${tab === key ? 'border border-cp-cyan/25 bg-cp-cyan/[0.08] text-cp-cyan' : 'border border-transparent text-cp-muted hover:border-white/8 hover:bg-white/[0.03] hover:text-cp-text'}`}
+          >
             {label}
           </button>
         ))}
@@ -110,21 +101,21 @@ export const MessagesPage = () => {
 
       {tab === 'announcements' && (
         <div className="space-y-4">
-          {announcements.length === 0 && <div className="text-center py-12 font-mono text-cp-muted text-sm">NO ANNOUNCEMENTS YET</div>}
+          {announcements.length === 0 && <div className="py-12 text-center font-mono text-sm text-cp-muted">NO ANNOUNCEMENTS YET</div>}
           {announcements.map(a => {
             const cfg = priorityConfig[a.priority] || priorityConfig.normal
             const Icon = cfg.icon
             return (
-              <div key={a.id} className={`border-l-4 ${cfg.border} ${cfg.bg} p-4`}>
-                <div className="flex items-start justify-between gap-3 mb-2">
+              <div key={a.id} className={`panel-surface border-l-4 p-4 ${cfg.border} ${cfg.bg}`}>
+                <div className="mb-2 flex items-start justify-between gap-3">
                   <div className="flex items-center gap-2">
                     <Icon size={14} className={cfg.text} />
                     <h3 className={`font-orbitron text-sm ${cfg.text}`}>{a.title}</h3>
                   </div>
-                  <span className={`font-mono text-[9px] px-2 py-0.5 rounded-sm uppercase ${cfg.badge}`}>{a.priority}</span>
+                  <span className={`rounded-full px-3 py-1 font-mono text-[9px] uppercase ${cfg.badge}`}>{a.priority}</span>
                 </div>
-                <p className="font-mono text-sm text-cp-text leading-relaxed">{a.body}</p>
-                <p className="font-mono text-[10px] text-cp-muted mt-2 flex items-center gap-1">
+                <p className="font-mono text-sm leading-relaxed text-cp-text">{a.body}</p>
+                <p className="mt-2 flex items-center gap-1 font-mono text-[10px] text-cp-muted">
                   <Clock size={9} />{new Date(a.created_at).toLocaleString()}
                 </p>
               </div>
@@ -134,28 +125,32 @@ export const MessagesPage = () => {
       )}
 
       {tab === 'messages' && (
-        <div className="flex flex-col h-[500px]">
-          <div className="space-y-3 flex-1 overflow-y-auto mb-4 border border-cp-border p-4 bg-cp-dark/50">
-            {messages.length === 0 && <div className="text-center py-12 font-mono text-cp-muted text-sm">NO MESSAGES</div>}
-            {[...messages].reverse().map(m => ( // reverse to show oldest top, newest bottom visually if we want? Actually, ordered by created_at DESC from DB. So reverse for chat view
+        <div className="flex h-[500px] flex-col">
+          <div className="panel-surface mb-4 flex-1 space-y-3 overflow-y-auto p-4">
+            {messages.length === 0 && <div className="py-12 text-center font-mono text-sm text-cp-muted">NO MESSAGES</div>}
+            {[...messages].reverse().map(m => (
               <div key={m.id} className={`flex ${m.sender_id === profile.id ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] p-3 font-mono text-xs ${m.sender_id === profile.id ? 'bg-cp-cyan/10 border border-cp-cyan/30 text-cp-text' : 'bg-cp-card border border-cp-border text-cp-text'}`}>
-                  <div className="flex items-center gap-2 mb-1 opacity-70 border-b border-white/10 pb-1">
+                <div className={`max-w-[80%] rounded-2xl p-3 font-mono text-xs ${m.sender_id === profile.id ? 'border border-cp-cyan/26 bg-cp-cyan/[0.08] text-cp-text' : 'border border-white/8 bg-white/[0.04] text-cp-text'}`}>
+                  <div className="mb-1 flex items-center gap-2 border-b border-white/10 pb-1 opacity-70">
                     <span className="font-bold">{m.sender_id === profile.id ? 'YOU' : m.profiles?.full_name || 'ADMIN'}</span>
-                    {m.is_broadcast && <span className="text-[8px] bg-cp-magenta/20 text-cp-magenta px-1">BROADCAST</span>}
+                    {m.is_broadcast && <span className="rounded-full bg-cp-magenta/20 px-2 py-0.5 text-[8px] text-cp-magenta">BROADCAST</span>}
                   </div>
                   {m.content}
-                  <div className="text-[9px] text-cp-muted mt-1 text-right">{new Date(m.created_at).toLocaleTimeString()}</div>
+                  <div className="mt-1 text-right text-[9px] text-cp-muted">{new Date(m.created_at).toLocaleTimeString()}</div>
                 </div>
               </div>
             ))}
           </div>
-          
+
           <div className="flex gap-2">
-            <input value={composeText} onChange={e => setComposeText(e.target.value)}
+            <input
+              value={composeText}
+              onChange={e => setComposeText(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && sendMessage()}
-              placeholder="Message organizers..." className="flex-1 bg-cp-dark border border-cp-border px-4 py-3 font-mono text-sm text-cp-text outline-none focus:border-cp-cyan placeholder:text-cp-muted" />
-            <button onClick={sendMessage} className="px-6 font-mono text-sm border border-cp-cyan text-cp-cyan hover:bg-cp-cyan hover:text-black transition-colors">
+              placeholder="Message organizers..."
+              className="field-shell flex-1 px-4 py-3 font-mono text-sm text-cp-text outline-none placeholder:text-cp-muted"
+            />
+            <button onClick={sendMessage} className="rounded-2xl border border-cp-cyan/28 bg-cp-cyan/[0.08] px-6 font-mono text-sm tracking-[0.18em] text-cp-cyan transition-all duration-200 hover:-translate-y-0.5 hover:border-cp-cyan/45 hover:bg-cp-cyan/[0.14]">
               SEND
             </button>
           </div>

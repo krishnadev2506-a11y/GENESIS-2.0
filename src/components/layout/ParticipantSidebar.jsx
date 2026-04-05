@@ -18,23 +18,23 @@ export const ParticipantSidebar = ({ isOpen, setIsOpen }) => {
   ]
 
   const SidebarContent = () => (
-    <div className="w-[240px] flex-shrink-0 bg-cp-dark border-r border-cp-border flex flex-col h-screen sticky top-0 z-50">
-      <div className="p-6 border-b border-cp-border flex justify-between items-center">
+    <div className="sticky top-0 z-50 flex h-screen w-[256px] flex-shrink-0 flex-col border-r border-white/8 bg-[#0b111a]/88 backdrop-blur-xl">
+      <div className="flex items-center justify-between border-b border-white/8 px-6 py-6">
         <div>
-          <h2 className="font-orbitron font-bold text-cp-cyan text-xl mb-1">
+          <h2 className="mb-1 font-orbitron text-xl font-semibold text-cp-cyan">
             <GlitchText text="GENESIS" />
           </h2>
-          <div className="font-mono text-[10px] tracking-widest text-cp-muted uppercase">
+          <div className="font-mono text-[10px] uppercase tracking-[0.22em] text-cp-muted">
             OPERATOR: {profile?.full_name?.substring(0, 15) || 'UNKNOWN'}
           </div>
         </div>
-        <button onClick={() => setIsOpen(false)} className="md:hidden text-cp-muted hover:text-white">
+        <button onClick={() => setIsOpen(false)} className="md:hidden rounded-xl border border-white/8 p-2 text-cp-muted transition-colors hover:border-white/20 hover:text-white">
           <X size={20} />
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-4">
-        <div className="space-y-1">
+      <nav className="flex-1 overflow-y-auto px-3 py-5">
+        <div className="space-y-1.5">
           {links.map(({ to, icon: Icon, label, end }) => (
             <NavLink 
               key={label} 
@@ -42,21 +42,21 @@ export const ParticipantSidebar = ({ isOpen, setIsOpen }) => {
               end={end}
               onClick={() => setIsOpen(false)}
               className={({ isActive }) => `
-                flex items-center gap-3 px-6 py-3 font-mono text-sm tracking-wider transition-colors
-                ${isActive ? 'bg-[rgba(0,245,255,0.08)] border-l-4 border-cp-cyan text-cp-cyan' : 'border-l-4 border-transparent text-cp-muted hover:bg-cp-card hover:text-cp-text'}
+                flex items-center gap-3 rounded-2xl px-4 py-3 font-mono text-[13px] tracking-[0.16em] transition-all duration-200 ease-in-out
+                ${isActive ? 'border border-cp-cyan/22 bg-cp-cyan/[0.08] text-cp-cyan shadow-[0_12px_26px_rgba(10,30,42,0.18)]' : 'border border-transparent text-cp-muted hover:border-white/8 hover:bg-white/[0.03] hover:text-cp-text'}
               `}
             >
-              <Icon size={18} />
+              <Icon size={17} />
               {label}
             </NavLink>
           ))}
         </div>
       </nav>
 
-      <div className="p-4 border-t border-cp-border">
+      <div className="border-t border-white/8 p-4">
         <button 
           onClick={logout}
-          className="flex items-center gap-3 px-6 py-3 font-mono text-sm tracking-wider text-cp-muted hover:text-cp-magenta transition-colors w-full"
+          className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 font-mono text-[13px] tracking-[0.16em] text-cp-muted transition-all duration-200 hover:bg-white/[0.03] hover:text-cp-magenta"
         >
           <LogOut size={18} />
           LOGOUT
@@ -81,13 +81,13 @@ export const ParticipantSidebar = ({ isOpen, setIsOpen }) => {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsOpen(false)}
-              className="fixed inset-0 bg-black/80 z-[60] md:hidden backdrop-blur-sm"
+              className="fixed inset-0 z-[60] bg-black/72 backdrop-blur-md md:hidden"
             />
             <motion.div 
               initial={{ x: '-100%' }}
               animate={{ x: 0 }}
               exit={{ x: '-100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              transition={{ type: 'spring', damping: 28, stiffness: 220, mass: 0.8 }}
               className="fixed inset-y-0 left-0 z-[70] md:hidden"
             >
               <SidebarContent />

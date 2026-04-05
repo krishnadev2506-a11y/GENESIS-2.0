@@ -26,3 +26,6 @@ dist-ssr
 # Environments
 .env
 .env.local
+
+# Supabase local CLI temp files
+supabase/.temp/

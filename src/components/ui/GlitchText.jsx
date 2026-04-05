@@ -30,8 +30,8 @@ export const GlitchText = ({ text, className = '' }) => {
   return (
     <span className={`relative inline-block ${className}`}>
       <span className="relative z-10">{displayText}</span>
-      <span className="absolute inset-0 text-cp-cyan animate-glitch opacity-50 ml-[-2px] mix-blend-screen">{displayText}</span>
-      <span className="absolute inset-0 text-cp-magenta animate-glitch opacity-50 ml-[2px] mix-blend-screen" style={{ animationDelay: '0.1s' }}>{displayText}</span>
+      <span className="absolute inset-0 ml-[-1px] animate-glitch text-cp-cyan opacity-18">{displayText}</span>
+      <span className="absolute inset-0 ml-[1px] animate-glitch text-cp-magenta opacity-12" style={{ animationDelay: '0.12s' }}>{displayText}</span>
     </span>
   )
 }

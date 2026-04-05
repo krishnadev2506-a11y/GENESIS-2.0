@@ -1,14 +1,14 @@
-export const TerminalInput = ({ label, ...props }) => {
+﻿export const TerminalInput = ({ label, ...props }) => {
   return (
-    <div className="flex flex-col gap-2 w-full font-mono">
-      {label && <label className="text-cp-muted text-sm tracking-widest">{label}</label>}
-      <div className="relative group">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-cp-cyan opacity-70">»</span>
-        <input 
-          className="w-full bg-cp-dark border border-cp-border py-3 pl-10 pr-4 text-cp-text focus:outline-none focus:border-cp-cyan focus:shadow-[0_0_10px_rgba(0,245,255,0.2)] transition-all placeholder:text-cp-muted"
-          {...props} 
+    <div className="flex w-full flex-col gap-2 font-mono">
+      {label && <label className="text-[11px] uppercase tracking-[0.24em] text-cp-muted">{label}</label>}
+      <div className="field-shell relative group">
+        <span className="absolute left-4 top-1/2 -translate-y-1/2 text-cp-cyan/70">»</span>
+        <input
+          className="w-full bg-transparent py-3.5 pl-10 pr-4 text-cp-text outline-none transition-all placeholder:text-cp-muted/80"
+          {...props}
         />
-        <div className="absolute top-0 right-0 w-2 h-full bg-cp-cyan opacity-0 group-focus-within:animate-flicker group-focus-within:opacity-100" />
+        <div className="absolute bottom-2 right-3 h-5 w-px bg-cp-cyan/0 transition-all duration-300 group-focus-within:bg-cp-cyan/55" />
       </div>
     </div>
   )

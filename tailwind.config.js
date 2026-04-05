@@ -7,27 +7,40 @@ export default {
   theme: {
     extend: {
       colors: {
-        'cp-black':   '#0A0A0F',
-        'cp-dark':    '#12121A',
-        'cp-card':    '#1A1A2E',
-        'cp-border':  '#2A2A3F',
-        'cp-cyan':    '#00F5FF',
-        'cp-magenta': '#FF2D78',
+        'cp-black':   '#06070b',
+        'cp-dark':    '#0d1117',
+        'cp-card':    '#111827',
+        'cp-border':  '#243041',
+        'cp-cyan':    '#6ee7f9',
+        'cp-magenta': '#8b5cf6',
         'cp-yellow':  '#F5E642',
         'cp-green':   '#39FF14',
-        'cp-text':    '#E0E0FF',
-        'cp-muted':   '#6B6B8A',
+        'cp-text':    '#edf4ff',
+        'cp-muted':   '#8b9ab1',
+        'cp-surface': '#0f1724',
+        'cp-panel':   '#131c2c',
       },
       fontFamily: {
         orbitron: ['Orbitron', 'monospace'],
         mono: ['JetBrains Mono', 'monospace'],
       },
+      boxShadow: {
+        glass: '0 18px 50px rgba(3, 8, 20, 0.35)',
+        panel: '0 8px 30px rgba(8, 15, 30, 0.24)',
+        accent: '0 0 0 1px rgba(110, 231, 249, 0.14), 0 12px 30px rgba(11, 39, 53, 0.16)',
+      },
+      backgroundImage: {
+        'cp-grid':
+          'linear-gradient(rgba(139,154,177,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(139,154,177,0.05) 1px, transparent 1px)',
+        'cp-radial':
+          'radial-gradient(circle at top, rgba(110,231,249,0.12), transparent 38%), radial-gradient(circle at 80% 20%, rgba(139,92,246,0.10), transparent 30%)',
+      },
       keyframes: {
         glitch: {
-          '0%,100%': { clipPath:'inset(0 0 98% 0)', transform:'translate(-2px,0)' },
-          '25%':     { clipPath:'inset(40% 0 50% 0)', transform:'translate(2px,0)' },
-          '50%':     { clipPath:'inset(80% 0 5% 0)', transform:'translate(-1px,0)' },
-          '75%':     { clipPath:'inset(10% 0 75% 0)', transform:'translate(1px,0)' },
+          '0%,100%': { clipPath:'inset(0 0 96% 0)', transform:'translate(-1px,0)' },
+          '25%':     { clipPath:'inset(38% 0 52% 0)', transform:'translate(1px,0)' },
+          '50%':     { clipPath:'inset(78% 0 8% 0)', transform:'translate(-1px,0)' },
+          '75%':     { clipPath:'inset(14% 0 70% 0)', transform:'translate(1px,0)' },
         },
         flicker: {
           '0%,100%': { opacity:'1' },
@@ -51,7 +64,7 @@ export default {
         }
       },
       animation: {
-        glitch:     'glitch 0.3s infinite',
+        glitch:     'glitch 0.45s infinite',
         flicker:    'flicker 4s infinite',
         scanline:   'scanline 8s linear infinite',
         pulse_neon: 'pulse_neon 2s ease-in-out infinite',
