@@ -109,12 +109,12 @@ const CyberCar = () => {
   useFrame((state, delta) => {
     const targetZ = THREE.MathUtils.lerp(CAR_START_Z, CAR_END_Z, scroll.offset)
     if (groupRef.current) {
-      // Faster lerp to follow the damped scroll offset closely
-      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, delta * 10)
+      // Use damp for ultra-smooth frame-rate independent gliding
+      THREE.MathUtils.damp(groupRef.current.position, 'z', targetZ, 4, delta)
       
       // Slight tilt based on movement speed
       const speed = (targetZ - groupRef.current.position.z)
-      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, speed * 0.1, delta * 5)
+      THREE.MathUtils.damp(groupRef.current.rotation, 'x', speed * 0.1, 2, delta)
     }
     if (exhaustRef.current) {
       exhaustRef.current.scale.z = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.2
@@ -288,21 +288,19 @@ const DynamicCamera = () => {
     const targetZ = THREE.MathUtils.lerp(30, -72, offset)
     const targetY = THREE.MathUtils.lerp(1.5, 4.5, offset)
     
-    camZ.current = THREE.MathUtils.lerp(camZ.current, targetZ, delta * 10)
-    camY.current = THREE.MathUtils.lerp(camY.current, targetY, delta * 10)
-    
-    state.camera.position.z = camZ.current
-    state.camera.position.y = camY.current
+    // Synchronized damping with the car
+    THREE.MathUtils.damp(state.camera.position, 'z', targetZ, 4, delta)
+    THREE.MathUtils.damp(state.camera.position, 'y', targetY, 4, delta)
     
     // Smooth Mouse Parallax
     const targetX = pointer.x * 1.5
     const targetYLook = 2 + pointer.y * 1
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, delta * 2)
+    THREE.MathUtils.damp(state.camera.position, 'x', targetX, 2, delta)
     state.camera.lookAt(0, targetYLook, -150)
     
     // Dynamic FOV for speed effect
     const fovTarget = 70 + (Math.sin(offset * Math.PI) * 10)
-    state.camera.fov = THREE.MathUtils.lerp(state.camera.fov, fovTarget, delta * 5)
+    THREE.MathUtils.damp(state.camera, 'fov', fovTarget, 2, delta)
     state.camera.updateProjectionMatrix()
   })
   return <CameraShake maxPitch={0.01} maxRoll={0.01} maxYaw={0.01} frequency={1.5} />
@@ -433,7 +431,7 @@ export const Home = () => {
           <ambientLight intensity={0.5} />
           <pointLight position={[0, 10, 10]} color="#00F5FF" intensity={2} decay={2} distance={30} />
           
-          <ScrollControls pages={5} damping={0.25}>
+          <ScrollControls pages={5} damping={0.4}>
             <DynamicCamera />
             <CyberCity />
             <Scroll html style={{ width: '100vw' }}><HTMLContent /></Scroll>
