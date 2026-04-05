@@ -104,35 +104,95 @@ const CyberCar = () => {
   const groupRef = useRef()
   const scroll = useScroll()
   const exhaustRef = useRef()
+  const headlightsRef = useRef()
 
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     const targetZ = THREE.MathUtils.lerp(CAR_START_Z, CAR_END_Z, scroll.offset)
-    if (groupRef.current) groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, delta * 5)
-    if (exhaustRef.current) exhaustRef.current.scale.z = 0.9 + ((Math.sin(Date.now() * 0.02) + 1) * 0.15)
+    if (groupRef.current) {
+      groupRef.current.position.z = THREE.MathUtils.lerp(groupRef.current.position.z, targetZ, delta * 4)
+      // Slight tilt based on movement speed
+      const speed = (targetZ - groupRef.current.position.z)
+      groupRef.current.rotation.x = THREE.MathUtils.lerp(groupRef.current.rotation.x, speed * 0.1, delta * 2)
+    }
+    if (exhaustRef.current) {
+      exhaustRef.current.scale.z = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.2
+      exhaustRef.current.scale.x = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.1
+    }
   })
 
   return (
     <group ref={groupRef} position={[0, -2.8, CAR_START_Z]}>
-      <Float speed={2} rotationIntensity={0} floatIntensity={0.5} floatingRange={[-0.02, 0.02]}>
-        {/* Chassis */}
-        <mesh position={[0, 0.3, 0]}><boxGeometry args={[3.6, 0.35, 7]} /><meshStandardMaterial color="#05050A" metalness={1} roughness={0.05} /></mesh>
-        {/* Cab */}
-        <mesh position={[0, 0.75, 0.5]}><boxGeometry args={[2.4, 0.55, 3.2]} /><meshStandardMaterial color="#0A0A15" metalness={0.9} roughness={0.1} /></mesh>
-        <mesh position={[0, 0.98, 2.1]} rotation={[0.35, 0, 0]}><boxGeometry args={[1.9, 0.65, 0.06]} /><meshStandardMaterial color="#00F5FF" emissive="#00F5FF" emissiveIntensity={0.2} transparent opacity={0.8} /></mesh>
-        {/* Skirts */}
-        <mesh position={[-1.82, 0.15, 0]}><boxGeometry args={[0.06, 0.18, 6.2]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
-        <mesh position={[1.82, 0.15, 0]}><boxGeometry args={[0.06, 0.18, 6.2]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
-        {/* Exhausts */}
-        {[-0.5, 0.5].map(x => (
-          <mesh key={x} ref={x === -0.5 ? exhaustRef : undefined} position={[x, 0.2, -3.95]} rotation={[Math.PI / 2, 0, 0]}>
-            <coneGeometry args={[0.1, 0.9, 8]} /><meshBasicMaterial color="#FF2D78" transparent opacity={0.6} toneMapped={false} blending={THREE.AdditiveBlending} />
+      <Float speed={3} rotationIntensity={0.05} floatIntensity={0.5} floatingRange={[-0.04, 0.04]}>
+        {/* Main Body */}
+        <mesh position={[0, 0.4, 0]}>
+          <boxGeometry args={[3.8, 0.5, 7.5]} />
+          <meshStandardMaterial color="#05050A" metalness={1} roughness={0.1} />
+        </mesh>
+        
+        {/* Cockpit / Cab */}
+        <mesh position={[0, 0.9, 0.2]}>
+          <boxGeometry args={[2.6, 0.6, 3.5]} />
+          <meshStandardMaterial color="#0A0A15" metalness={1} roughness={0.05} />
+        </mesh>
+
+        {/* Windshield */}
+        <mesh position={[0, 1.1, 1.8]} rotation={[0.4, 0, 0]}>
+          <boxGeometry args={[2.2, 0.8, 0.05]} />
+          <meshStandardMaterial color="#00F5FF" emissive="#00F5FF" emissiveIntensity={1.5} transparent opacity={0.4} />
+        </mesh>
+
+        {/* Side Neon Strips */}
+        {[-1.92, 1.92].map(x => (
+          <mesh key={`strip-${x}`} position={[x, 0.3, 0]}>
+            <boxGeometry args={[0.05, 0.2, 6.5]} />
+            <meshBasicMaterial color="#00F5FF" />
           </mesh>
         ))}
+
+        {/* Headlights */}
+        {[-1.4, 1.4].map(x => (
+          <group key={`headlight-${x}`} position={[x, 0.45, 3.76]}>
+            <mesh>
+              <boxGeometry args={[0.6, 0.15, 0.05]} />
+              <meshBasicMaterial color="#00F5FF" />
+            </mesh>
+            <pointLight distance={5} intensity={5} color="#00F5FF" />
+          </group>
+        ))}
+
+        {/* Taillights */}
+        {[-1.2, 1.2].map(x => (
+          <mesh key={`tail-${x}`} position={[x, 0.5, -3.76]}>
+            <boxGeometry args={[0.8, 0.1, 0.05]} />
+            <meshBasicMaterial color="#FF2D78" />
+          </mesh>
+        ))}
+
+        {/* Underglow */}
+        <mesh position={[0, -0.1, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+          <planeGeometry args={[4, 7]} />
+          <meshBasicMaterial color="#00F5FF" transparent opacity={0.3} />
+        </mesh>
+
+        {/* Exhausts */}
+        {[-0.6, 0.6].map(x => (
+          <mesh key={`exhaust-${x}`} ref={x === -0.6 ? exhaustRef : undefined} position={[x, 0.3, -3.8]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.15, 0.05, 1.2, 8]} />
+            <meshBasicMaterial color="#FF2D78" transparent opacity={0.8} blending={THREE.AdditiveBlending} />
+          </mesh>
+        ))}
+
         {/* Wheels */}
-        {[[-1.9, -0.1, 2.2], [1.9, -0.1, 2.2], [-1.9, -0.1, -2.2], [1.9, -0.1, -2.2]].map((p, i) => (
+        {[[-2, 0, 2.4], [2, 0, 2.4], [-2, 0, -2.4], [2, 0, -2.4]].map((p, i) => (
           <group key={i} position={p} rotation={[0, 0, Math.PI / 2]}>
-            <mesh><cylinderGeometry args={[0.55, 0.55, 0.4, 16]} /><meshStandardMaterial color="#030305" roughness={0.8} /></mesh>
-            <mesh><cylinderGeometry args={[0.35, 0.35, 0.42, 8]} /><meshStandardMaterial color="#0A0A15" metalness={1} roughness={0} emissive="#7B61FF" emissiveIntensity={0.5} /></mesh>
+            <mesh>
+              <cylinderGeometry args={[0.65, 0.65, 0.5, 24]} />
+              <meshStandardMaterial color="#020205" roughness={0.5} />
+            </mesh>
+            <mesh position={[0, 0.26, 0]}>
+              <cylinderGeometry args={[0.4, 0.4, 0.05, 16]} />
+              <meshBasicMaterial color={i < 2 ? "#00F5FF" : "#FF2D78"} />
+            </mesh>
           </group>
         ))}
       </Float>
@@ -223,21 +283,20 @@ const DynamicCamera = () => {
   useFrame((state, delta) => {
     const offset = scroll.offset
     // Z & Y Position based on scroll
-    camZ.current = THREE.MathUtils.lerp(camZ.current, THREE.MathUtils.lerp(30, -72, offset), delta * 4)
-    camY.current = THREE.MathUtils.lerp(camY.current, THREE.MathUtils.lerp(1.5, 4.5, offset), delta * 4)
+    camZ.current = THREE.MathUtils.lerp(camZ.current, THREE.MathUtils.lerp(30, -72, offset), delta * 2)
+    camY.current = THREE.MathUtils.lerp(camY.current, THREE.MathUtils.lerp(1.5, 4.5, offset), delta * 2)
     state.camera.position.z = camZ.current
     state.camera.position.y = camY.current
     
     // Smooth Mouse Parallax (looking slightly around based on mouse)
-    const targetX = pointer.x * 2
-    const targetYLook = 2 + pointer.y * 1.5
-    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, delta * 2)
+    const targetX = pointer.x * 1.5
+    const targetYLook = 2 + pointer.y * 1
+    state.camera.position.x = THREE.MathUtils.lerp(state.camera.position.x, targetX, delta * 1.5)
     state.camera.lookAt(0, targetYLook, -150)
     
     // Dynamic FOV for speed effect (expands while scrolling fast)
-    // We approximate speed by checking scroll difference, but simple offset mapping works well too.
-    const fovTarget = 70 + (Math.sin(offset * Math.PI) * 15) // Widen fov in the middle of scroll
-    state.camera.fov = THREE.MathUtils.lerp(state.camera.fov, fovTarget, delta * 3)
+    const fovTarget = 70 + (Math.sin(offset * Math.PI) * 10)
+    state.camera.fov = THREE.MathUtils.lerp(state.camera.fov, fovTarget, delta * 2)
     state.camera.updateProjectionMatrix()
   })
   return <CameraShake maxPitch={0.01} maxRoll={0.01} maxYaw={0.01} frequency={1.5} />
@@ -368,18 +427,18 @@ export const Home = () => {
           <ambientLight intensity={0.5} />
           <pointLight position={[0, 10, 10]} color="#00F5FF" intensity={2} decay={2} distance={30} />
           
-          <ScrollControls pages={5} damping={0.2}>
+          <ScrollControls pages={5} damping={0.3} distance={1.5}>
             <DynamicCamera />
             <CyberCity />
             <Scroll html style={{ width: '100vw' }}><HTMLContent /></Scroll>
           </ScrollControls>
 
-          <EffectComposer>
-            <Bloom luminanceThreshold={0.5} luminanceSmoothing={0.9} intensity={2} mipmapBlur />
-            <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={[0.001, 0.001]} />
+          <EffectComposer disableNormalPass>
+            <Bloom luminanceThreshold={0.8} luminanceSmoothing={0.9} intensity={1.5} mipmapBlur />
+            <ChromaticAberration blendFunction={BlendFunction.NORMAL} offset={[0.0005, 0.0005]} />
             <Vignette eskil={false} offset={0.1} darkness={1.1} />
-            <Noise opacity={0.03} />
-            <Scanline density={1.5} opacity={0.05} />
+            <Noise opacity={0.02} />
+            <Scanline density={1.2} opacity={0.03} />
           </EffectComposer>
         </Canvas>
       </div>
