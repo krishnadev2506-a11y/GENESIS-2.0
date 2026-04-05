@@ -26,17 +26,17 @@ const BUILDING_DATA = Array.from({ length: BUILDING_COUNT }, (_, i) => {
 })
 
 const JET_DATA = [
-  { id: 0, x: -30, y: 18, z: -40,  speed: 28, dir:  1 },
-  { id: 1, x:  40, y: 22, z: -120, speed: 35, dir: -1 },
-  { id: 2, x: -10, y: 14, z: -200, speed: 22, dir:  1 },
-  { id: 3, x:  20, y: 26, z: -280, speed: 40, dir: -1 },
-  { id: 4, x: -50, y: 20, z: -350, speed: 30, dir:  1 },
+  { id: 0, x: -30, y: 18, z: -20,  speed: 28, dir:  1 },
+  { id: 1, x:  40, y: 22, z: -55,  speed: 35, dir: -1 },
+  { id: 2, x: -10, y: 14, z: -90,  speed: 22, dir:  1 },
+  { id: 3, x:  20, y: 26, z: -130, speed: 40, dir: -1 },
+  { id: 4, x: -50, y: 20, z: -170, speed: 30, dir:  1 },
 ]
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-const CAR_START_Z = 30
-const CAR_END_Z = -300
-const TROPHY_Z = -310
+const CAR_START_Z = 20
+const CAR_END_Z = -180
+const TROPHY_Z = -185
 const BUILDING_SPACING = 15
 
 // ─── Instanced City (Massive Performance Boost) ───────────────────────────────
@@ -111,12 +111,12 @@ const CyberCar = () => {
   useFrame((state, delta) => {
     const targetZ = THREE.MathUtils.lerp(CAR_START_Z, CAR_END_Z, scroll.offset)
     if (groupRef.current) {
-      // Increased frequency for a tighter, smoother glide that follows scroll exactly
-      THREE.MathUtils.damp(groupRef.current.position, 'z', targetZ, 10, delta)
+      // Smooth gliding with slightly slower damping for a more "cinematic" feel
+      THREE.MathUtils.damp(groupRef.current.position, 'z', targetZ, 6, delta)
       
       // Slight tilt based on movement speed
       const speed = (targetZ - groupRef.current.position.z)
-      THREE.MathUtils.damp(groupRef.current.rotation, 'x', speed * 0.1, 4, delta)
+      THREE.MathUtils.damp(groupRef.current.rotation, 'x', speed * 0.1, 3, delta)
     }
     if (exhaustRef.current) {
       exhaustRef.current.scale.z = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.2
@@ -125,7 +125,7 @@ const CyberCar = () => {
   })
 
   return (
-    <group ref={groupRef} position={[0, -2.8, CAR_START_Z]}>
+    <group ref={groupRef} position={[0, -3.8, CAR_START_Z]}>
       <Float speed={3} rotationIntensity={0.05} floatIntensity={0.5} floatingRange={[-0.04, 0.04]}>
         {/* Main Body */}
         <mesh position={[0, 0.4, 0]}>
@@ -211,11 +211,11 @@ const CyberTrophy = () => {
     if (trophyRef.current) trophyRef.current.rotation.y = state.clock.elapsedTime * 0.5
   })
   return (
-    <group ref={trophyRef} position={[0, -1.5, TROPHY_Z]}>
-      <mesh position={[0, 0, 0]}><boxGeometry args={[3, 0.5, 3]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} /></mesh>
-      <mesh position={[0, 0.9, 0]}><boxGeometry args={[1.8, 0.8, 1.8]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} emissive="#00F5FF" emissiveIntensity={0.2} /></mesh>
-      <mesh position={[0, 3.55, 0]}><octahedronGeometry args={[0.35]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
-      <mesh position={[0, -0.24, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[2.0, 2.3, 32]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} side={THREE.DoubleSide} transparent opacity={0.6} /></mesh>
+    <group ref={trophyRef} position={[0, -4, TROPHY_Z]}>
+      <mesh position={[0, 0.25, 0]}><boxGeometry args={[3, 0.5, 3]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} /></mesh>
+      <mesh position={[0, 1.15, 0]}><boxGeometry args={[1.8, 0.8, 1.8]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} emissive="#00F5FF" emissiveIntensity={0.2} /></mesh>
+      <mesh position={[0, 3.8, 0]}><octahedronGeometry args={[0.35]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
+      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[2.0, 2.3, 32]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} side={THREE.DoubleSide} transparent opacity={0.6} /></mesh>
     </group>
   )
 }
@@ -223,8 +223,15 @@ const CyberTrophy = () => {
 // ─── Environment & Scene ──────────────────────────────────────────────────────
 const CyberCity = () => {
   const gridRef = useRef()
+  const scroll = useScroll()
+
   useFrame((_, delta) => {
-    if (gridRef.current) gridRef.current.position.z = (gridRef.current.position.z + delta * 15) % 2.5
+    if (gridRef.current) {
+      // Tie road movement directly to scroll progress for tangible feedback
+      // This makes the ground move "under" the car as you scroll
+      const targetZ = (scroll.offset * 200) % 2.5
+      THREE.MathUtils.damp(gridRef.current.position, 'z', targetZ, 4, delta)
+    }
   })
 
   return (
@@ -286,12 +293,11 @@ const DynamicCamera = () => {
 
   useFrame((state, delta) => {
     const offset = scroll.offset
-    // Camera moves behind the car with a longer, deeper path
-    // Starts at 60 and ends at -250 (providing 50 units of distance from car)
-    const targetZ = THREE.MathUtils.lerp(60, -250, offset)
-    const targetY = THREE.MathUtils.lerp(1.5, 5, offset)
+    // Camera moves behind the car with a longer path
+    const targetZ = THREE.MathUtils.lerp(45, -170, offset)
+    const targetY = THREE.MathUtils.lerp(1.5, 4.5, offset)
     
-    // Smooth damping for a floaty camera feel
+    // Synchronized damping with the car
     THREE.MathUtils.damp(state.camera.position, 'z', targetZ, 6, delta)
     THREE.MathUtils.damp(state.camera.position, 'y', targetY, 6, delta)
     
@@ -300,12 +306,12 @@ const DynamicCamera = () => {
     const targetYLook = 2 + pointer.y * 1
     THREE.MathUtils.damp(state.camera.position, 'x', targetX, 3, delta)
     
-    // Always look ahead towards the final prize
-    const lookAtZ = THREE.MathUtils.lerp(CAR_START_Z - 60, TROPHY_Z, offset)
+    // Look ahead of the car, focusing on the trophy at the end
+    const lookAtZ = THREE.MathUtils.lerp(CAR_START_Z - 50, TROPHY_Z, offset)
     state.camera.lookAt(0, targetYLook, lookAtZ)
     
     // Dynamic FOV for speed effect
-    const fovTarget = 70 + (Math.sin(offset * Math.PI) * 12)
+    const fovTarget = 70 + (Math.sin(offset * Math.PI) * 10)
     THREE.MathUtils.damp(state.camera, 'fov', fovTarget, 3, delta)
     state.camera.updateProjectionMatrix()
   })
@@ -437,7 +443,7 @@ export const Home = () => {
           <ambientLight intensity={0.5} />
           <pointLight position={[0, 10, 10]} color="#00F5FF" intensity={2} decay={2} distance={30} />
           
-          <ScrollControls pages={5} damping={0.5}>
+          <ScrollControls pages={5} damping={0.6}>
             <DynamicCamera />
             <CyberCity />
             <Scroll html style={{ width: '100vw' }}><HTMLContent /></Scroll>
