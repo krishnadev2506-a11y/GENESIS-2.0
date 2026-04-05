@@ -112,11 +112,13 @@ const CyberCar = () => {
     const targetZ = THREE.MathUtils.lerp(CAR_START_Z, CAR_END_Z, scroll.offset)
     if (groupRef.current) {
       // Smooth gliding with slightly slower damping for a more "cinematic" feel
-      THREE.MathUtils.damp(groupRef.current.position, 'z', targetZ, 6, delta)
+      groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetZ, 6, delta)
       
       // Slight tilt based on movement speed
       const speed = (targetZ - groupRef.current.position.z)
-      THREE.MathUtils.damp(groupRef.current.rotation, 'x', speed * 0.1, 3, delta)
+      // Clamp the tilt to prevent the car from doing a flip/jump on fast scrolls
+      const tilt = THREE.MathUtils.clamp(speed * 0.015, -0.15, 0.15)
+      groupRef.current.rotation.x = THREE.MathUtils.damp(groupRef.current.rotation.x, tilt, 5, delta)
     }
     if (exhaustRef.current) {
       exhaustRef.current.scale.z = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.2
@@ -291,13 +293,13 @@ const DynamicCamera = () => {
     const targetY = THREE.MathUtils.lerp(1.5, 4.5, offset)
     
     // Synchronized damping with the car
-    THREE.MathUtils.damp(state.camera.position, 'z', targetZ, 6, delta)
-    THREE.MathUtils.damp(state.camera.position, 'y', targetY, 6, delta)
+    state.camera.position.z = THREE.MathUtils.damp(state.camera.position.z, targetZ, 6, delta)
+    state.camera.position.y = THREE.MathUtils.damp(state.camera.position.y, targetY, 6, delta)
     
     // Smooth Mouse Parallax
     const targetX = pointer.x * 1.5
     const targetYLook = 2 + pointer.y * 1
-    THREE.MathUtils.damp(state.camera.position, 'x', targetX, 3, delta)
+    state.camera.position.x = THREE.MathUtils.damp(state.camera.position.x, targetX, 3, delta)
     
     // Look ahead of the car, focusing on the trophy at the end
     const lookAtZ = THREE.MathUtils.lerp(CAR_START_Z - 50, TROPHY_Z, offset)
@@ -305,7 +307,7 @@ const DynamicCamera = () => {
     
     // Dynamic FOV for speed effect
     const fovTarget = 70 + (Math.sin(offset * Math.PI) * 10)
-    THREE.MathUtils.damp(state.camera, 'fov', fovTarget, 3, delta)
+    state.camera.fov = THREE.MathUtils.damp(state.camera.fov, fovTarget, 3, delta)
     state.camera.updateProjectionMatrix()
   })
   return null // Removed CameraShake for smoother gliding
