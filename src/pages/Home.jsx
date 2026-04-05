@@ -125,7 +125,7 @@ const CyberCar = () => {
   })
 
   return (
-    <group ref={groupRef} position={[0, -3.8, CAR_START_Z]}>
+    <group ref={groupRef} position={[0, -2.8, CAR_START_Z]}>
       <Float speed={3} rotationIntensity={0.05} floatIntensity={0.5} floatingRange={[-0.04, 0.04]}>
         {/* Main Body */}
         <mesh position={[0, 0.4, 0]}>
@@ -211,11 +211,11 @@ const CyberTrophy = () => {
     if (trophyRef.current) trophyRef.current.rotation.y = state.clock.elapsedTime * 0.5
   })
   return (
-    <group ref={trophyRef} position={[0, -4, TROPHY_Z]}>
-      <mesh position={[0, 0.25, 0]}><boxGeometry args={[3, 0.5, 3]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} /></mesh>
-      <mesh position={[0, 1.15, 0]}><boxGeometry args={[1.8, 0.8, 1.8]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} emissive="#00F5FF" emissiveIntensity={0.2} /></mesh>
-      <mesh position={[0, 3.8, 0]}><octahedronGeometry args={[0.35]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
-      <mesh position={[0, 0.01, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[2.0, 2.3, 32]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} side={THREE.DoubleSide} transparent opacity={0.6} /></mesh>
+    <group ref={trophyRef} position={[0, -1.5, TROPHY_Z]}>
+      <mesh position={[0, 0, 0]}><boxGeometry args={[3, 0.5, 3]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} /></mesh>
+      <mesh position={[0, 0.9, 0]}><boxGeometry args={[1.8, 0.8, 1.8]} /><meshStandardMaterial color="#050510" metalness={1} roughness={0.1} emissive="#00F5FF" emissiveIntensity={0.2} /></mesh>
+      <mesh position={[0, 3.55, 0]}><octahedronGeometry args={[0.35]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} /></mesh>
+      <mesh position={[0, -0.24, 0]} rotation={[-Math.PI / 2, 0, 0]}><ringGeometry args={[2.0, 2.3, 32]} /><meshBasicMaterial color="#00F5FF" toneMapped={false} side={THREE.DoubleSide} transparent opacity={0.6} /></mesh>
     </group>
   )
 }
@@ -223,15 +223,8 @@ const CyberTrophy = () => {
 // ─── Environment & Scene ──────────────────────────────────────────────────────
 const CyberCity = () => {
   const gridRef = useRef()
-  const scroll = useScroll()
-
   useFrame((_, delta) => {
-    if (gridRef.current) {
-      // Tie road movement directly to scroll progress for tangible feedback
-      // This makes the ground move "under" the car as you scroll
-      const targetZ = (scroll.offset * 200) % 2.5
-      THREE.MathUtils.damp(gridRef.current.position, 'z', targetZ, 4, delta)
-    }
+    if (gridRef.current) gridRef.current.position.z = (gridRef.current.position.z + delta * 15) % 2.5
   })
 
   return (
@@ -443,7 +436,7 @@ export const Home = () => {
           <ambientLight intensity={0.5} />
           <pointLight position={[0, 10, 10]} color="#00F5FF" intensity={2} decay={2} distance={30} />
           
-          <ScrollControls pages={5} damping={0.6}>
+          <ScrollControls pages={5} damping={0.5}>
             <DynamicCamera />
             <CyberCity />
             <Scroll html style={{ width: '100vw' }}><HTMLContent /></Scroll>
