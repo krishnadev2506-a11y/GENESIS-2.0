@@ -34,9 +34,9 @@ const JET_DATA = [
 ]
 
 // ─── Constants ──────────────────────────────────────────────────────────────
-const CAR_START_Z = 15
-const CAR_END_Z = -86.5
-const TROPHY_Z = -88
+const CAR_START_Z = 20
+const CAR_END_Z = -180
+const TROPHY_Z = -185
 const BUILDING_SPACING = 15
 
 // ─── Instanced City (Massive Performance Boost) ───────────────────────────────
@@ -111,12 +111,12 @@ const CyberCar = () => {
   useFrame((state, delta) => {
     const targetZ = THREE.MathUtils.lerp(CAR_START_Z, CAR_END_Z, scroll.offset)
     if (groupRef.current) {
-      // Use damp for ultra-smooth frame-rate independent gliding
-      THREE.MathUtils.damp(groupRef.current.position, 'z', targetZ, 8, delta)
+      // Smooth gliding with slightly slower damping for a more "cinematic" feel
+      THREE.MathUtils.damp(groupRef.current.position, 'z', targetZ, 6, delta)
       
       // Slight tilt based on movement speed
       const speed = (targetZ - groupRef.current.position.z)
-      THREE.MathUtils.damp(groupRef.current.rotation, 'x', speed * 0.1, 4, delta)
+      THREE.MathUtils.damp(groupRef.current.rotation, 'x', speed * 0.1, 3, delta)
     }
     if (exhaustRef.current) {
       exhaustRef.current.scale.z = 1 + Math.sin(state.clock.elapsedTime * 20) * 0.2
@@ -286,26 +286,26 @@ const DynamicCamera = () => {
 
   useFrame((state, delta) => {
     const offset = scroll.offset
-    // Z & Y Position based on scroll
-    const targetZ = THREE.MathUtils.lerp(35, -78, offset)
+    // Camera moves behind the car with a longer path
+    const targetZ = THREE.MathUtils.lerp(45, -170, offset)
     const targetY = THREE.MathUtils.lerp(1.5, 4.5, offset)
     
-    // Tighter synchronized damping with the car
-    THREE.MathUtils.damp(state.camera.position, 'z', targetZ, 8, delta)
-    THREE.MathUtils.damp(state.camera.position, 'y', targetY, 8, delta)
+    // Synchronized damping with the car
+    THREE.MathUtils.damp(state.camera.position, 'z', targetZ, 6, delta)
+    THREE.MathUtils.damp(state.camera.position, 'y', targetY, 6, delta)
     
     // Smooth Mouse Parallax
     const targetX = pointer.x * 1.5
     const targetYLook = 2 + pointer.y * 1
-    THREE.MathUtils.damp(state.camera.position, 'x', targetX, 4, delta)
+    THREE.MathUtils.damp(state.camera.position, 'x', targetX, 3, delta)
     
-    // Look slightly ahead of the car
+    // Look ahead of the car, focusing on the trophy at the end
     const lookAtZ = THREE.MathUtils.lerp(CAR_START_Z - 50, TROPHY_Z, offset)
     state.camera.lookAt(0, targetYLook, lookAtZ)
     
     // Dynamic FOV for speed effect
     const fovTarget = 70 + (Math.sin(offset * Math.PI) * 10)
-    THREE.MathUtils.damp(state.camera, 'fov', fovTarget, 4, delta)
+    THREE.MathUtils.damp(state.camera, 'fov', fovTarget, 3, delta)
     state.camera.updateProjectionMatrix()
   })
   return null // Removed CameraShake for smoother gliding
