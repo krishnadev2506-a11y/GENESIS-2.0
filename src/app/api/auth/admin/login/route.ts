@@ -50,8 +50,9 @@ export async function POST(req: NextRequest) {
     setAuthCookie(response, token);
     
     return response;
-  } catch (error) {
+  } catch (error: any) {
     console.error('Admin login error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    const message = error instanceof Error ? error.message : 'Internal server error';
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
