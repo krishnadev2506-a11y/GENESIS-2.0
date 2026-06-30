@@ -150,7 +150,7 @@ export default async function DashboardPage() {
             </div>
             <div className="flex-grow flex flex-col gap-2 mt-2">
               {team.members.map((member: any, i: number) => (
-                <div key={i} className="flex justify-between items-center p-3 rounded-xl bg-glass border border-glass-border">
+                <div key={i} className="flex justify-between items-center p-4 rounded-xl bg-glass border border-glass-border">
                   <div>
                     <div className="font-bold text-white">{member.name}</div>
                     <div className="text-xs text-text-muted">{member.role}</div>

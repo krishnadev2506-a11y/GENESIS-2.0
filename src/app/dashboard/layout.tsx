@@ -79,7 +79,7 @@ export default function DashboardLayout({
                       : 'text-text-muted hover:bg-glass hover:text-white'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <Icon size={20} className={isActive ? 'text-pulse' : ''} />
                   <span className="font-medium">{item.name}</span>
                 </div>
@@ -96,7 +96,7 @@ export default function DashboardLayout({
         <div className="p-4 border-t border-[rgba(255,255,255,0.08)]">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-[14px] text-text-muted hover:bg-[rgba(248,113,113,0.1)] hover:text-danger w-full transition-colors"
+            className="flex items-center gap-4 px-4 py-3 rounded-[14px] text-text-muted hover:bg-[rgba(248,113,113,0.1)] hover:text-danger w-full transition-colors"
           >
             <LogOut size={20} />
             <span className="font-medium">Log Out</span>
@@ -153,7 +153,7 @@ export default function DashboardLayout({
                             : 'text-text-muted hover:bg-glass hover:text-white'
                       }`}
                     >
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-4">
                         <Icon size={20} className={isActive ? 'text-pulse' : ''} />
                         <span className="font-medium">{item.name}</span>
                       </div>
@@ -164,7 +164,7 @@ export default function DashboardLayout({
               <div className="p-4 border-t border-[rgba(255,255,255,0.08)]">
                 <button 
                   onClick={handleLogout}
-                  className="flex items-center gap-3 px-4 py-3 rounded-[14px] text-text-muted hover:bg-[rgba(248,113,113,0.1)] hover:text-danger w-full transition-colors"
+                  className="flex items-center gap-4 px-4 py-3 rounded-[14px] text-text-muted hover:bg-[rgba(248,113,113,0.1)] hover:text-danger w-full transition-colors"
                 >
                   <LogOut size={20} />
                   <span className="font-medium">Log Out</span>

@@ -59,12 +59,16 @@ export async function sendRegistrationReceived(to: string, teamName: string): Pr
   // Convert newlines to HTML paragraphs for plain text templates
   const content = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: fromEmail,
     to,
     subject: "We've received your GENESIS 2.0 registration",
     html: emailTemplate(content),
   });
+
+  if (error) {
+    throw new Error(`Resend Error: ${error.message}`);
+  }
 }
 
 export async function sendRegistrationConfirmed(to: string, teamName: string, username: string, password: string): Promise<void> {
@@ -97,12 +101,16 @@ export async function sendRegistrationConfirmed(to: string, teamName: string, us
     </p>
   `;
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: fromEmail,
     to,
     subject: "You're confirmed for GENESIS 2.0 — Welcome!",
     html: emailTemplate(content),
   });
+
+  if (error) {
+    throw new Error(`Resend Error: ${error.message}`);
+  }
 }
 
 export async function sendAdminMessage(to: string, subject: string, body: string): Promise<void> {
@@ -111,12 +119,16 @@ export async function sendAdminMessage(to: string, subject: string, body: string
     ${body.split('\n').map(p => `<p>${p}</p>`).join('')}
   `;
 
-  await resend.emails.send({
+  const { error } = await resend.emails.send({
     from: fromEmail,
     to,
     subject,
     html: emailTemplate(content),
   });
+
+  if (error) {
+    throw new Error(`Resend Error: ${error.message}`);
+  }
 }
 
 

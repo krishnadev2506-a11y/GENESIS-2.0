@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import { comparePassword, signToken, setAuthCookie } from '@/lib/auth';
-
+import { z } from 'zod';
 const rateLimit = new Map<string, { count: number, resetTime: number }>();
 
 export async function POST(req: NextRequest) {
@@ -23,10 +23,21 @@ export async function POST(req: NextRequest) {
     await connectDB();
     
     const body = await req.json();
-    const { username, password } = body;
-    
-    if (!username || !password) {
-      return NextResponse.json({ error: 'Username and password required' }, { status: 400 });
+    const loginSchema = z.object({
+      username: z.string().min(1, 'Username is required'),
+      password: z.string().min(1, 'Password is required'),
+    });
+
+    let username, password;
+    try {
+      const parsed = loginSchema.parse(body);
+      username = parsed.username;
+      password = parsed.password;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
+      }
+      return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }
 
     const team = await Team.findOne({ 'credentials.username': username });

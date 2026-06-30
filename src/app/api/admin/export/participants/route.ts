@@ -4,7 +4,7 @@ import { connectDB } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import Team from '@/models/Team';
 
-type ExportFormat = 'csv' | 'json' | 'xlsx';
+type ExportFormat = 'csv' | 'xlsx';
 
 type ExportMember = {
   name: string;
@@ -379,11 +379,9 @@ export async function GET(req: NextRequest) {
     await connectDB();
     await requireAuth(req, 'admin');
 
-    const format = (req.nextUrl.searchParams.get('format') === 'json'
-      ? 'json'
-      : req.nextUrl.searchParams.get('format') === 'xlsx'
-        ? 'xlsx'
-        : 'csv') as ExportFormat;
+    const format = (req.nextUrl.searchParams.get('format') === 'xlsx'
+      ? 'xlsx'
+      : 'csv') as ExportFormat;
 
     const teams = await Team.find().sort({ createdAt: 1 }).lean();
 
@@ -419,21 +417,6 @@ export async function GET(req: NextRequest) {
       createdAt: toIsoString(team.createdAt) || '',
       updatedAt: toIsoString(team.updatedAt) || '',
     }));
-
-    if (format === 'json') {
-      return NextResponse.json(
-        {
-          generatedAt: new Date().toISOString(),
-          totalTeams: participants.length,
-          participants,
-        },
-        {
-          headers: {
-            'Content-Disposition': `attachment; filename="${buildFilename('json')}"`,
-          },
-        }
-      );
-    }
 
     if (format === 'xlsx') {
       const workbook = buildXlsx(participants);

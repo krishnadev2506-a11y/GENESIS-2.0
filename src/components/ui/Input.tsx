@@ -23,10 +23,10 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             id={inputId}
             ref={ref}
             className={`
-              w-full bg-void border border-glass-border 
+              w-full bg-[rgba(20,15,45,0.4)] backdrop-blur-md border border-[rgba(139,92,246,0.2)] 
               rounded-[14px] px-4 min-h-[48px] text-white placeholder:text-text-muted/50
               transition-all duration-300 outline-none font-body text-[14px]
-              focus:bg-[rgba(255,255,255,0.02)] focus:border-pulse focus:ring-1 focus:ring-pulse focus:shadow-[0_0_16px_rgba(167,139,250,0.15)]
+              focus:bg-[rgba(20,15,45,0.6)] focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7] focus:shadow-[0_0_24px_rgba(168,85,247,0.4)]
               disabled:opacity-50 disabled:cursor-not-allowed
               ${error ? 'border-danger focus:border-danger focus:shadow-[0_0_16px_rgba(248,113,113,0.3)]' : ''}
               ${className}

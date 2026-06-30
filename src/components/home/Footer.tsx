@@ -10,7 +10,7 @@ export function Footer() {
       <div className="mx-auto mb-12 flex max-w-7xl flex-col justify-between gap-10 md:flex-row md:items-start">
         <div>
           <BrandWordmark className="mb-3 text-2xl tracking-[0.28em] text-white" />
-          <div className="flex items-center gap-3 rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-4 py-3 shadow-[0_0_24px_rgba(139,92,246,0.08)]">
+          <div className="flex items-center gap-4 rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-4 py-3 shadow-[0_0_24px_rgba(139,92,246,0.08)]">
             <ClubLogo className="h-12 w-12 shrink-0 sm:h-14 sm:w-14" />
             <div>
               <p className="text-[10px] uppercase tracking-[0.28em] text-text-muted sm:text-[11px] sm:tracking-[0.34em]">Organized by</p>

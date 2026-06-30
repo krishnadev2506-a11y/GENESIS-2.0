@@ -46,7 +46,7 @@ export function GlassCard({
         variants={fadeUp}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: '-100px' }}
+        viewport={{ once: true, margin: '0px' }}
         transition={{ delay }}
         {...motionProps}
         {...sharedProps}

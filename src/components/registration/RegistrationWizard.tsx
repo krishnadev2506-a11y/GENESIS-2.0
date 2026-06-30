@@ -9,6 +9,20 @@ import { SegmentedToggle } from '@/components/ui/SegmentedToggle';
 import { useToast } from '@/components/ui/Toast';
 import { slideLeft, slideRight } from '@/lib/motion-variants';
 import { useRouter } from 'next/navigation';
+import { z } from 'zod';
+
+const step1Schema = z.object({
+  teamName: z.string().min(2, "Team name must be at least 2 characters").max(50),
+});
+
+const memberSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  email: z.string().email("Invalid email address"),
+  phone: z.string().regex(/^[0-9]{10}$/, 'Invalid phone number (10 digits)'),
+  college: z.string().min(2, "College name is required"),
+  semester: z.string().min(1, "Semester is required"),
+});
+
 
 export function RegistrationWizard() {
   const [step, setStep] = useState(1);
@@ -39,8 +53,10 @@ export function RegistrationWizard() {
   const nextStep = () => {
     // Validate current step before proceeding
     if (step === 1) {
-      if (!formData.teamName) {
-        error('Error', 'Please enter a Team Name');
+      try {
+        step1Schema.parse({ teamName: formData.teamName });
+      } catch (err: any) {
+        error('Validation Error', err.errors?.[0]?.message || err.message || 'Invalid input');
         return;
       }
       
@@ -74,10 +90,13 @@ export function RegistrationWizard() {
         return;
       }
 
-      const allMembersValid = formData.members.every(m => m.name && m.email && m.phone && m.college && m.semester);
-      if (!allMembersValid) {
-        error('Error', 'Please fill in all details for every team member');
-        return;
+      for (let i = 0; i < formData.members.length; i++) {
+        try {
+          memberSchema.parse(formData.members[i]);
+        } catch (err: any) {
+          error(`Participant ${i + 1} Error`, err.errors?.[0]?.message || err.message || 'Invalid input');
+          return;
+        }
       }
     }
     
@@ -273,7 +292,7 @@ export function RegistrationWizard() {
               
               <div className="space-y-8 max-h-[60vh] overflow-y-auto pr-2">
                 {formData.members.map((member, index) => (
-                  <div key={index} className={`p-5 rounded-2xl border ${member.isLeader ? 'border-pulse bg-pulse/10' : 'border-white/10 bg-white/[0.02]'}`}>
+                  <div key={index} className={`p-6 rounded-2xl border ${member.isLeader ? 'border-pulse bg-pulse/10' : 'border-white/10 bg-white/[0.02]'}`}>
                     <div className="flex justify-between items-center mb-6">
                       <h4 className={`font-bold ${member.isLeader ? 'text-pulse' : 'text-white'}`}>
                         Participant {index + 1}

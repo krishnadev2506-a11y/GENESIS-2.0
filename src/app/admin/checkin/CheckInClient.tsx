@@ -72,7 +72,7 @@ export function CheckInClient() {
           {data.teams.map((team: any) => (
             <GlassCard key={team._id} className="p-6 flex flex-col md:flex-row items-center justify-between gap-6 hoverEffect={true}">
               <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
+                <div className="flex items-center gap-4 mb-2">
                   <h3 className="text-2xl font-bold text-white">{team.teamName}</h3>
                   <Badge variant={team.paymentStatus === 'verified' ? 'success' : 'danger'}>
                     {team.paymentStatus.replace('_', ' ')}

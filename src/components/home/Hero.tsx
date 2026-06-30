@@ -88,40 +88,57 @@ export function Hero() {
         </m.div>
       ))}
 
-      <m.div className="absolute left-1/2 top-[55%] z-[1] h-[20rem] w-[20rem] -translate-x-1/2 rounded-full bg-[radial-gradient(circle_at_50%_50%,rgba(15,12,24,0.4)_0%,#040408_70%)] blur-[1px] sm:top-[50%] sm:h-[28rem] sm:w-[28rem] md:h-[32rem] md:w-[32rem]" style={{ x: farX, y: farY }}>
-        <div className="absolute inset-[-5%] rounded-full bg-[conic-gradient(from_210deg,rgba(139,92,246,0.15)_0deg,rgba(255,255,255,0.4)_72deg,rgba(167,139,250,0.2)_118deg,rgba(0,0,0,0)_360deg)] blur-[12px]" />
-        <div className="absolute inset-[2%] overflow-hidden rounded-full bg-[#0a0a10]">
-          <div className="absolute inset-[-10%] bg-[radial-gradient(circle_at_30%_36%,rgba(139,92,246,0.15)_0%,transparent_30%),linear-gradient(140deg,#09090f_10%,#181126_40%,#030306_100%)] opacity-80" />
+      <m.div className="absolute right-[-10%] top-[40%] z-[1] h-[24rem] w-[24rem] lg:right-[5%] lg:top-[20%] lg:h-[40rem] lg:w-[40rem] rounded-full shadow-[0_0_150px_rgba(168,85,247,0.5)] blur-[1px]" style={{ x: farX, y: farY }}>
+        <div className="absolute inset-[-5%] rounded-full bg-[conic-gradient(from_210deg,rgba(168,85,247,0.8)_0deg,rgba(255,255,255,0.9)_72deg,rgba(109,40,217,0.9)_118deg,rgba(0,0,0,0)_360deg)] blur-[20px]" />
+        
+        <div className="absolute inset-[2%] overflow-hidden rounded-full bg-[#1a103c] shadow-[inset_-30px_-30px_80px_rgba(168,85,247,0.8),inset_30px_30px_80px_rgba(0,0,0,0.8)] border border-[rgba(168,85,247,0.3)]">
+          <m.div 
+            className="absolute inset-[-50%] bg-[radial-gradient(circle_at_30%_36%,rgba(196,181,253,0.3)_0%,transparent_70%),linear-gradient(140deg,#2d1b4e_10%,#140d21_50%,#0a0a10_100%)] opacity-100"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 180, repeat: Infinity, ease: 'linear' }}
+          >
+            <div className="absolute top-[20%] left-[30%] w-[18%] h-[18%] rounded-full bg-[#150d29] shadow-[inset_6px_6px_14px_rgba(0,0,0,0.7),inset_-2px_-2px_8px_rgba(196,181,253,0.4)]" />
+            <div className="absolute top-[45%] left-[60%] w-[14%] h-[14%] rounded-full bg-[#1c1236] shadow-[inset_5px_5px_12px_rgba(0,0,0,0.6),inset_-2px_-2px_6px_rgba(196,181,253,0.3)]" />
+            <div className="absolute top-[65%] left-[25%] w-[22%] h-[22%] rounded-full bg-[#110a22] shadow-[inset_8px_8px_16px_rgba(0,0,0,0.8),inset_-3px_-3px_10px_rgba(196,181,253,0.5)]" />
+            <div className="absolute top-[35%] left-[75%] w-[8%] h-[8%] rounded-full bg-[#1f143d] shadow-[inset_3px_3px_6px_rgba(0,0,0,0.5),inset_-1px_-1px_4px_rgba(196,181,253,0.2)]" />
+            <div className="absolute top-[75%] left-[65%] w-[12%] h-[12%] rounded-full bg-[#180f2f] shadow-[inset_4px_4px_8px_rgba(0,0,0,0.65),inset_-2px_-2px_5px_rgba(196,181,253,0.3)]" />
+            <div className="absolute top-[15%] left-[55%] w-[10%] h-[10%] rounded-full bg-[#110a22] shadow-[inset_3px_3px_8px_rgba(0,0,0,0.7),inset_-1px_-1px_4px_rgba(196,181,253,0.2)]" />
+            <div className="absolute top-[55%] left-[40%] w-[6%] h-[6%] rounded-full bg-[#1a103c] shadow-[inset_2px_2px_5px_rgba(0,0,0,0.5),inset_-1px_-1px_3px_rgba(196,181,253,0.2)]" />
+          </m.div>
         </div>
       </m.div>
 
-      <div className="relative z-10 mx-auto flex min-h-[72vh] max-w-7xl items-center justify-center sm:min-h-[78vh]">
-        <div className="w-full max-w-5xl">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center px-4 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
           <m.div
-            className="glass-surface rounded-[32px] px-7 py-10 text-center shadow-[0_0_100px_rgba(139,92,246,0.18)] sm:rounded-[40px] sm:px-10 sm:py-14 md:px-16 md:py-20 border border-[rgba(255,255,255,0.12)]"
+            className="text-left pt-20 lg:pt-0"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
             <m.h1 variants={fadeUp as any}>
-              <BrandWordmark className="text-3xl tracking-[0.16em] text-white sm:text-5xl sm:tracking-[0.2em] lg:text-7xl lg:tracking-[0.22em]" />
+              <BrandWordmark className="text-4xl tracking-[0.16em] text-transparent bg-clip-text bg-gradient-to-r from-[#c4b5fd] via-white to-[#a855f7] sm:text-6xl sm:tracking-[0.2em] lg:text-7xl lg:tracking-[0.22em]" />
             </m.h1>
             <m.p
               variants={fadeUp as any}
-              className="font-display mx-auto mt-6 max-w-4xl text-base font-semibold uppercase tracking-[0.24em] text-text-muted sm:mt-8 sm:text-2xl sm:tracking-[0.3em] lg:text-4xl"
+              className="font-display mt-6 max-w-2xl text-lg font-semibold uppercase tracking-[0.24em] text-text-muted sm:mt-8 sm:text-2xl sm:tracking-[0.3em] lg:text-3xl"
             >
               <span className="block">Code the future</span>
-              <span className="block">Code the impossible</span>
+              <span className="block text-white/50">Code the impossible</span>
             </m.p>
-            <m.div variants={fadeUp as any} className="mt-10 flex flex-col items-center justify-center gap-4 sm:mt-12 sm:gap-5 sm:flex-row">
+            <m.div variants={fadeUp as any} className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row">
               <Link href="/register" className="w-full sm:w-auto">
-                <Button size="lg" variant="primary" className="w-full min-w-0 sm:min-w-[240px]">Register Your Team</Button>
+                <Button size="lg" variant="primary" className="w-full min-w-0 sm:min-w-[220px]">Register Your Team</Button>
               </Link>
               <Link href="/schedule" className="w-full sm:w-auto">
-                <Button size="lg" variant="secondary" className="w-full min-w-0 sm:min-w-[240px]">Explore Schedule</Button>
+                <Button size="lg" variant="secondary" className="w-full min-w-0 sm:min-w-[220px]">Explore Schedule</Button>
               </Link>
             </m.div>
           </m.div>
+          
+          <div className="hidden lg:block relative h-full w-full">
+            {/* Visual anchor buffer to prevent text from overlapping the eclipse */}
+          </div>
         </div>
       </div>
     </section>

@@ -39,9 +39,9 @@ export function PublicNav() {
 
   return (
     <>
-      <header className="fixed left-0 right-0 top-3 z-50 px-3 sm:top-4 sm:px-6 lg:px-8">
+      <header className="fixed left-0 right-0 top-4 z-50 px-3 sm:top-4 sm:px-6 lg:px-8">
         <div className="glass-surface mx-auto flex h-[64px] max-w-7xl items-center justify-between rounded-full border border-[rgba(255,255,255,0.12)] px-3 sm:h-[72px] sm:px-6 shadow-[0_4px_20px_rgba(0,0,0,0.35),0_0_30px_rgba(139,92,246,0.12)]">
-          <Link href="/" className="flex items-center gap-2.5 sm:gap-3" onClick={() => setMobileMenuOpen(false)}>
+          <Link href="/" className="flex items-center gap-2 sm:gap-4" onClick={() => setMobileMenuOpen(false)}>
             <ClubLogo className="h-10 w-10 shrink-0 sm:h-11 sm:w-11" />
             <div className="min-w-0 leading-none">
               <BrandWordmark className="text-[11px] tracking-[0.22em] text-white sm:text-base sm:tracking-[0.35em]" />
@@ -97,7 +97,7 @@ export function PublicNav() {
               Live 2026
             </m.div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               <Link href="/login" tabIndex={-1}>
                 <Button variant="ghost" size="sm">Login</Button>
               </Link>
@@ -126,7 +126,7 @@ export function PublicNav() {
             exit={{ opacity: 0, x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
           >
-            <nav className="flex flex-1 flex-col gap-5 overflow-y-auto p-5 sm:gap-6 sm:p-6">
+            <nav className="flex flex-1 flex-col gap-6 overflow-y-auto p-6 sm:gap-6 sm:p-6">
               {navLinks.map((link) => {
                 let isActive = false;
                 if (link.href.includes('#')) {
@@ -160,7 +160,7 @@ export function PublicNav() {
                 </Link>
               </div>
             </nav>
-            <div className="p-5 sm:p-6">
+            <div className="p-6 sm:p-6">
               <Link href="/register" onClick={() => setMobileMenuOpen(false)} tabIndex={-1}>
                 <Button variant="primary" size="lg" className="w-full">Join The Event</Button>
               </Link>

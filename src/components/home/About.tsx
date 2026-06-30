@@ -54,7 +54,7 @@ const features = [
 
 export function About() {
   return (
-    <section id="about" className="relative z-10 mx-auto max-w-7xl overflow-hidden px-4 py-32 sm:px-6 lg:px-8">
+    <section id="about" className="relative z-10 mx-auto max-w-7xl overflow-hidden px-4 py-16 sm:px-6 lg:px-8">
       <div className="section-glow left-[-10rem] top-[4rem] opacity-70" />
       <div className="section-glow right-[-8rem] bottom-[10rem] opacity-60" />
 
@@ -62,7 +62,7 @@ export function About() {
         variants={staggerContainer}
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true, margin: '-100px' }}
+        viewport={{ once: true, margin: '0px' }}
         className="space-y-16"
       >
         <div className="mx-auto max-w-3xl text-center">

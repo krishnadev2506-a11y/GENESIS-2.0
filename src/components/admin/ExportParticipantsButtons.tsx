@@ -11,7 +11,7 @@ function downloadParticipants(format: ExportFormat) {
 
 export function ExportParticipantsButtons() {
   return (
-    <div className="flex flex-wrap gap-3">
+    <div className="flex flex-wrap gap-4">
       <Button
         variant="secondary"
         size="sm"

@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-void: #0A0A0F;
-  --color-void-alt: #0D0B14;
-  --color-nebula: #171123;
-  --color-pulse: #7C3AED;
-  --color-pulse-bright: #8B5CF6;
-  --color-starlight: #A78BFA;
-  --color-starlight-soft: #C4B5FD;
-  --color-text-primary: #F5F3FF;
-  --color-text-muted: #B9B0CF;
+  --color-void: #050505;
+  --color-void-alt: #0a0a0f;
+  --color-nebula: #0f0b29;
+  --color-pulse: #8b5cf6;
+  --color-pulse-bright: #a855f7;
+  --color-starlight: #6d28d9;
+  --color-starlight-soft: #4c1d95;
+  --color-text-primary: #ffffff;
+  --color-text-muted: #cbd5e1;
   --color-success: #34D399;
   --color-pending: #FBBF24;
   --color-danger: #F87171;
-  --color-glass-fill: rgba(20, 16, 30, 0.6);
-  --color-glass-border: rgba(255, 255, 255, 0.08);
+  --color-glass-fill: rgba(20, 15, 45, 0.4);
+  --color-glass-border: rgba(139, 92, 246, 0.2);
   --color-glass-strong: rgba(28, 20, 44, 0.76);
 
   --color-bg-base: var(--color-void);
@@ -45,9 +45,9 @@ html {
 
 body {
   background:
-    radial-gradient(circle at 18% 18%, rgba(139, 92, 246, 0.14), transparent 28%),
-    radial-gradient(circle at 82% 22%, rgba(196, 181, 253, 0.08), transparent 24%),
-    linear-gradient(180deg, #0a0a0f 0%, #0d0b14 52%, #09090e 100%);
+    radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.15), transparent 35%),
+    radial-gradient(circle at 85% 30%, rgba(109, 40, 217, 0.15), transparent 40%),
+    linear-gradient(180deg, #050505 0%, #0f0b29 50%, #050505 100%);
   color: var(--color-text-primary);
   font-family: var(--font-body);
 }
@@ -103,14 +103,14 @@ h1, h2, h3, h4, h5, h6, .font-display {
 }
 
 .glass-surface {
-  background: linear-gradient(180deg, rgba(30, 22, 46, 0.72), rgba(16, 12, 24, 0.62));
+  background: var(--color-glass-fill);
   border: 1px solid var(--color-glass-border);
   box-shadow:
     inset 0 1px 0 rgba(255,255,255,0.06),
     0 24px 80px rgba(0,0,0,0.38),
     0 0 40px rgba(139, 92, 246, 0.12);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .glass-shadow {
@@ -141,8 +141,9 @@ h1, h2, h3, h4, h5, h6, .font-display {
 .card-hover-glow:hover {
   box-shadow:
     0 24px 60px rgba(0,0,0,0.45),
-    0 0 54px rgba(139, 92, 246, 0.22);
-  border-color: rgba(167, 139, 250, 0.26);
+    0 0 54px rgba(167, 139, 250, 0.3);
+  border-color: rgba(167, 139, 250, 0.4);
+  background: rgba(28, 20, 55, 0.45);
 }
 
 .violet-text-glow {

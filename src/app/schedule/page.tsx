@@ -1,5 +1,6 @@
 import { SchedulePreview } from '@/components/home/SchedulePreview';
 import { Footer } from '@/components/home/Footer';
+import { BrandWordmark } from '@/components/brand/BrandWordmark';
 
 export const metadata = {
   title: 'Schedule | GENESIS 2.0',
@@ -16,7 +17,7 @@ export default function SchedulePage() {
             Full Schedule
           </h1>
           <p className="mx-auto max-w-2xl text-base text-text-muted sm:text-lg md:text-xl">
-            Two days of building, learning, and competing inside the same cosmic visual system. Here is the full GENESIS 2.0 agenda.
+            Two days of building, learning, and competing inside the same cosmic visual system. Here is the full <BrandWordmark className="inline-block text-[inherit] tracking-wider" /> agenda.
           </p>
         </div>
 

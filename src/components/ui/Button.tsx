@@ -30,7 +30,7 @@ export function Button({
   const radius = 'rounded-full';
 
   const variantStyles = {
-    primary: 'bg-[linear-gradient(135deg,#7C3AED_0%,#8B5CF6_55%,#C4B5FD_100%)] text-white border border-[rgba(255,255,255,0.14)] shadow-[0_0_24px_rgba(139,92,246,0.35)] hover:shadow-[0_0_42px_rgba(167,139,250,0.55)] hover:-translate-y-0.5 violet-text-glow',
+    primary: 'bg-[linear-gradient(135deg,#6d28d9_0%,#a855f7_100%)] text-white border border-[rgba(168,85,247,0.5)] shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_50px_rgba(168,85,247,0.7)] hover:-translate-y-1 transition-all duration-300 violet-text-glow',
     secondary: 'glass-surface text-text-primary border border-glass-border hover:border-[rgba(167,139,250,0.22)] hover:bg-[rgba(255,255,255,0.08)]',
     ghost: 'bg-transparent text-text-muted hover:text-text-primary hover:bg-[rgba(255,255,255,0.05)] border border-transparent',
     danger: 'bg-[rgba(248,113,113,0.1)] text-danger border border-[rgba(248,113,113,0.2)] hover:bg-[rgba(248,113,113,0.15)]',

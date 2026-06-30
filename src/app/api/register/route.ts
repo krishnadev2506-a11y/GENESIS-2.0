@@ -57,10 +57,12 @@ export async function POST(req: NextRequest) {
       registrationStatus: 'submitted',
     });
     
-    // Send email (don't await so it doesn't block response)
-    sendRegistrationReceived(validatedData.email, validatedData.teamName).catch(err => {
+    // Send email (await it to ensure serverless functions don't terminate prematurely)
+    try {
+      await sendRegistrationReceived(validatedData.email, validatedData.teamName);
+    } catch (err) {
       console.error('Failed to send registration email:', err);
-    });
+    }
     
     return NextResponse.json({ success: true, teamId: newTeam._id }, { status: 201 });
   } catch (error) {
@@ -68,6 +70,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: (error as any).errors[0].message }, { status: 400 });
     }
     console.error('Registration error:', error);
-    return NextResponse.json({ error: String(error) }, { status: 400 });
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

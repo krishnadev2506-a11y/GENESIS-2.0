@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { LayoutDashboard, Users, ShieldCheck, CheckSquare, Calendar, Mail, Settings, LogOut } from 'lucide-react';
 import { m } from 'framer-motion';
 
@@ -12,6 +13,25 @@ export default function AdminLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [pendingCount, setPendingCount] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const res = await fetch('/api/teams?paymentStatus=pending_verification&limit=1');
+        if (res.ok) {
+          const data = await res.json();
+          setPendingCount(data.total);
+        }
+      } catch (err) {
+        console.error('Failed to fetch pending verifications', err);
+      }
+    };
+    
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 30000); // Poll every 30s for real-time updates
+    return () => clearInterval(interval);
+  }, []);
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
@@ -21,7 +41,7 @@ export default function AdminLayout({
   const navItems = [
     { name: 'Overview', href: '/admin', icon: LayoutDashboard },
     { name: 'Teams', href: '/admin/teams', icon: Users },
-    { name: 'Verification', href: '/admin/verification', icon: ShieldCheck, badge: 14 },
+    { name: 'Verification', href: '/admin/verification', icon: ShieldCheck, badge: pendingCount && pendingCount > 0 ? pendingCount : null },
     { name: 'Check-In', href: '/admin/checkin', icon: CheckSquare },
     { name: 'Schedule', href: '/admin/schedule', icon: Calendar },
     { name: 'Messages', href: '/admin/messages', icon: Mail },
@@ -67,7 +87,7 @@ export default function AdminLayout({
                     : 'text-text-muted border border-transparent hover:bg-glass hover:text-white hover:border-glass-border'
                 }`}
               >
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-4">
                   <Icon size={20} className={isActive ? 'text-pulse' : ''} />
                   <span className="font-medium text-sm">{item.name}</span>
                 </div>
@@ -84,7 +104,7 @@ export default function AdminLayout({
         <div className="p-4 border-t border-[rgba(255,255,255,0.08)]">
           <button 
             onClick={handleLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-[14px] text-text-muted hover:bg-danger/10 hover:text-danger w-full transition-colors"
+            className="flex items-center gap-4 px-4 py-3 rounded-[14px] text-text-muted hover:bg-danger/10 hover:text-danger w-full transition-colors"
           >
             <LogOut size={20} />
             <span className="font-medium text-sm">Secure Logout</span>
