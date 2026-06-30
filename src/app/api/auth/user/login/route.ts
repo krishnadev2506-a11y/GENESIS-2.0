@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       password = parsed.password;
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return NextResponse.json({ error: error.errors[0].message }, { status: 400 });
+        return NextResponse.json({ error: (error as any).errors[0].message }, { status: 400 });
       }
       return NextResponse.json({ error: 'Invalid input' }, { status: 400 });
     }

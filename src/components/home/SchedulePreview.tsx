@@ -20,7 +20,7 @@ export async function SchedulePreview() {
 
   try {
     await connectDB();
-    items = (await ScheduleItem.find().sort({ day: 1, order: 1 }).lean()) as ScheduleItemRecord[];
+    items = (await ScheduleItem.find().sort({ day: 1, order: 1 }).lean()) as unknown as ScheduleItemRecord[];
   } catch (error) {
     loadError = true;
     console.error('Schedule preview failed:', error);
