@@ -40,10 +40,12 @@ export async function PATCH(
     
     await team.save();
     
-    // Send email with credentials (don't await)
-    sendRegistrationConfirmed(team.email, team.teamName, username, password).catch(err => {
+    // Send email with credentials
+    try {
+      await sendRegistrationConfirmed(team.email, team.teamName, username, password);
+    } catch (err) {
       console.error('Failed to send confirmation email:', err);
-    });
+    }
     
     // Audit log
     await AuditLog.create({

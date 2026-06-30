@@ -63,13 +63,17 @@ export async function POST(req: NextRequest) {
         
         // In a real app, you might want to batch these or use a mailing list
         // For now, we'll send individually
-        emails.forEach(email => {
-          sendAdminMessage(email, subject, messageBody).catch(console.error);
-        });
+        // Await all emails using Promise.allSettled to ensure serverless doesn't terminate early
+        const promises = emails.map(email => sendAdminMessage(email, subject, messageBody));
+        await Promise.allSettled(promises);
       } else if (scope === 'team' && targetTeamId) {
         const team = await Team.findById(targetTeamId);
         if (team) {
-          sendAdminMessage(team.email, subject, messageBody).catch(console.error);
+          try {
+            await sendAdminMessage(team.email, subject, messageBody);
+          } catch (err) {
+            console.error('Failed to send admin message:', err);
+          }
         }
       }
     }

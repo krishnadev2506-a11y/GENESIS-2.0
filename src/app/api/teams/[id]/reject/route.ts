@@ -33,13 +33,15 @@ export async function PATCH(
     team.paymentStatus = 'rejected';
     await team.save();
     
-    // Send rejection email (don't await)
+    // Send rejection email
     const subject = 'Issue with your GENESIS 2.0 Registration';
     const emailBody = `Hi Team ${team.teamName},\n\nWe encountered an issue while verifying your payment for GENESIS 2.0.\n\nReason: ${reason}\n\nPlease reply to this email or contact the organizers to resolve this issue and complete your registration.\n\nBest regards,\nThe GENESIS 2.0 Team`;
     
-    sendAdminMessage(team.email, subject, emailBody).catch(err => {
+    try {
+      await sendAdminMessage(team.email, subject, emailBody);
+    } catch (err) {
       console.error('Failed to send rejection email:', err);
-    });
+    }
     
     // Audit log
     await AuditLog.create({
