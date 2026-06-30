@@ -2,8 +2,21 @@ import { Resend } from 'resend';
 import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 
-const resend = new Resend(process.env.RESEND_API_KEY || 're_dummy_key_to_prevent_crash');
-const fromEmail = process.env.EMAIL_FROM || 'GENESIS 2.0 <noreply@genesis2026.dev>';
+let _resend: Resend | null = null;
+function getResend(): Resend {
+  if (!_resend) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      throw new Error('RESEND_API_KEY is not defined in environment variables');
+    }
+    _resend = new Resend(apiKey);
+  }
+  return _resend;
+}
+
+function getFromEmail(): string {
+  return process.env.EMAIL_FROM || 'GENESIS 2.0 <noreply@genesis2026.dev>';
+}
 
 const emailTemplate = (content: string) => `
 <!DOCTYPE html>
@@ -59,8 +72,8 @@ export async function sendRegistrationReceived(to: string, teamName: string): Pr
   // Convert newlines to HTML paragraphs for plain text templates
   const content = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
 
-  const { error } = await resend.emails.send({
-    from: fromEmail,
+  const { error } = await getResend().emails.send({
+    from: getFromEmail(),
     to,
     subject: "We've received your GENESIS 2.0 registration",
     html: emailTemplate(content),
@@ -89,7 +102,7 @@ export async function sendRegistrationConfirmed(to: string, teamName: string, us
     .replace(/{{username}}/g, username)
     .replace(/{{password}}/g, password);
 
-  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL}/login`;
+  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/login`;
   
   // Convert newlines to HTML paragraphs for plain text templates
   const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
@@ -101,8 +114,8 @@ export async function sendRegistrationConfirmed(to: string, teamName: string, us
     </p>
   `;
 
-  const { error } = await resend.emails.send({
-    from: fromEmail,
+  const { error } = await getResend().emails.send({
+    from: getFromEmail(),
     to,
     subject: "You're confirmed for GENESIS 2.0 — Welcome!",
     html: emailTemplate(content),
@@ -119,8 +132,8 @@ export async function sendAdminMessage(to: string, subject: string, body: string
     ${body.split('\n').map(p => `<p>${p}</p>`).join('')}
   `;
 
-  const { error } = await resend.emails.send({
-    from: fromEmail,
+  const { error } = await getResend().emails.send({
+    from: getFromEmail(),
     to,
     subject,
     html: emailTemplate(content),
