@@ -56,7 +56,12 @@ export async function POST(req: NextRequest) {
     }
 
     // Try Team Login
-    const team = await Team.findOne({ 'credentials.username': identifier });
+    const team = await Team.findOne({
+      $or: [
+        { 'credentials.username': identifier },
+        { email: identifier }
+      ]
+    });
     
     if (team && team.credentials?.passwordHash) {
       const isMatch = await comparePassword(password, team.credentials.passwordHash);

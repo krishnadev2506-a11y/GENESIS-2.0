@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import Image from 'next/image';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
@@ -79,8 +80,7 @@ export function VerificationClient() {
           
           {team.paymentScreenshotUrl ? (
             <div className="w-full h-48 bg-void border border-glass-border rounded-[14px] overflow-hidden flex items-center justify-center">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={team.paymentScreenshotUrl} alt="Payment Receipt" className="max-h-full object-contain" />
+              <Image src={team.paymentScreenshotUrl} alt="Payment Receipt" width={600} height={400} className="max-h-full object-contain" />
             </div>
           ) : (
             <div className="w-full h-48 bg-void border border-glass-border rounded-[14px] flex items-center justify-center text-text-muted text-sm">

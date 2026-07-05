@@ -66,6 +66,7 @@ export function PublicNav() {
                   <Link
                     key={link.name}
                     href={link.href}
+                    prefetch={true}
                     className={`relative group label-caps text-[13px] tracking-[0.24em] transition-all ${isActive ? 'text-white violet-text-glow' : 'text-text-muted hover:text-white'}`}
                   >
                     {link.name}
@@ -98,10 +99,10 @@ export function PublicNav() {
             </m.div>
 
             <div className="flex items-center gap-4">
-              <Link href="/login" tabIndex={-1}>
+              <Link href="/login" tabIndex={-1} prefetch={true}>
                 <Button variant="ghost" size="sm">Login</Button>
               </Link>
-              <Link href="/register" tabIndex={-1}>
+              <Link href="/register" tabIndex={-1} prefetch={true}>
                 <Button variant="primary" size="sm">Join The Event</Button>
               </Link>
             </div>
@@ -140,6 +141,7 @@ export function PublicNav() {
                   <Link
                     key={link.name}
                     href={link.href}
+                    prefetch={true}
                     className={`text-xl font-display font-bold uppercase tracking-[0.14em] sm:text-2xl sm:tracking-[0.18em] ${isActive ? 'text-white' : 'text-text-muted'}`}
                     onClick={() => setMobileMenuOpen(false)}
                   >
@@ -155,13 +157,13 @@ export function PublicNav() {
                 Team buildathon experience with workshops and challenges.
               </div>
               <div className="mt-2 flex flex-col gap-4 border-t border-[rgba(255,255,255,0.08)] pt-5 sm:pt-6">
-                <Link href="/login" onClick={() => setMobileMenuOpen(false)} tabIndex={-1}>
+                <Link href="/login" onClick={() => setMobileMenuOpen(false)} tabIndex={-1} prefetch={true}>
                   <Button variant="ghost" size="lg" className="w-full justify-start text-lg font-display sm:text-xl">Login</Button>
                 </Link>
               </div>
             </nav>
             <div className="p-6 sm:p-6">
-              <Link href="/register" onClick={() => setMobileMenuOpen(false)} tabIndex={-1}>
+              <Link href="/register" onClick={() => setMobileMenuOpen(false)} tabIndex={-1} prefetch={true}>
                 <Button variant="primary" size="lg" className="w-full">Join The Event</Button>
               </Link>
             </div>

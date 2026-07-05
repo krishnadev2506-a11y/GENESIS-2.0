@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
@@ -143,10 +144,10 @@ export function SettingsClient() {
               className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse font-mono text-sm"
               value={formData.qrCodeImageUrl} onChange={handleChange}
             />
+
             {formData.qrCodeImageUrl && (
-              <div className="mt-4 w-48 h-48 bg-void border border-glass-border rounded-[14px] overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={formData.qrCodeImageUrl} alt="QR Code Preview" className="w-full h-full object-cover" />
+              <div className="mt-4 w-48 h-48 bg-void border border-glass-border rounded-[14px] overflow-hidden relative">
+                <Image src={formData.qrCodeImageUrl} alt="QR Code Preview" fill className="object-cover" />
               </div>
             )}
           </div>

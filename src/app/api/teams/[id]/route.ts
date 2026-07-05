@@ -81,6 +81,8 @@ export async function PATCH(
   }
 }
 
+import DeletedTeam from '@/models/DeletedTeam';
+
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -98,6 +100,12 @@ export async function DELETE(
     }
     
     const teamData = team.toObject();
+    
+    // Archive the team data before deleting
+    await DeletedTeam.create({
+      ...teamData,
+      _id: undefined, // Let MongoDB generate a new ID or keep the old one? Better to keep it or just omit. Actually, keeping the old _id can be useful.
+    });
     
     await Team.findByIdAndDelete(id);
     

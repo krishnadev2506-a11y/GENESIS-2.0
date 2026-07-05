@@ -2,6 +2,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ExportParticipantsButtons } from '@/components/admin/ExportParticipantsButtons';
+import { AnalyticsChart } from '@/components/admin/AnalyticsChart';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 
@@ -20,14 +21,34 @@ export default async function AdminDashboardPage() {
     pendingVerification,
     verified,
     checkedIn,
-    recentTeams
+    recentTeams,
+    registrationData
   ] = await Promise.all([
     Team.countDocuments(),
     Team.countDocuments({ paymentStatus: 'pending_verification' }),
     Team.countDocuments({ paymentStatus: 'verified' }),
     Team.countDocuments({ checkedIn: true }),
-    Team.find().sort({ createdAt: -1 }).limit(5).lean()
+    Team.find().sort({ createdAt: -1 }).limit(5).lean(),
+    Team.aggregate([
+      {
+        $group: {
+          _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+          registrations: { $sum: 1 }
+        }
+      },
+      { $sort: { _id: 1 } }
+    ])
   ]);
+
+  // Format aggregated data for the chart
+  const chartData = registrationData.map((item: any) => {
+    const dateObj = new Date(item._id);
+    return {
+      date: new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(dateObj),
+      registrations: item.registrations,
+      fullDate: item._id // keep for sorting just in case
+    };
+  });
 
   return (
     <div className="space-y-8 relative z-10">
@@ -72,6 +93,11 @@ export default async function AdminDashboardPage() {
             <div className="text-[12px] font-mono text-starlight mb-4 uppercase tracking-[0.12em]">Checked In</div>
             <div className="text-4xl font-display font-bold text-starlight drop-shadow-[0_0_12px_rgba(196,181,253,0.3)]">{checkedIn}</div>
           </GlassCard>
+        </div>
+
+        {/* Analytics Chart (Span 12) */}
+        <div className="md:col-span-12 mt-4 min-h-[400px]">
+          <AnalyticsChart data={chartData} />
         </div>
 
         {/* Data Table Area (Span 12) */}

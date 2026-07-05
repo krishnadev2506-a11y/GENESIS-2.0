@@ -1,17 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
+import { ITeamMember } from './Team';
 
-export interface ITeamMember {
-  name: string;
-  role: string;
-  email: string;
-  phone: string;
-  college: string;
-  semester: string;
-  foodPreference: 'veg' | 'non-veg';
-  isLeader: boolean;
-}
-
-export interface ITeam extends Document {
+export interface IDeletedTeam extends Document {
   teamName: string;
   college: string;
   semester: string;
@@ -31,6 +21,7 @@ export interface ITeam extends Document {
   mustResetPassword: boolean;
   createdAt: Date;
   updatedAt: Date;
+  deletedAt: Date;
 }
 
 const TeamMemberSchema = new Schema<ITeamMember>({
@@ -44,9 +35,9 @@ const TeamMemberSchema = new Schema<ITeamMember>({
   isLeader: { type: Boolean, default: false },
 });
 
-const TeamSchema = new Schema<ITeam>(
+const DeletedTeamSchema = new Schema<IDeletedTeam>(
   {
-    teamName: { type: String, required: true, unique: true },
+    teamName: { type: String, required: true },
     college: { type: String, required: true },
     semester: { type: String, required: true },
     contactNumber: { type: String, required: true },
@@ -75,18 +66,11 @@ const TeamSchema = new Schema<ITeam>(
     },
     scoreboardPoints: { type: Number, default: 0 },
     mustResetPassword: { type: Boolean, default: true },
+    deletedAt: { type: Date, default: Date.now },
   },
-  { timestamps: true }
+  { timestamps: true } // Keeps original timestamps if provided during creation
 );
 
-const Team: Model<ITeam> = mongoose.models.Team || mongoose.model<ITeam>('Team', TeamSchema);
+const DeletedTeam: Model<IDeletedTeam> = mongoose.models.DeletedTeam || mongoose.model<IDeletedTeam>('DeletedTeam', DeletedTeamSchema);
 
-// Add indexes for performance optimization
-if (!mongoose.models.Team) {
-  TeamSchema.index({ 'credentials.username': 1 });
-  TeamSchema.index({ email: 1 });
-  TeamSchema.index({ paymentStatus: 1 });
-  TeamSchema.index({ createdAt: -1 });
-}
-
-export default Team;
+export default DeletedTeam;

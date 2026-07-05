@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Eye, Pencil, Save, Trash2, Plus } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
@@ -8,11 +9,13 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { useDebounce } from '@/hooks/useDebounce';
 
 export function TeamsClient() {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [paymentStatus, setPaymentStatus] = useState('');
+  const [isDeleted, setIsDeleted] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState<any | null>(null);
   
   const [isEditing, setIsEditing] = useState(false);
@@ -20,14 +23,17 @@ export function TeamsClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
+  
+  const debouncedSearch = useDebounce(search, 500);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ['teams', page, search, paymentStatus],
+    queryKey: ['teams', page, debouncedSearch, paymentStatus, isDeleted],
     staleTime: 30000,
     queryFn: async () => {
       const params = new URLSearchParams({ page: page.toString(), limit: '20' });
-      if (search) params.append('search', search);
+      if (debouncedSearch) params.append('search', debouncedSearch);
       if (paymentStatus) params.append('paymentStatus', paymentStatus);
+      if (isDeleted) params.append('deleted', 'true');
       
       const res = await fetch(`/api/teams?${params.toString()}`);
       if (!res.ok) throw new Error('Failed to fetch teams');
@@ -98,6 +104,22 @@ export function TeamsClient() {
 
   return (
     <div className="space-y-6">
+      {/* View Toggle */}
+      <div className="flex bg-void border border-glass-border rounded-lg p-1 w-fit">
+        <button 
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${!isDeleted ? 'bg-glass-strong text-white' : 'text-text-muted hover:text-white hover:bg-glass'}`}
+          onClick={() => { setIsDeleted(false); setPage(1); }}
+        >
+          Active Teams
+        </button>
+        <button 
+          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${isDeleted ? 'bg-danger/20 text-danger border border-danger/30' : 'text-text-muted hover:text-white hover:bg-glass'}`}
+          onClick={() => { setIsDeleted(true); setPage(1); }}
+        >
+          Deleted Teams
+        </button>
+      </div>
+
       {/* Filters */}
       <GlassCard className="p-4 flex flex-col md:flex-row gap-4">
         <input 
@@ -121,8 +143,8 @@ export function TeamsClient() {
 
       {/* Data Table */}
       <GlassCard className="p-0 overflow-hidden">
-        <div className="p-6 border-b border-glass-border flex justify-between items-center bg-glass/30">
-          <h2 className="text-xl font-display font-bold text-white uppercase">All Teams</h2>
+        <div className={`p-6 border-b border-glass-border flex justify-between items-center ${isDeleted ? 'bg-danger/5' : 'bg-glass/30'}`}>
+          <h2 className={`text-xl font-display font-bold uppercase ${isDeleted ? 'text-danger' : 'text-white'}`}>{isDeleted ? 'Deleted Teams' : 'All Teams'}</h2>
           {data?.total !== undefined && (
             <Badge variant="default">{data.total} Teams Found</Badge>
           )}
@@ -217,12 +239,16 @@ export function TeamsClient() {
               <div className="flex gap-2 items-center">
                 {!isEditing ? (
                   <>
-                    <Button variant="secondary" size="sm" onClick={() => { setIsEditing(true); setEditedTeam(JSON.parse(JSON.stringify(selectedTeam))); }}>
-                      <Pencil className="w-4 h-4 mr-2" /> Edit
-                    </Button>
-                    <Button variant="danger" size="sm" onClick={() => handleDeleteTeam(selectedTeam._id)} disabled={isDeleting}>
-                      {isDeleting ? <LoadingSpinner size="sm" className="mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />} Delete
-                    </Button>
+                    {!isDeleted && (
+                      <>
+                        <Button variant="secondary" size="sm" onClick={() => { setIsEditing(true); setEditedTeam(JSON.parse(JSON.stringify(selectedTeam))); }}>
+                          <Pencil className="w-4 h-4 mr-2" /> Edit
+                        </Button>
+                        <Button variant="danger" size="sm" onClick={() => handleDeleteTeam(selectedTeam._id)} disabled={isDeleting}>
+                          {isDeleting ? <LoadingSpinner size="sm" className="mr-2" /> : <Trash2 className="w-4 h-4 mr-2" />} Delete
+                        </Button>
+                      </>
+                    )}
                   </>
                 ) : (
                   <Button variant="primary" size="sm" onClick={handleSave} disabled={isSaving}>
@@ -367,14 +393,15 @@ export function TeamsClient() {
                   <h3 className="text-lg font-bold text-white border-b border-glass-border pb-2">Payment Details</h3>
                   <div className="space-y-3 text-sm">
                     <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Transaction ID</span> <span className="text-white font-mono bg-glass px-2 py-1 rounded">{selectedTeam.transactionId || 'N/A'}</span></p>
+
                     {selectedTeam.paymentScreenshotUrl && (
                       <div className="mt-4">
                         <p className="text-text-muted mb-2 uppercase text-[10px] tracking-wider">Screenshot</p>
                         <a href={selectedTeam.paymentScreenshotUrl} target="_blank" rel="noreferrer" className="block w-full h-40 relative rounded-lg overflow-hidden border border-glass-border hover:border-pulse transition-all group">
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img 
+                          <Image 
                             src={selectedTeam.paymentScreenshotUrl} 
                             alt="Payment Screenshot" 
+                            width={600} height={400}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                           <div className="absolute inset-0 bg-void/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">

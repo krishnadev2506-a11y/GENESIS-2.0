@@ -3,28 +3,7 @@ import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import { sendRegistrationReceived } from '@/lib/mail';
 import { z } from 'zod';
-
-const registerSchema = z.object({
-  teamName: z.string().min(2).max(50),
-  college: z.string().min(2),
-  semester: z.string(),
-  contactNumber: z.string().regex(/^[0-9]{10}$/, 'Invalid phone number'),
-  email: z.string().email(),
-  foodPreference: z.enum(['veg', 'non-veg']),
-  members: z.array(z.object({
-    name: z.string().min(2),
-    role: z.string(),
-    email: z.string().email(),
-    phone: z.string().regex(/^[0-9]{10}$/, 'Invalid phone number'),
-    college: z.string().min(2),
-    semester: z.string(),
-    foodPreference: z.enum(['veg', 'non-veg']),
-    isLeader: z.boolean(),
-  })).min(4).max(6),
-  paymentScreenshotUrl: z.string().url(),
-  paymentScreenshotPublicId: z.string(),
-  transactionId: z.string().min(4),
-});
+import { teamRegistrationSchema } from '@/lib/validations/team';
 
 export async function POST(req: NextRequest) {
   try {
@@ -32,8 +11,8 @@ export async function POST(req: NextRequest) {
     
     const body = await req.json();
     
-    // Validate input
-    const validatedData = registerSchema.parse(body);
+    // Validate input using centralized Zod schema
+    const validatedData = teamRegistrationSchema.parse(body);
     
     // Check duplicates
     const existingTeam = await Team.findOne({

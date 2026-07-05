@@ -24,6 +24,8 @@ const memberSchema = z.object({
 });
 
 
+import imageCompression from 'browser-image-compression';
+
 export function RegistrationWizard() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -132,6 +134,13 @@ export function RegistrationWizard() {
     if (file) {
       setIsLoading(true);
       try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+
         const sigRes = await fetch('/api/cloudinary/sign', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -142,7 +151,7 @@ export function RegistrationWizard() {
         const { timestamp, signature, api_key, cloud_name, folder } = await sigRes.json();
 
         const uploadData = new FormData();
-        uploadData.append('file', file);
+        uploadData.append('file', compressedFile);
         uploadData.append('api_key', api_key);
         uploadData.append('timestamp', timestamp.toString());
         uploadData.append('signature', signature);

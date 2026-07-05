@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
+import DeletedTeam from '@/models/DeletedTeam';
 import { requireAuth } from '@/lib/auth';
 
 export async function GET(req: NextRequest) {
@@ -13,6 +14,7 @@ export async function GET(req: NextRequest) {
     const search = searchParams.get('search');
     const paymentStatus = searchParams.get('paymentStatus');
     const checkedIn = searchParams.get('checkedIn');
+    const isDeleted = searchParams.get('deleted') === 'true';
     
     const sortBy = searchParams.get('sortBy') || 'createdAt';
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
@@ -44,14 +46,26 @@ export async function GET(req: NextRequest) {
       query.checkedIn = checkedIn === 'true';
     }
     
-    const total = await Team.countDocuments(query);
-    const totalPages = Math.ceil(total / limit);
+    let total: number;
+    let teams: any[];
+
+    if (isDeleted) {
+      total = await DeletedTeam.countDocuments(query);
+      teams = await DeletedTeam.find(query)
+        .sort({ [sortBy]: sortOrder })
+        .skip(skip)
+        .limit(limit)
+        .select('-credentials.passwordHash');
+    } else {
+      total = await Team.countDocuments(query);
+      teams = await Team.find(query)
+        .sort({ [sortBy]: sortOrder })
+        .skip(skip)
+        .limit(limit)
+        .select('-credentials.passwordHash');
+    }
     
-    const teams = await Team.find(query)
-      .sort({ [sortBy]: sortOrder })
-      .skip(skip)
-      .limit(limit)
-      .select('-credentials.passwordHash'); // Exclude password hashes
+    const totalPages = Math.ceil(total / limit);
     
     return NextResponse.json({
       teams,

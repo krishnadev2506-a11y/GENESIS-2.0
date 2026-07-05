@@ -44,6 +44,18 @@ export default async function DashboardPage() {
     read: false
   });
 
+  // Calculate rank dynamically
+  // Find how many teams have strictly more points than this team
+  const rankCount = await Team.countDocuments({
+    paymentStatus: 'verified',
+    checkedIn: true,
+    scoreboardPoints: { $gt: team.scoreboardPoints }
+  });
+  
+  // Rank is teams with more points + 1
+  const currentRank = rankCount + 1;
+  const isRanked = team.paymentStatus === 'verified' && team.checkedIn && team.scoreboardPoints > 0;
+
   return (
     <div className="space-y-8 relative z-10">
       <div className="flex flex-col gap-2">
@@ -99,7 +111,9 @@ export default async function DashboardPage() {
                 </div>
                 <div className="text-sm text-text-muted">Total Points</div>
               </div>
-              <Badge variant="default" className="mb-1">Rank: N/A</Badge>
+              <Badge variant={isRanked ? (currentRank <= 3 ? 'success' : 'default') : 'default'} className="mb-1">
+                {isRanked ? `Rank: #${currentRank}` : 'Rank: N/A'}
+              </Badge>
             </div>
           </GlassCard>
         </div>
@@ -114,7 +128,9 @@ export default async function DashboardPage() {
                   {team.checkedIn ? 'Checked In' : 'Not Checked In'}
                 </div>
                 <div className="text-sm text-text-muted">
-                  {team.checkedIn && team.checkedInAt ? new Date(team.checkedInAt as any).toLocaleString() : 'Event day only'}
+                  {team.checkedIn && team.checkedInAt 
+                    ? new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(team.checkedInAt as any)) 
+                    : 'Event day only'}
                 </div>
               </div>
               <Badge variant={team.checkedIn ? 'success' : 'pending'} className="mb-1">

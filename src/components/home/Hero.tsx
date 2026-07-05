@@ -116,17 +116,17 @@ export function Hero() {
             initial="hidden"
             animate="visible"
           >
-            <m.h1 variants={fadeUp as any}>
+            <m.h1 variants={fadeUp}>
               <BrandWordmark className="text-4xl tracking-[0.16em] text-transparent bg-clip-text bg-gradient-to-r from-[#c4b5fd] via-white to-[#a855f7] sm:text-6xl sm:tracking-[0.2em] lg:text-7xl lg:tracking-[0.22em]" />
             </m.h1>
             <m.p
-              variants={fadeUp as any}
+              variants={fadeUp}
               className="font-display mt-6 max-w-2xl text-lg font-semibold uppercase tracking-[0.24em] text-text-muted sm:mt-8 sm:text-2xl sm:tracking-[0.3em] lg:text-3xl"
             >
               <span className="block">Code the future</span>
               <span className="block text-white/50">Code the impossible</span>
             </m.p>
-            <m.div variants={fadeUp as any} className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row">
+            <m.div variants={fadeUp} className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row">
               <Link href="/register" className="w-full sm:w-auto">
                 <Button size="lg" variant="primary" className="w-full min-w-0 sm:min-w-[220px]">Register Your Team</Button>
               </Link>
