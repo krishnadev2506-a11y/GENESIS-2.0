@@ -26,16 +26,8 @@ export async function GET(req: NextRequest) {
     const query: Record<string, unknown> = {};
     
     if (search) {
-      const searchRegex = new RegExp(search, 'i');
-      query.$or = [
-        { teamName: searchRegex },
-        { email: searchRegex },
-        { college: searchRegex },
-        { contactNumber: searchRegex },
-        { 'members.name': searchRegex },
-        { 'members.email': searchRegex },
-        { 'members.phone': searchRegex },
-      ];
+      // Use the newly created text index for lighting fast search
+      query.$text = { $search: search };
     }
     
     if (paymentStatus) {
@@ -55,14 +47,16 @@ export async function GET(req: NextRequest) {
         .sort({ [sortBy]: sortOrder })
         .skip(skip)
         .limit(limit)
-        .select('-credentials.passwordHash');
+        .select('-credentials.passwordHash')
+        .lean();
     } else {
       total = await Team.countDocuments(query);
       teams = await Team.find(query)
         .sort({ [sortBy]: sortOrder })
         .skip(skip)
         .limit(limit)
-        .select('-credentials.passwordHash');
+        .select('-credentials.passwordHash')
+        .lean();
     }
     
     const totalPages = Math.ceil(total / limit);

@@ -87,6 +87,24 @@ if (!mongoose.models.Team) {
   TeamSchema.index({ email: 1 });
   TeamSchema.index({ paymentStatus: 1 });
   TeamSchema.index({ createdAt: -1 });
+  
+  // Compound Text Index for fast admin search
+  TeamSchema.index({ 
+    teamName: 'text', 
+    email: 'text', 
+    college: 'text', 
+    contactNumber: 'text',
+    'members.name': 'text',
+    'members.email': 'text',
+    'members.phone': 'text'
+  }, { 
+    name: 'team_search_text_idx',
+    weights: {
+      teamName: 10,
+      email: 5,
+      college: 3
+    }
+  });
 }
 
 export default Team;

@@ -90,7 +90,7 @@ export function LeaderboardChart({ data }: LeaderboardChartProps) {
               fontFamily: 'Outfit, sans-serif'
             }}
             itemStyle={{ color: '#C4B5FD', fontWeight: 'bold' }}
-            formatter={(value: number) => [`${value} Points`, 'Score']}
+            formatter={(value: any) => [`${value} Points`, 'Score']}
             labelStyle={{ color: 'rgba(255,255,255,0.7)', marginBottom: '4px' }}
           />
           <Bar 

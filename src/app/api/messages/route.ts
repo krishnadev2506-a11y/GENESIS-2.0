@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
     
     const messages = await Message.find(query)
       .sort({ sentAt: -1 })
+      .lean()
       .populate('sentByAdminId', 'name email');
       
     return NextResponse.json(messages);
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
     // Optional: send email as well
     if (sendEmail) {
       if (scope === 'broadcast') {
-        const teams = await Team.find({ registrationStatus: 'confirmed' }).select('email');
+        const teams = await Team.find({ registrationStatus: 'confirmed' }).select('email').lean();
         const emails = teams.map(t => t.email);
         
         // Use batch sending to avoid rate limits and timeouts during stress testing
