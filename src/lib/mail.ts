@@ -1,17 +1,25 @@
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 
-let _resend: Resend | null = null;
-function getResend(): Resend {
-  if (!_resend) {
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) {
-      throw new Error('RESEND_API_KEY is not defined in environment variables');
+let transporter: nodemailer.Transporter | null = null;
+
+function getTransporter(): nodemailer.Transporter {
+  if (!transporter) {
+    const user = process.env.EMAIL_USER;
+    const pass = process.env.EMAIL_PASS;
+    if (!user || !pass) {
+      throw new Error('EMAIL_USER and EMAIL_PASS environment variables are required');
     }
-    _resend = new Resend(apiKey);
+    transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user,
+        pass,
+      },
+    });
   }
-  return _resend;
+  return transporter;
 }
 
 function getFromEmail(): string {
@@ -66,26 +74,19 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
     contentStr = 'Registration received for {{teamName}}';
   }
 
-  // Replace variables
   contentStr = contentStr.replace(/{{teamName}}/g, teamName);
-
-  // Convert newlines to HTML paragraphs for plain text templates
   const content = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
 
-  const payload = toEmails.map(to => ({
+  const promises = toEmails.map(to => getTransporter().sendMail({
     from: fromEmail,
     to,
     subject: "We've received your GENESIS 2.0 registration",
     html: htmlContent,
   }));
 
-  const { error } = await getResend().batch.send(payload);
-
-  if (error) {
-    throw new Error(`Resend Batch Error: ${error.message}`);
-  }
+  await Promise.allSettled(promises);
 }
 
 export async function sendRegistrationConfirmed(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
@@ -100,15 +101,12 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     contentStr = 'Confirmed! User: {{username}}, Pass: {{password}}';
   }
 
-  // Replace variables
   contentStr = contentStr
     .replace(/{{teamName}}/g, teamName)
     .replace(/{{username}}/g, username)
     .replace(/{{password}}/g, password);
 
   const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/login`;
-  
-  // Convert newlines to HTML paragraphs for plain text templates
   const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
 
   const content = `
@@ -120,18 +118,14 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
 
-  const payload = toEmails.map(to => ({
+  const promises = toEmails.map(to => getTransporter().sendMail({
     from: fromEmail,
     to,
     subject: "You're confirmed for GENESIS 2.0 — Welcome!",
     html: htmlContent,
   }));
 
-  const { error } = await getResend().batch.send(payload);
-
-  if (error) {
-    throw new Error(`Resend Batch Error: ${error.message}`);
-  }
+  await Promise.allSettled(promises);
 }
 
 export async function sendAdminMessage(to: string, subject: string, body: string): Promise<void> {
@@ -139,17 +133,13 @@ export async function sendAdminMessage(to: string, subject: string, body: string
     <h1>${subject}</h1>
     ${body.split('\n').map(p => `<p>${p}</p>`).join('')}
   `;
-
-  const { error } = await getResend().emails.send({
+  
+  await getTransporter().sendMail({
     from: getFromEmail(),
     to,
     subject,
     html: emailTemplate(content),
   });
-
-  if (error) {
-    throw new Error(`Resend Error: ${error.message}`);
-  }
 }
 
 export async function sendAdminMessageBatch(toEmails: string[], subject: string, body: string): Promise<void> {
@@ -157,23 +147,15 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
     <h1>${subject}</h1>
     ${body.split('\n').map(p => `<p>${p}</p>`).join('')}
   `;
-  
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
 
-  // Resend batch API accepts an array of email objects
-  const payload = toEmails.map(to => ({
+  const promises = toEmails.map(to => getTransporter().sendMail({
     from: fromEmail,
     to,
     subject,
     html: htmlContent,
   }));
 
-  const { error } = await getResend().batch.send(payload);
-
-  if (error) {
-    throw new Error(`Resend Batch Error: ${error.message}`);
-  }
+  await Promise.allSettled(promises);
 }
-
-
