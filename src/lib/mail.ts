@@ -54,7 +54,7 @@ const emailTemplate = (content: string) => `
 </html>
 `;
 
-export async function sendRegistrationReceived(to: string, teamName: string): Promise<void> {
+export async function sendRegistrationReceived(toEmails: string[], teamName: string): Promise<void> {
   await connectDB();
   let contentStr = '';
   try {
@@ -71,20 +71,24 @@ export async function sendRegistrationReceived(to: string, teamName: string): Pr
 
   // Convert newlines to HTML paragraphs for plain text templates
   const content = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
+  const htmlContent = emailTemplate(content);
+  const fromEmail = getFromEmail();
 
-  const { error } = await getResend().emails.send({
-    from: getFromEmail(),
+  const payload = toEmails.map(to => ({
+    from: fromEmail,
     to,
     subject: "We've received your GENESIS 2.0 registration",
-    html: emailTemplate(content),
-  });
+    html: htmlContent,
+  }));
+
+  const { error } = await getResend().batch.send(payload);
 
   if (error) {
-    throw new Error(`Resend Error: ${error.message}`);
+    throw new Error(`Resend Batch Error: ${error.message}`);
   }
 }
 
-export async function sendRegistrationConfirmed(to: string, teamName: string, username: string, password: string): Promise<void> {
+export async function sendRegistrationConfirmed(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
   await connectDB();
   let contentStr = '';
   try {
@@ -113,16 +117,20 @@ export async function sendRegistrationConfirmed(to: string, teamName: string, us
       <a href="${loginUrl}" class="btn">Access Dashboard</a>
     </p>
   `;
+  const htmlContent = emailTemplate(content);
+  const fromEmail = getFromEmail();
 
-  const { error } = await getResend().emails.send({
-    from: getFromEmail(),
+  const payload = toEmails.map(to => ({
+    from: fromEmail,
     to,
     subject: "You're confirmed for GENESIS 2.0 — Welcome!",
-    html: emailTemplate(content),
-  });
+    html: htmlContent,
+  }));
+
+  const { error } = await getResend().batch.send(payload);
 
   if (error) {
-    throw new Error(`Resend Error: ${error.message}`);
+    throw new Error(`Resend Batch Error: ${error.message}`);
   }
 }
 

@@ -37,17 +37,11 @@ export async function POST(req: NextRequest) {
     
     // Check duplicates
     const existingTeam = await Team.findOne({
-      $or: [
-        { teamName: { $regex: new RegExp(`^${validatedData.teamName}$`, 'i') } },
-        { email: { $regex: new RegExp(`^${validatedData.email}$`, 'i') } }
-      ]
+      teamName: { $regex: new RegExp(`^${validatedData.teamName}$`, 'i') }
     });
     
     if (existingTeam) {
-      if (existingTeam.teamName.toLowerCase() === validatedData.teamName.toLowerCase()) {
-        return NextResponse.json({ error: 'Team name already taken' }, { status: 400 });
-      }
-      return NextResponse.json({ error: 'Email already registered' }, { status: 400 });
+      return NextResponse.json({ error: 'Team name already taken' }, { status: 400 });
     }
     
     // Create team
@@ -59,7 +53,8 @@ export async function POST(req: NextRequest) {
     
     // Send email (await it to ensure serverless functions don't terminate prematurely)
     try {
-      await sendRegistrationReceived(validatedData.email, validatedData.teamName);
+      const allMemberEmails = validatedData.members.map(m => m.email).filter(Boolean);
+      await sendRegistrationReceived(allMemberEmails, validatedData.teamName);
     } catch (err) {
       console.error('Failed to send registration email:', err);
     }

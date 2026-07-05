@@ -28,7 +28,8 @@ export function RegistrationWizard() {
   const [step, setStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [direction, setDirection] = useState(1);
-  const { success, error } = useToast();
+  const [formError, setFormError] = useState<string | null>(null);
+  const { success } = useToast();
   const router = useRouter();
 
   // Basic state for the form
@@ -51,12 +52,13 @@ export function RegistrationWizard() {
   });
 
   const nextStep = () => {
+    setFormError(null);
     // Validate current step before proceeding
     if (step === 1) {
       try {
         step1Schema.parse({ teamName: formData.teamName });
       } catch (err: any) {
-        error('Validation Error', err.errors?.[0]?.message || err.message || 'Invalid input');
+        setFormError(err.errors?.[0]?.message || err.message || 'Invalid input');
         return;
       }
       
@@ -86,7 +88,7 @@ export function RegistrationWizard() {
     if (step === 2) {
       const leaderCount = formData.members.filter(m => m.isLeader).length;
       if (leaderCount !== 1) {
-        error('Error', 'Please select exactly one Team Leader');
+        setFormError('Please select exactly one Team Leader');
         return;
       }
 
@@ -94,7 +96,7 @@ export function RegistrationWizard() {
         try {
           memberSchema.parse(formData.members[i]);
         } catch (err: any) {
-          error(`Participant ${i + 1} Error`, err.errors?.[0]?.message || err.message || 'Invalid input');
+          setFormError(`Participant ${i + 1}: ${err.errors?.[0]?.message || err.message || 'Invalid input'}`);
           return;
         }
       }
@@ -105,6 +107,7 @@ export function RegistrationWizard() {
   };
 
   const prevStep = () => {
+    setFormError(null);
     setDirection(-1);
     setStep((prev) => Math.max(prev - 1, 1));
   };
@@ -158,9 +161,10 @@ export function RegistrationWizard() {
           paymentScreenshotUrl: result.secure_url,
           paymentScreenshotPublicId: result.public_id
         }));
+        setFormError(null);
         success('Success', 'File uploaded successfully');
       } catch (err) {
-        error('Error', 'Failed to upload file');
+        setFormError('Failed to upload file');
         console.error(err);
       } finally {
         setIsLoading(false);
@@ -170,8 +174,9 @@ export function RegistrationWizard() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
     if (!formData.transactionId || !formData.paymentScreenshotUrl) {
-      error('Error', 'Please provide payment details');
+      setFormError('Please provide payment details');
       return;
     }
 
@@ -205,11 +210,11 @@ export function RegistrationWizard() {
         success('Registration submitted!', 'Your team is registered. Wait for verification email.');
         setTimeout(() => router.push('/'), 2000);
       } else {
-        error('Registration failed', data.error || 'Unknown error');
+        setFormError(data.error || 'Unknown error during registration');
       }
     } catch (err: any) {
       console.error('Submission error:', err);
-      error('Error', err.message || 'An error occurred during registration');
+      setFormError(err.message || 'An error occurred during registration');
     } finally {
       setIsLoading(false);
     }
@@ -239,6 +244,27 @@ export function RegistrationWizard() {
       </div>
 
       <GlassCard hoverEffect={true} className="overflow-hidden relative min-h-[400px] max-w-2xl mx-auto">
+        <AnimatePresence>
+          {formError && (
+            <m.div 
+              initial={{ opacity: 0, y: -10 }} 
+              animate={{ opacity: 1, y: 0 }} 
+              exit={{ opacity: 0 }}
+              className="mb-6 p-4 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-3"
+            >
+              <div className="mt-0.5 text-danger">
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-danger">Registration Error</h4>
+                <p className="text-sm text-danger/80">{formError}</p>
+              </div>
+            </m.div>
+          )}
+        </AnimatePresence>
+        
         <AnimatePresence mode="wait" custom={direction}>
           {step === 1 && (
             <m.div

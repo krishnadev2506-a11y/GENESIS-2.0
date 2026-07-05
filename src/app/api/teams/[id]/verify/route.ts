@@ -42,7 +42,8 @@ export async function PATCH(
     
     // Send email with credentials
     try {
-      await sendRegistrationConfirmed(team.email, team.teamName, username, password);
+      const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
+      await sendRegistrationConfirmed(allMemberEmails, team.teamName, username, password);
     } catch (err) {
       console.error('Failed to send confirmation email:', err);
     }

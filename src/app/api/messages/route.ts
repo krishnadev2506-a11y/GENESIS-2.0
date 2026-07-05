@@ -78,9 +78,12 @@ export async function POST(req: NextRequest) {
         }
       } else if (scope === 'team' && targetTeamId) {
         const team = await Team.findById(targetTeamId);
-        if (team) {
+        if (team && team.members && team.members.length > 0) {
           try {
-            await sendAdminMessage(team.email, subject, messageBody);
+            const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
+            if (allMemberEmails.length > 0) {
+              await sendAdminMessageBatch(allMemberEmails, subject, messageBody);
+            }
           } catch (err) {
             console.error('Failed to send admin message:', err);
           }
