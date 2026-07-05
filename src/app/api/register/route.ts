@@ -44,6 +44,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Team name already taken' }, { status: 400 });
     }
     
+    // Ensure the old unique email index is dropped so duplicate emails are allowed
+    try {
+      await Team.collection.dropIndex('email_1');
+    } catch (e) {
+      // Ignore if index doesn't exist
+    }
+    
     // Create team
     const newTeam = await Team.create({
       ...validatedData,

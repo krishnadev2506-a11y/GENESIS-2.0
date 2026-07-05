@@ -50,7 +50,7 @@ const TeamSchema = new Schema<ITeam>(
     college: { type: String, required: true },
     semester: { type: String, required: true },
     contactNumber: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
+    email: { type: String, required: true },
     foodPreference: { type: String, enum: ['veg', 'non-veg'], required: true },
     members: [TeamMemberSchema],
     paymentScreenshotUrl: { type: String, required: true },
