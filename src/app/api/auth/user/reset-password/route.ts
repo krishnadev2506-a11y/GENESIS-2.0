@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
     }
     
     team.credentials.passwordHash = await hashPassword(newPassword);
+    team.credentials.temporaryPassword = undefined;
     team.mustResetPassword = false;
     await team.save();
     

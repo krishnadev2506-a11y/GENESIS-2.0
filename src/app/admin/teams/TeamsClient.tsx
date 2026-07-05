@@ -289,6 +289,61 @@ export function TeamsClient() {
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Semester</span> <span className="text-white font-medium">{selectedTeam.semester}</span></p>
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Food Pref</span> <span className="text-white capitalize font-medium">{selectedTeam.foodPreference}</span></p>
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Points</span> <span className="text-white font-medium">{selectedTeam.scoreboardPoints}</span></p>
+                        
+                        {/* Credentials Section */}
+                        {selectedTeam.paymentStatus === 'verified' && (
+                          <div className="mt-6 p-4 rounded-xl bg-glass-strong border border-glass-border">
+                            <h4 className="text-sm font-bold text-white mb-3">Team Credentials</h4>
+                            <div className="space-y-2">
+                              <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                                <span className="text-text-muted uppercase text-[10px] tracking-wider w-24 shrink-0">Username</span> 
+                                <span className="text-white font-mono bg-void/50 px-2 py-0.5 rounded text-sm">{selectedTeam.credentials?.username || 'N/A'}</span>
+                              </p>
+                              <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
+                                <span className="text-text-muted uppercase text-[10px] tracking-wider w-24 shrink-0">Password</span> 
+                                <span className="text-white font-mono bg-void/50 px-2 py-0.5 rounded text-sm">
+                                  {selectedTeam.credentials?.temporaryPassword ? selectedTeam.credentials.temporaryPassword : <span className="text-success text-xs">Set by participant (Private)</span>}
+                                </span>
+                              </p>
+                            </div>
+                            <div className="mt-4 pt-3 border-t border-glass-border">
+                              <Button 
+                                variant="secondary" 
+                                size="sm" 
+                                className="w-full text-xs py-1.5"
+                                onClick={async (e) => {
+                                  const btn = e.currentTarget;
+                                  const originalText = btn.innerText;
+                                  if (!window.confirm("Are you sure? This will invalidate their current password, generate a new one, and email it to the team.")) return;
+                                  
+                                  btn.disabled = true;
+                                  btn.innerText = "Processing...";
+                                  try {
+                                    const res = await fetch(`/api/teams/${selectedTeam._id}/reset-credentials`, { method: 'POST' });
+                                    if (!res.ok) throw new Error('Failed to reset credentials');
+                                    const data = await res.json();
+                                    alert("Credentials reset and email sent successfully!");
+                                    // Let TeamsClient handle setSelectedTeam state by passing it the updated team
+                                    if (data.team) {
+                                      // It's a bit hacky to use a global window function, but in React we should trigger a state update.
+                                      // Since we are inside the component render method, we can't directly call setSelectedTeam here without closures, 
+                                      // but wait, we ARE inside the render method so we HAVE access to setSelectedTeam!
+                                      setSelectedTeam(data.team);
+                                    }
+                                  } catch (err) {
+                                    alert("Error resetting credentials. Check console.");
+                                  } finally {
+                                    btn.disabled = false;
+                                    btn.innerText = originalText;
+                                  }
+                                }}
+                              >
+                                Reset & Resend Credentials
+                              </Button>
+                            </div>
+                          </div>
+                        )}
+
                         <div className="flex gap-6 pt-4">
                           <div>
                             <p className="text-text-muted mb-2 text-[10px] uppercase tracking-wider">Payment Status</p>

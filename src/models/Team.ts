@@ -71,6 +71,7 @@ const TeamSchema = new Schema<ITeam>(
     credentials: {
       username: { type: String },
       passwordHash: { type: String },
+      temporaryPassword: { type: String },
     },
     scoreboardPoints: { type: Number, default: 0 },
     mustResetPassword: { type: Boolean, default: true },
