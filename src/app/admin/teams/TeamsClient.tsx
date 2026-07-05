@@ -341,7 +341,7 @@ export function TeamsClient() {
                   {(isEditing ? editedTeam : selectedTeam).members?.map((member: any, idx: number) => (
                     <div key={idx} className={`bg-glass-strong/50 border border-glass-border rounded-[14px] p-5 flex flex-col gap-2 relative ${isEditing ? 'border-pulse/30' : 'hover:border-pulse/50 transition-colors'}`}>
                       <div className="absolute top-4 right-4 z-10 flex gap-2">
-                        {member.isLeader && <Badge variant="primary">Leader</Badge>}
+                        {member.isLeader && <Badge variant="default">Leader</Badge>}
                         {isEditing && (
                           <button onClick={() => handleRemoveMember(idx)} className="text-danger hover:text-danger/80 bg-danger/10 p-1 rounded-full transition-colors" title="Remove Member">
                             <Trash2 className="w-4 h-4" />

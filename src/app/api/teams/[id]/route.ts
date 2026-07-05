@@ -108,7 +108,6 @@ export async function DELETE(
       targetCollection: 'Team',
       targetId: team._id,
       before: teamData,
-      after: null,
     });
     
     return NextResponse.json({ success: true, message: 'Team deleted successfully' });
