@@ -12,7 +12,9 @@ function getTransporter(): nodemailer.Transporter {
       throw new Error('EMAIL_USER and EMAIL_PASS environment variables are required');
     }
     transporter = nodemailer.createTransport({
-      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user,
         pass,
