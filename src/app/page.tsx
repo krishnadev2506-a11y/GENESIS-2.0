@@ -9,7 +9,7 @@ import { SpaceDust } from '@/components/home/SpaceDust';
 
 export default function Home() {
   return (
-    <main className="cosmic-page flex-grow flex flex-col gap-y-12 md:gap-y-20 pb-16 overflow-hidden relative">
+    <main className="cosmic-page flex-grow flex flex-col pb-16 overflow-hidden relative">
       <SpaceDust />
       <Hero />
       <About />

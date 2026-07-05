@@ -51,7 +51,7 @@ export function SkillUpSessions() {
 
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4 relative z-10">
           {sessions.map((session, index) => (
-            <GlassCard key={session.title} delay={index * 0.1} hoverEffect className="flex h-full flex-col p-7">
+            <GlassCard key={session.title} delay={index * 0.1} hoverEffect className="flex h-full flex-col p-8">
               <div className="mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-[rgba(167,139,250,0.22)] bg-[linear-gradient(180deg,rgba(139,92,246,0.16),rgba(255,255,255,0.04))] text-sm font-display tracking-[0.22em] text-accent-secondary shadow-[0_0_26px_rgba(139,92,246,0.16)]">
                 {session.badge}
               </div>

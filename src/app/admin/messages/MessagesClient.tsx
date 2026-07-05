@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
@@ -11,9 +11,19 @@ export function MessagesClient() {
   
   const [scope, setScope] = useState('broadcast');
   const [targetParticipantEmail, setTargetParticipantEmail] = useState('');
+  const [targetTeamId, setTargetTeamId] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
   const [sendEmail, setSendEmail] = useState(false);
+
+  const { data: teamsData, isLoading: isLoadingTeams } = useQuery({
+    queryKey: ['teams', 'all'],
+    queryFn: async () => {
+      const res = await fetch('/api/teams?limit=1000');
+      if (!res.ok) throw new Error('Failed to fetch teams');
+      return res.json();
+    }
+  });
 
   const sendMutation = useMutation({
     mutationFn: async (messageData: any) => {
@@ -27,7 +37,7 @@ export function MessagesClient() {
     },
     onSuccess: () => {
       success('Success', sendEmail ? 'Message sent and email delivered!' : 'Message sent successfully!');
-      setSubject(''); setBody(''); setTargetParticipantEmail('');
+      setSubject(''); setBody(''); setTargetParticipantEmail(''); setTargetTeamId('');
       setSendEmail(false);
     },
     onError: (err: Error) => error('Error', err.message)
@@ -38,6 +48,8 @@ export function MessagesClient() {
     const payload: any = { scope, subject, body, sendEmail };
     if (scope === 'participant') {
       payload.targetParticipantEmail = targetParticipantEmail;
+    } else if (scope === 'team') {
+      payload.targetTeamId = targetTeamId;
     }
     sendMutation.mutate(payload);
   };
@@ -55,11 +67,35 @@ export function MessagesClient() {
                 Broadcast to All
               </label>
               <label className="flex items-center gap-2 text-white cursor-pointer">
+                <input type="radio" name="scope" value="team" checked={scope === 'team'} onChange={() => setScope('team')} className="accent-pulse" />
+                Specific Team
+              </label>
+              <label className="flex items-center gap-2 text-white cursor-pointer">
                 <input type="radio" name="scope" value="participant" checked={scope === 'participant'} onChange={() => setScope('participant')} className="accent-pulse" />
                 Single Participant
               </label>
             </div>
           </div>
+
+          {scope === 'team' && (
+            <div>
+              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Select Team</label>
+              {isLoadingTeams ? (
+                <div className="text-text-muted text-sm">Loading teams...</div>
+              ) : (
+                <select 
+                  required
+                  className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse transition-colors"
+                  value={targetTeamId} onChange={(e) => setTargetTeamId(e.target.value)}
+                >
+                  <option value="">-- Choose a Team --</option>
+                  {teamsData?.teams?.map((team: any) => (
+                    <option key={team._id} value={team._id}>{team.teamName} ({team.email})</option>
+                  ))}
+                </select>
+              )}
+            </div>
+          )}
 
           {scope === 'participant' && (
             <div>
@@ -107,7 +143,7 @@ export function MessagesClient() {
             <div>
               <span className="text-white text-sm font-medium">Also send via Email</span>
               <p className="text-xs text-text-muted mt-0.5">
-                {scope === 'broadcast' ? 'Email will be sent to all confirmed teams' : 'Email will be sent to the participant'}
+                {scope === 'broadcast' ? 'Email will be sent to all confirmed teams' : scope === 'team' ? 'Email will be sent to the team\'s primary contact' : 'Email will be sent to the participant'}
               </p>
             </div>
           </div>
