@@ -217,7 +217,7 @@ export function TeamsClient() {
               <div className="flex gap-2 items-center">
                 {!isEditing ? (
                   <>
-                    <Button variant="outline" size="sm" onClick={() => { setIsEditing(true); setEditedTeam(JSON.parse(JSON.stringify(selectedTeam))); }}>
+                    <Button variant="secondary" size="sm" onClick={() => { setIsEditing(true); setEditedTeam(JSON.parse(JSON.stringify(selectedTeam))); }}>
                       <Pencil className="w-4 h-4 mr-2" /> Edit
                     </Button>
                     <Button variant="danger" size="sm" onClick={() => handleDeleteTeam(selectedTeam._id)} disabled={isDeleting}>
@@ -408,7 +408,7 @@ export function TeamsClient() {
                   ))}
                 </div>
                 {isEditing && (
-                  <Button variant="outline" onClick={handleAddMember} className="w-full mt-4 border-dashed border-glass-border hover:border-pulse text-text-muted hover:text-white">
+                  <Button variant="secondary" onClick={handleAddMember} className="w-full mt-4 border-dashed border-glass-border hover:border-pulse text-text-muted hover:text-white">
                     <Plus className="w-4 h-4 mr-2" /> Add Participant
                   </Button>
                 )}
