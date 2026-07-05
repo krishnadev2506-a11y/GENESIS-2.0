@@ -18,6 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={fontVariables}>
+      <head>
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="dns-prefetch" href="https://res.cloudinary.com" />
+        <meta name="theme-color" content="#0A0118" />
+      </head>
       <body className={`${fontBody.className} min-h-screen flex flex-col font-body bg-void text-text-primary antialiased`}>
         <QueryProvider>
           <MotionProvider>

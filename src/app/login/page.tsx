@@ -11,8 +11,8 @@ import { m } from 'framer-motion';
 import { fadeUp } from '@/lib/motion-variants';
 import { BrandWordmark } from '@/components/brand/BrandWordmark';
 
-export default function ParticipantLogin() {
-  const [username, setUsername] = useState('');
+export default function LoginPage() {
+  const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { error } = useToast();
@@ -20,23 +20,23 @@ export default function ParticipantLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!username || !password) return;
+    if (!identifier || !password) return;
     
     setIsLoading(true);
     try {
-      const res = await fetch('/api/auth/user/login', {
+      const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({ identifier, password }),
       });
       
       const data = await res.json();
       
       if (res.ok) {
-        if (data.mustResetPassword) {
-          router.push('/dashboard/reset-password');
+        if (data.redirect) {
+          router.push(data.redirect);
         } else {
-          router.push('/dashboard');
+          router.push('/dashboard'); // fallback
         }
       } else {
         error('Login failed', data.error);
@@ -60,16 +60,16 @@ export default function ParticipantLogin() {
         
         <m.div variants={fadeUp as any} initial="hidden" animate="visible">
           <GlassCard className="border-[rgba(167,139,250,0.14)] p-6 sm:p-8">
-            <h1 className="mb-2 text-center text-xl font-display font-bold uppercase tracking-[0.08em] text-white sm:text-2xl sm:tracking-[0.12em]">Participant Login</h1>
-            <p className="mb-6 text-center text-sm text-text-muted sm:mb-8">Access your team dashboard</p>
+            <h1 className="mb-2 text-center text-xl font-display font-bold uppercase tracking-[0.08em] text-white sm:text-2xl sm:tracking-[0.12em]">Login</h1>
+            <p className="mb-6 text-center text-sm text-text-muted sm:mb-8">Access your dashboard</p>
             
             <form onSubmit={handleLogin} className="space-y-6">
               <Input
-                label="Username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
+                label="Username or Email"
+                value={identifier}
+                onChange={(e) => setIdentifier(e.target.value)}
                 required
-                placeholder="Enter your team username"
+                placeholder="Enter your username or email"
               />
               <Input
                 label="Password"
@@ -81,15 +81,12 @@ export default function ParticipantLogin() {
               />
               
               <Button type="submit" variant="primary" className="w-full" isLoading={isLoading}>
-                Login to Dashboard
+                Login
               </Button>
             </form>
             
             <div className="mt-6 text-center text-sm text-text-muted">
               Don't have an account? <Link href="/register" className="text-accent-secondary hover:underline">Register your team</Link>
-            </div>
-            <div className="mt-4 text-center text-xs text-text-muted/50">
-              <Link href="/admin/login" className="hover:text-white">Admin Login</Link>
             </div>
           </GlassCard>
         </m.div>

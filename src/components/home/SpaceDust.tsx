@@ -1,26 +1,25 @@
 'use client';
 
 import { m } from 'framer-motion';
-import { useMemo, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 export function SpaceDust() {
   const [mounted, setMounted] = useState(false);
+  const [dustParticles, setDustParticles] = useState<Array<{left: string, top: string, delay: string, duration: string, size: string, opacity: number}>>([]);
 
   useEffect(() => {
     setMounted(true);
+    setDustParticles(
+      Array.from({ length: 30 }).map(() => ({
+        left: `${Math.random() * 100}%`,
+        top: `${Math.random() * 100}%`,
+        delay: `${Math.random() * 10}s`,
+        duration: `${20 + Math.random() * 30}s`,
+        size: Math.random() > 0.5 ? 'h-1 w-1' : 'h-1.5 w-1.5',
+        opacity: 0.15 + Math.random() * 0.4
+      }))
+    );
   }, []);
-
-  const dustParticles = useMemo(
-    () => Array.from({ length: 30 }).map((_, i) => ({
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      delay: `${Math.random() * 10}s`,
-      duration: `${20 + Math.random() * 30}s`,
-      size: Math.random() > 0.5 ? 'h-1 w-1' : 'h-1.5 w-1.5',
-      opacity: 0.15 + Math.random() * 0.4
-    })),
-    []
-  );
 
   if (!mounted) return null;
 

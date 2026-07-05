@@ -38,12 +38,17 @@ async function seed() {
 
   // 1. Seed Admin
   const adminEmail = 'krishnadev2506@mail.com';
-  const adminPass = 'Kride@5678';
+  const adminPass = 'AdminPassword123!';
   
   const existingAdmin = await AdminUser.findOne({ email: adminEmail });
   
   if (existingAdmin) {
-    console.log(`Admin user ${adminEmail} already exists.`);
+    console.log(`Admin user ${adminEmail} already exists. Updating password...`);
+    const salt = await bcrypt.genSalt(12);
+    const passwordHash = await bcrypt.hash(adminPass, salt);
+    existingAdmin.passwordHash = passwordHash;
+    await existingAdmin.save();
+    console.log('Admin password updated successfully.');
   } else {
     console.log(`Creating admin user ${adminEmail}...`);
     const salt = await bcrypt.genSalt(12);

@@ -144,4 +144,28 @@ export async function sendAdminMessage(to: string, subject: string, body: string
   }
 }
 
+export async function sendAdminMessageBatch(toEmails: string[], subject: string, body: string): Promise<void> {
+  const content = `
+    <h1>${subject}</h1>
+    ${body.split('\n').map(p => `<p>${p}</p>`).join('')}
+  `;
+  
+  const htmlContent = emailTemplate(content);
+  const fromEmail = getFromEmail();
+
+  // Resend batch API accepts an array of email objects
+  const payload = toEmails.map(to => ({
+    from: fromEmail,
+    to,
+    subject,
+    html: htmlContent,
+  }));
+
+  const { error } = await getResend().batch.send(payload);
+
+  if (error) {
+    throw new Error(`Resend Batch Error: ${error.message}`);
+  }
+}
+
 

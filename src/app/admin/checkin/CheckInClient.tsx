@@ -25,12 +25,11 @@ export function CheckInClient() {
   const { data, isLoading } = useQuery({
     queryKey: ['teams', 'checkin', debouncedSearch],
     queryFn: async () => {
-      if (!debouncedSearch) return { teams: [] };
-      const res = await fetch(`/api/teams?search=${debouncedSearch}&limit=5`);
+      const url = debouncedSearch ? `/api/teams?search=${debouncedSearch}&limit=1000` : `/api/teams?limit=1000`;
+      const res = await fetch(url);
       if (!res.ok) throw new Error('Failed to fetch teams');
       return res.json();
-    },
-    enabled: debouncedSearch.length > 2
+    }
   });
 
   const checkInMutation = useMutation({
@@ -55,7 +54,7 @@ export function CheckInClient() {
         <h2 className="text-2xl font-display font-bold text-white mb-6 uppercase">Find Team</h2>
         <input 
           type="text" 
-          placeholder="Search by Team Name, Email, or College (min 3 chars)..." 
+          placeholder="Search by Team Name, Email, or College..." 
           className="w-full bg-void border border-pulse/30 rounded-[14px] px-6 py-4 text-white text-lg focus:outline-none focus:border-pulse shadow-[0_0_15px_rgba(147,51,234,0.1)] transition-all"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
@@ -63,7 +62,7 @@ export function CheckInClient() {
         />
       </GlassCard>
 
-      {isLoading && debouncedSearch.length > 2 && (
+      {isLoading && (
         <div className="flex justify-center py-8"><LoadingSpinner size="lg" /></div>
       )}
 

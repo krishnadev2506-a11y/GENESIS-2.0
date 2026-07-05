@@ -35,7 +35,7 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
-    router.push('/admin/login');
+    router.push('/login');
   };
 
   const navItems = [
@@ -81,6 +81,7 @@ export default function AdminLayout({
               <Link 
                 key={item.name} 
                 href={item.href}
+                prefetch={true}
                 className={`flex items-center justify-between px-4 py-3 rounded-[14px] transition-all duration-300 ${
                   isActive 
                     ? 'bg-pulse/20 text-white border border-pulse/30 shadow-[0_0_15px_rgba(147,51,234,0.2)]' 
@@ -127,6 +128,7 @@ export default function AdminLayout({
               <Link 
                 key={item.name}
                 href={item.href}
+                prefetch={true}
                 className={`flex-shrink-0 px-6 py-4 text-sm font-medium relative whitespace-nowrap transition-colors ${
                   isActive ? 'text-pulse' : 'text-text-muted'
                 }`}

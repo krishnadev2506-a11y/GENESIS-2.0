@@ -51,7 +51,7 @@ export async function PATCH(
     const beforeData = team.toObject();
     
     // Allowed fields to update directly
-    const allowedUpdates = ['teamName', 'college', 'semester', 'contactNumber', 'email', 'foodPreference', 'members', 'scoreboardPoints'];
+    const allowedUpdates = ['teamName', 'college', 'semester', 'contactNumber', 'email', 'foodPreference', 'members', 'scoreboardPoints', 'checkedIn'];
     
     allowedUpdates.forEach(field => {
       if (body[field] !== undefined) {
@@ -77,6 +77,46 @@ export async function PATCH(
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
     console.error('Team PATCH error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+  }
+}
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    await connectDB();
+    const payload = await requireAuth(req, 'admin');
+    
+    const { id } = await params;
+    
+    const team = await Team.findById(id);
+    
+    if (!team) {
+      return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+    }
+    
+    const teamData = team.toObject();
+    
+    await Team.findByIdAndDelete(id);
+    
+    // Create audit log
+    await AuditLog.create({
+      adminId: new mongoose.Types.ObjectId(payload.id),
+      action: 'DELETE_TEAM',
+      targetCollection: 'Team',
+      targetId: team._id,
+      before: teamData,
+      after: null,
+    });
+    
+    return NextResponse.json({ success: true, message: 'Team deleted successfully' });
+  } catch (error: any) {
+    if (error.message === 'Authentication required' || error.message === 'Insufficient permissions') {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
+    console.error('Team DELETE error:', error);
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }

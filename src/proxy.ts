@@ -16,7 +16,6 @@ export async function proxy(request: NextRequest) {
   if (
     pathname === '/' ||
     pathname === '/login' ||
-    pathname === '/admin/login' ||
     pathname === '/register' ||
     pathname === '/schedule' ||
     pathname.startsWith('/api/') // API routes handle their own auth
@@ -30,7 +29,7 @@ export async function proxy(request: NextRequest) {
   // Protect /admin routes
   if (pathname.startsWith('/admin')) {
     if (!token) {
-      return NextResponse.redirect(new URL('/admin/login', request.url));
+      return NextResponse.redirect(new URL('/login', request.url));
     }
 
     try {
@@ -40,7 +39,7 @@ export async function proxy(request: NextRequest) {
       }
     } catch {
       // Token invalid or expired
-      const response = NextResponse.redirect(new URL('/admin/login', request.url));
+      const response = NextResponse.redirect(new URL('/login', request.url));
       response.cookies.delete('genesis_token');
       return response;
     }

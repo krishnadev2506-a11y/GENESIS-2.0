@@ -13,6 +13,7 @@ export function MessagesClient() {
   const [targetParticipantEmail, setTargetParticipantEmail] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+  const [sendEmail, setSendEmail] = useState(false);
 
   const sendMutation = useMutation({
     mutationFn: async (messageData: any) => {
@@ -25,15 +26,16 @@ export function MessagesClient() {
       return res.json();
     },
     onSuccess: () => {
-      success('Success', 'Message sent successfully!');
+      success('Success', sendEmail ? 'Message sent and email delivered!' : 'Message sent successfully!');
       setSubject(''); setBody(''); setTargetParticipantEmail('');
+      setSendEmail(false);
     },
     onError: (err: Error) => error('Error', err.message)
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: any = { scope, subject, body };
+    const payload: any = { scope, subject, body, sendEmail };
     if (scope === 'participant') {
       payload.targetParticipantEmail = targetParticipantEmail;
     }
@@ -90,6 +92,24 @@ export function MessagesClient() {
               className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse transition-colors font-body"
               value={body} onChange={(e) => setBody(e.target.value)}
             />
+          </div>
+
+          <div className="flex items-center gap-3 p-4 rounded-[14px] bg-glass border border-glass-border">
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                checked={sendEmail} 
+                onChange={(e) => setSendEmail(e.target.checked)}
+                className="sr-only peer"
+              />
+              <div className="w-11 h-6 bg-void rounded-full peer peer-checked:bg-pulse transition-colors border border-glass-border peer-checked:border-pulse/50 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-text-muted after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:bg-white"></div>
+            </label>
+            <div>
+              <span className="text-white text-sm font-medium">Also send via Email</span>
+              <p className="text-xs text-text-muted mt-0.5">
+                {scope === 'broadcast' ? 'Email will be sent to all confirmed teams' : 'Email will be sent to the participant'}
+              </p>
+            </div>
           </div>
 
           <Button type="submit" variant="primary" size="lg" className="w-full text-lg" disabled={sendMutation.isPending}>

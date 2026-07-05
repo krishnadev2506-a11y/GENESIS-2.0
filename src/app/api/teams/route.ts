@@ -30,6 +30,9 @@ export async function GET(req: NextRequest) {
         { email: searchRegex },
         { college: searchRegex },
         { contactNumber: searchRegex },
+        { 'members.name': searchRegex },
+        { 'members.email': searchRegex },
+        { 'members.phone': searchRegex },
       ];
     }
     
