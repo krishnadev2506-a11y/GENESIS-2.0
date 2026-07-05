@@ -2,6 +2,7 @@ import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { BrandWordmark } from '@/components/brand/BrandWordmark';
+import { LeaderboardChart } from '@/components/leaderboard/LeaderboardChart';
 import Link from 'next/link';
 
 export const metadata = {
@@ -41,6 +42,16 @@ export default async function LeaderboardPage() {
             Top teams battling it out in the ultimate cosmic buildathon. Ranks are determined by accumulated points from challenges.
           </p>
         </div>
+
+        {teams.length > 0 && (
+          <LeaderboardChart 
+            data={teams.slice(0, 10).map((team, index) => ({ 
+              teamName: team.teamName, 
+              scoreboardPoints: team.scoreboardPoints,
+              rank: index + 1
+            }))} 
+          />
+        )}
 
         <GlassCard className="p-0 overflow-hidden border-pulse/20 shadow-[0_0_40px_rgba(139,92,246,0.15)]">
           {teams.length === 0 ? (

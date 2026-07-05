@@ -161,3 +161,27 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
 
   await Promise.allSettled(promises);
 }
+
+export async function sendAdminRegistrationAlert(teamName: string, college: string, memberCount: number): Promise<void> {
+  const content = `
+    <h1>New Team Registered!</h1>
+    <p>A new team has just submitted their registration for GENESIS 2.0.</p>
+    <ul>
+      <li><strong>Team Name:</strong> ${teamName}</li>
+      <li><strong>College:</strong> ${college}</li>
+      <li><strong>Members:</strong> ${memberCount}</li>
+    </ul>
+    <p>Please log in to the admin panel to review and verify their payment.</p>
+  `;
+  
+  try {
+    await getTransporter().sendMail({
+      from: getFromEmail(),
+      to: 'krishnadev2506@gmail.com',
+      subject: `🚨 New Registration: ${teamName}`,
+      html: emailTemplate(content),
+    });
+  } catch (err) {
+    console.error('Failed to send admin alert email:', err);
+  }
+}

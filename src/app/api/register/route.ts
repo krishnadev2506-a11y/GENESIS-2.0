@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
-import { sendRegistrationReceived } from '@/lib/mail';
+import { sendRegistrationReceived, sendAdminRegistrationAlert } from '@/lib/mail';
 import { z } from 'zod';
 import { teamRegistrationSchema } from '@/lib/validations/team';
 
@@ -40,7 +40,10 @@ export async function POST(req: NextRequest) {
     // Send email (await it to ensure serverless functions don't terminate prematurely)
     try {
       const allMemberEmails = validatedData.members.map(m => m.email).filter(Boolean);
-      await sendRegistrationReceived(allMemberEmails, validatedData.teamName);
+      await Promise.allSettled([
+        sendRegistrationReceived(allMemberEmails, validatedData.teamName),
+        sendAdminRegistrationAlert(validatedData.teamName, validatedData.college, validatedData.members.length)
+      ]);
     } catch (err) {
       console.error('Failed to send registration email:', err);
     }

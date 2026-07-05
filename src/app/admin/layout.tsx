@@ -41,6 +41,7 @@ export default function AdminLayout({
   const navItems = [
     { name: 'Overview', href: '/admin', icon: LayoutDashboard },
     { name: 'Teams', href: '/admin/teams', icon: Users },
+    { name: 'Scores', href: '/admin/scores', icon: LayoutDashboard }, // using LayoutDashboard icon for Scores
     { name: 'Verification', href: '/admin/verification', icon: ShieldCheck, badge: pendingCount && pendingCount > 0 ? pendingCount : null },
     { name: 'Check-In', href: '/admin/checkin', icon: CheckSquare },
     { name: 'Schedule', href: '/admin/schedule', icon: Calendar },

@@ -33,6 +33,7 @@ export function PublicNav() {
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Schedule', href: '/schedule' },
+    { name: 'Leaderboard', href: '/leaderboard' },
     { name: 'About', href: '/#about' },
     { name: 'Register', href: '/register' },
   ];
