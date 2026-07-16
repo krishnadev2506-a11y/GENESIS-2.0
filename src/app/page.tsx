@@ -14,7 +14,7 @@ const Footer = dynamic(() => import('@/components/home/Footer').then(mod => mod.
 
 export default function Home() {
   return (
-    <main className="cosmic-page flex-grow flex flex-col pb-16 overflow-hidden relative">
+    <main className="cosmic-page flex-grow flex flex-col pb-16 overflow-x-hidden relative">
       <SpaceDust />
       <Hero />
       <LazyLoadSection minHeight="900px">

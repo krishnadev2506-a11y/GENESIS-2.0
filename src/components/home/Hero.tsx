@@ -122,36 +122,36 @@ export function Hero() {
           </m.div>
 
           <m.h1 variants={fadeUp} className="mb-6">
-            <BrandWordmark className="text-4xl tracking-[0.16em] text-transparent bg-clip-text bg-gradient-to-r from-[#c4b5fd] via-white to-[#a855f7] sm:text-6xl sm:tracking-[0.2em] lg:text-7xl lg:tracking-[0.22em]" />
+            <BrandWordmark className="text-[2.5rem] sm:text-7xl lg:text-[6rem] tracking-[0.15em] sm:tracking-[0.2em] lg:tracking-[0.22em] leading-none text-transparent bg-clip-text bg-gradient-to-br from-[#c4b5fd] via-white to-[#a855f7]" />
           </m.h1>
 
           <m.p
             variants={fadeUp}
-            className="mb-10 text-xl font-semibold text-white sm:text-2xl lg:text-3xl leading-snug max-w-[600px] drop-shadow-md"
+            className="mb-12 text-lg sm:text-xl lg:text-2xl font-light text-text-muted tracking-wide font-body leading-relaxed max-w-2xl drop-shadow-sm"
           >
             Engineering-First Buildathon
           </m.p>
 
           {/* Event meta */}
-          <m.div variants={fadeUp} className="mb-12 flex flex-wrap justify-center gap-6 sm:gap-10">
+          <m.div variants={fadeUp} className="mb-14 flex flex-wrap justify-center gap-5 sm:gap-16">
             <div className="flex flex-col items-center">
               <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Date</span>
-              <span className="mt-1 text-sm font-semibold text-white">August 7 & 8</span>
+              <span className="mt-1 text-base font-semibold text-white">August 7 & 8</span>
             </div>
             <div className="w-px bg-white/10" />
             <div className="flex flex-col items-center">
               <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Venue</span>
-              <span className="mt-1 text-sm font-semibold text-white">FISAT Campus</span>
+              <span className="mt-1 text-base font-semibold text-white">FISAT Campus</span>
             </div>
             <div className="w-px bg-white/10" />
             <div className="flex flex-col items-center">
               <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Deadline</span>
-              <span className="mt-1 text-sm font-semibold text-white">Aug 5</span>
+              <span className="mt-1 text-base font-semibold text-white">Aug 5</span>
             </div>
           </m.div>
 
-          <m.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
-            <Link href="/register" className="w-full sm:w-auto" id="hero-register-btn">
+          <m.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto justify-center">
+            <Link href="/register" className="w-full sm:w-auto shadow-[0_0_40px_rgba(168,85,247,0.2)] rounded-full" id="hero-register-btn">
               <Button size="lg" variant="primary" className="w-full sm:w-auto min-w-[160px] h-14 flex items-center justify-center">Register Now</Button>
             </Link>
             <a
