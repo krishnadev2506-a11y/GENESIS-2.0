@@ -115,7 +115,7 @@ export function EvaluationCriteria() {
 
         <div className="flex flex-wrap justify-center gap-4 max-w-4xl mx-auto">
           {criteria.map((item, index) => (
-            <FadeUp key={item.id} delay={index * 0.04}>
+            <FadeUp key={item.id}>
               <div
                 className="flex items-center gap-2 rounded-full border border-[rgba(167,139,250,0.25)] bg-[rgba(139,92,246,0.1)] px-5 py-2.5 transition-transform duration-300 hover:-translate-y-1 hover:border-[rgba(168,85,247,0.5)] hover:bg-[rgba(168,85,247,0.15)]"
               >

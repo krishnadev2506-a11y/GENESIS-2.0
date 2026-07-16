@@ -1,7 +1,8 @@
+import { ReactNode } from 'react';
 import { StaggerContainer } from '@/components/ui/StaggerContainer';
 import { FadeUp } from '@/components/ui/FadeUp';
 
-const buildRules = [
+const buildRules: Array<{ id: string; icon: ReactNode; rule: string; critical?: boolean }> = [
   {
     id: 'post-announcement',
     icon: (
