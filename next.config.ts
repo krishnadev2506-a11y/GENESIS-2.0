@@ -4,6 +4,9 @@ const nextConfig: NextConfig = {
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
+  experimental: {
+    optimizeCss: true,
+  },
 
   images: {
     formats: ['image/avif', 'image/webp'],
@@ -34,6 +37,8 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()',
           },
+          // Prevent Cross-Site Scripting (XSS)
+          { key: 'X-XSS-Protection', value: '1; mode=block' },
           // Content Security Policy — restrict resource origins
           {
             key: 'Content-Security-Policy',

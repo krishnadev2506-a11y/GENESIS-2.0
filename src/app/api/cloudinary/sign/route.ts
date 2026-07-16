@@ -1,15 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSignedUploadParams } from '@/lib/cloudinary';
-import { requireAuth } from '@/lib/auth';
+import { rateLimit } from '@/lib/rate-limit';
 
 // Allowlist of folders users are permitted to upload to
 const ALLOWED_FOLDERS = ['genesis2.0/payments', 'genesis2.0/misc'];
 
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 20 }, 'cloudinary_sign');
+
 export async function POST(req: NextRequest) {
   try {
-    // Require a valid session before issuing a Cloudinary signature.
-    // This prevents anonymous users from spamming your Cloudinary storage.
-    await requireAuth(req);
+    // Enforce rate limiting instead of requireAuth to allow signups
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResult = limiter.check(ip);
+    
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many upload attempts. Please try again later.' },
+        { status: 429 }
+      );
+    }
 
     const body = await req.json();
     const { folder } = body;

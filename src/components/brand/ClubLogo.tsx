@@ -8,14 +8,14 @@ type ClubLogoProps = {
 
 export function ClubLogo({ className = 'h-14 w-14' }: ClubLogoProps) {
   return (
-    <div className={`relative aspect-square overflow-hidden rounded-2xl border border-white/10 bg-white p-1.5 shadow-[0_0_24px_rgba(0,0,0,0.22)] ${className}`}>
+    <div className={`relative aspect-square overflow-hidden rounded-xl shadow-[0_0_24px_rgba(139,92,246,0.3)] ${className}`}>
       <Image
-        src="/fisat-horizon-club-logo.png"
-        alt="FISAT Horizon Club logo"
+        src="/genesis-logo.png"
+        alt="Genesis 2.0 logo"
         fill
         sizes="(max-width: 640px) 56px, 72px"
-        className="object-contain object-center"
-        priority={false}
+        className="object-cover object-center"
+        priority={true}
       />
     </div>
   );

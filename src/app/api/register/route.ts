@@ -4,6 +4,10 @@ import Team from '@/models/Team';
 import { sendRegistrationReceived, sendAdminRegistrationAlert } from '@/lib/mail';
 import { z } from 'zod';
 import { teamRegistrationSchema } from '@/lib/validations/team';
+import { rateLimit } from '@/lib/rate-limit';
+import { logger } from '@/lib/logger';
+
+const limiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 10 }, 'register_api');
 
 // Max request body size: 1MB. Prevents memory exhaustion from huge payloads.
 const MAX_BODY_BYTES = 1 * 1024 * 1024;
@@ -16,6 +20,17 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         { error: 'Request payload is too large.' },
         { status: 413 }
+      );
+    }
+
+    const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
+    const rateLimitResult = limiter.check(ip);
+    
+    if (!rateLimitResult.success) {
+      logger.security('Rate limit exceeded for registration', { ip });
+      return NextResponse.json(
+        { error: 'Too many registration attempts. Please try again later.' },
+        { status: 429, headers: { 'Retry-After': Math.ceil((rateLimitResult.reset - Date.now()) / 1000).toString() } }
       );
     }
 
@@ -49,16 +64,17 @@ export async function POST(req: NextRequest) {
         sendRegistrationReceived(allMemberEmails, validatedData.teamName),
         sendAdminRegistrationAlert(validatedData.teamName, validatedData.college, validatedData.members.length)
       ]);
-    } catch (err) {
-      console.error('Failed to send registration email:', err);
+      } catch (err) {
+        logger.error('Failed to send registration email', err);
+      }
+      
+      logger.info('Team registered successfully', { teamId: newTeam._id, teamName: newTeam.teamName });
+      return NextResponse.json({ success: true, teamId: newTeam._id }, { status: 201 });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return NextResponse.json({ error: (error as any).errors[0].message }, { status: 400 });
+      }
+      logger.error('Registration internal error', error);
+      return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
     }
-    
-    return NextResponse.json({ success: true, teamId: newTeam._id }, { status: 201 });
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      return NextResponse.json({ error: (error as any).errors[0].message }, { status: 400 });
-    }
-    console.error('Registration error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
-}

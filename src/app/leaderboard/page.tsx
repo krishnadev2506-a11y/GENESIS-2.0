@@ -14,17 +14,25 @@ export const metadata = {
 export const revalidate = 60;
 
 export default async function LeaderboardPage() {
-  await connectDB();
+  let teams: any[] = [];
+  let loadError = false;
 
-  // Fetch verified and checked-in teams, sorted by points descending, then by creation date ascending (as tie-breaker)
-  const teams = await Team.find({ 
-    paymentStatus: 'verified',
-    checkedIn: true,
-    scoreboardPoints: { $gt: 0 } 
-  })
-    .sort({ scoreboardPoints: -1, createdAt: 1 })
-    .select('teamName college scoreboardPoints')
-    .lean();
+  try {
+    await connectDB();
+
+    // Fetch verified and checked-in teams, sorted by points descending, then by creation date ascending (as tie-breaker)
+    teams = await Team.find({ 
+      paymentStatus: 'verified',
+      checkedIn: true,
+      scoreboardPoints: { $gt: 0 } 
+    })
+      .sort({ scoreboardPoints: -1, createdAt: 1 })
+      .select('teamName college scoreboardPoints')
+      .lean();
+  } catch (error) {
+    console.error('Leaderboard fetch failed:', error);
+    loadError = true;
+  }
 
   return (
     <main className="cosmic-page flex-grow min-h-screen pt-28 sm:pt-32 pb-20">

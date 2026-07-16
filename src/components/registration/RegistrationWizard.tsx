@@ -20,9 +20,9 @@ const step1Schema = z.object({
 const memberSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^[0-9]{10}$/, 'Invalid phone number (10 digits)'),
-  college: z.string().min(2, "College name is required"),
-  semester: z.string().min(1, "Semester is required"),
+  phone: z.string().regex(/^[0-9]{10}$/, 'Invalid phone number (10 digits)').optional().or(z.literal('')),
+  college: z.string().optional().or(z.literal('')),
+  semester: z.string().optional().or(z.literal('')),
 });
 
 
@@ -35,6 +35,7 @@ export function RegistrationWizard() {
   const [formError, setFormError] = useState<string | null>(null);
   const { success } = useToast();
   const router = useRouter();
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   // Basic state for the form
   const [formData, setFormData] = useState({
@@ -47,7 +48,6 @@ export function RegistrationWizard() {
       phone: '',
       college: '',
       semester: '',
-      foodPreference: 'veg' as 'veg' | 'non-veg',
       isLeader: i === 0
     })),
     paymentScreenshotUrl: '',
@@ -74,7 +74,7 @@ export function RegistrationWizard() {
           for (let i = 0; i < toAdd; i++) {
             newMembers.push({
               name: '', role: 'Member', email: '', phone: '',
-              college: '', semester: '', foodPreference: 'veg', isLeader: false
+              college: '', semester: '', isLeader: false
             });
           }
         } else if (newMembers.length > prev.participantCount) {
@@ -98,6 +98,11 @@ export function RegistrationWizard() {
 
       for (let i = 0; i < formData.members.length; i++) {
         try {
+          const member = formData.members[i];
+          if (member.isLeader) {
+            if (!member.phone || !member.phone.match(/^[0-9]{10}$/)) throw new Error("Leader must provide a valid 10-digit phone number");
+            if (!member.college) throw new Error("Leader must provide a college name");
+          }
           memberSchema.parse(formData.members[i]);
         } catch (err: any) {
           setFormError(`Participant ${i + 1}: ${getFriendlyErrorMessage(err.errors?.[0]?.message || err.message)}`);
@@ -182,13 +187,32 @@ export function RegistrationWizard() {
       uploadData.append('signature', signature);
       uploadData.append('folder', folder);
 
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
-        method: 'POST',
-        body: uploadData,
+      setUploadProgress(1); // Start progress
+
+      const result = await new Promise<any>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', `https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`);
+        
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const percentComplete = Math.round((event.loaded / event.total) * 100);
+            setUploadProgress(percentComplete);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) {
+            resolve(JSON.parse(xhr.responseText));
+          } else {
+            reject(new Error('Failed to upload image'));
+          }
+        };
+
+        xhr.onerror = () => reject(new Error('Network error during upload'));
+        xhr.send(uploadData);
       });
 
-      if (!uploadRes.ok) throw new Error('Failed to upload image');
-      const result = await uploadRes.json();
+      setUploadProgress(0);
 
       setFormData(prev => ({
         ...prev,
@@ -355,6 +379,7 @@ export function RegistrationWizard() {
                         value={member.name}
                         onChange={(e) => updateMember(index, 'name', e.target.value)}
                         required
+                        autoComplete="name"
                       />
                       <Input
                         placeholder="Email Address"
@@ -362,33 +387,26 @@ export function RegistrationWizard() {
                         value={member.email}
                         onChange={(e) => updateMember(index, 'email', e.target.value)}
                         required
+                        autoComplete="email"
                       />
-                      <Input
-                        placeholder="Phone Number"
-                        type="tel"
-                        value={member.phone}
-                        onChange={(e) => updateMember(index, 'phone', e.target.value)}
-                        required
-                      />
-                      <Input
-                        placeholder="College"
-                        value={member.college}
-                        onChange={(e) => updateMember(index, 'college', e.target.value)}
-                        required
-                      />
-                      <Input
-                        placeholder="Semester"
-                        value={member.semester}
-                        onChange={(e) => updateMember(index, 'semester', e.target.value)}
-                        required
-                      />
-                      <div>
-                        <SegmentedToggle
-                          options={[{ label: 'Vegetarian', value: 'veg' }, { label: 'Non-Vegetarian', value: 'non-veg' }]}
-                          value={member.foodPreference}
-                          onChange={(val) => updateMember(index, 'foodPreference', val)}
-                        />
-                      </div>
+                      {member.isLeader && (
+                        <>
+                          <Input
+                            placeholder="Phone Number"
+                            type="tel"
+                            value={member.phone}
+                            onChange={(e) => updateMember(index, 'phone', e.target.value)}
+                            required
+                            autoComplete="tel"
+                          />
+                          <Input
+                            placeholder="College"
+                            value={member.college}
+                            onChange={(e) => updateMember(index, 'college', e.target.value)}
+                            required
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -449,6 +467,11 @@ export function RegistrationWizard() {
                         file:bg-accent-primary/20 file:text-accent-primary
                         hover:file:bg-accent-primary/30"
                     />
+                    {uploadProgress > 0 && uploadProgress < 100 && (
+                      <div className="w-full h-2 bg-white/10 rounded-full mt-2 overflow-hidden">
+                        <div className="h-full bg-accent-primary transition-all duration-300" style={{ width: `${uploadProgress}%` }} />
+                      </div>
+                    )}
                     {formData.paymentScreenshotUrl && <p className="text-success text-xs mt-2">File uploaded successfully.</p>}
                   </div>
                   

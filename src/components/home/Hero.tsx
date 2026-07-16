@@ -88,7 +88,7 @@ export function Hero() {
         </m.div>
       ))}
 
-      <m.div className="absolute right-[-10%] top-[40%] z-[1] h-[24rem] w-[24rem] lg:right-[5%] lg:top-[20%] lg:h-[40rem] lg:w-[40rem] rounded-full shadow-[0_0_150px_rgba(168,85,247,0.5)] blur-[1px]" style={{ x: farX, y: farY }}>
+      <m.div className="absolute right-[-10%] top-[55%] z-[1] h-[24rem] w-[24rem] lg:right-[5%] lg:top-[50%] lg:h-[40rem] lg:w-[40rem] rounded-full shadow-[0_0_150px_rgba(168,85,247,0.5)] blur-[1px]" style={{ x: farX, y: farY }}>
         <div className="absolute inset-[-5%] rounded-full bg-[conic-gradient(from_210deg,rgba(168,85,247,0.8)_0deg,rgba(255,255,255,0.9)_72deg,rgba(109,40,217,0.9)_118deg,rgba(0,0,0,0)_360deg)] blur-[20px]" />
         
         <div className="absolute inset-[2%] overflow-hidden rounded-full bg-[#1a103c] shadow-[inset_-30px_-30px_80px_rgba(168,85,247,0.8),inset_30px_30px_80px_rgba(0,0,0,0.8)] border border-[rgba(168,85,247,0.3)]">
@@ -108,43 +108,69 @@ export function Hero() {
         </div>
       </m.div>
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
-          <m.div
-            className="text-left pt-20 lg:pt-0"
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-          >
-            <m.h1 variants={fadeUp}>
-              <BrandWordmark className="text-4xl tracking-[0.16em] text-transparent bg-clip-text bg-gradient-to-r from-[#c4b5fd] via-white to-[#a855f7] sm:text-6xl sm:tracking-[0.2em] lg:text-7xl lg:tracking-[0.22em]" />
-            </m.h1>
-            <m.p
-              variants={fadeUp}
-              className="font-display mt-6 max-w-2xl text-lg font-semibold uppercase tracking-[0.24em] text-text-muted sm:mt-8 sm:text-2xl sm:tracking-[0.3em] lg:text-3xl"
-            >
-              <span className="block">Code the future</span>
-              <span className="block text-white/50">Code the impossible</span>
-            </m.p>
-            <m.div variants={fadeUp} className="mt-10 flex flex-col gap-4 sm:mt-12 sm:flex-row">
-              <Link href="/register" className="w-full sm:w-auto">
-                <Button size="lg" variant="primary" className="w-full min-w-0 sm:min-w-[220px]">Register Your Team</Button>
-              </Link>
-              <Link href="/schedule" className="w-full sm:w-auto">
-                <Button size="lg" variant="secondary" className="w-full min-w-0 sm:min-w-[220px]">Explore Schedule</Button>
-              </Link>
-            </m.div>
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 sm:px-12 lg:px-24">
+        <m.div
+          className="flex flex-col items-center text-center pt-20 lg:pt-0 w-full"
+          variants={staggerContainer}
+          initial="hidden"
+          animate="visible"
+        >
+          {/* Event badge */}
+          <m.div variants={fadeUp} className="mb-8 inline-flex items-center gap-2 rounded-full border border-[rgba(167,139,250,0.3)] bg-[rgba(139,92,246,0.1)] px-4 py-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse" />
+            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-accent-secondary">Buildathon 2026</span>
           </m.div>
-          
-          <div className="hidden lg:block relative h-full w-full">
-            {/* Visual anchor buffer to prevent text from overlapping the eclipse */}
-          </div>
-        </div>
+
+          <m.h1 variants={fadeUp} className="mb-6">
+            <BrandWordmark className="text-4xl tracking-[0.16em] text-transparent bg-clip-text bg-gradient-to-r from-[#c4b5fd] via-white to-[#a855f7] sm:text-6xl sm:tracking-[0.2em] lg:text-7xl lg:tracking-[0.22em]" />
+          </m.h1>
+
+          <m.p
+            variants={fadeUp}
+            className="mb-10 text-xl font-semibold text-white sm:text-2xl lg:text-3xl leading-snug max-w-[600px] drop-shadow-md"
+          >
+            Engineering-First Buildathon
+          </m.p>
+
+          {/* Event meta */}
+          <m.div variants={fadeUp} className="mb-12 flex flex-wrap justify-center gap-6 sm:gap-10">
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Date</span>
+              <span className="mt-1 text-sm font-semibold text-white">August 7 & 8</span>
+            </div>
+            <div className="w-px bg-white/10" />
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Venue</span>
+              <span className="mt-1 text-sm font-semibold text-white">FISAT Campus</span>
+            </div>
+            <div className="w-px bg-white/10" />
+            <div className="flex flex-col items-center">
+              <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Deadline</span>
+              <span className="mt-1 text-sm font-semibold text-white">Aug 5</span>
+            </div>
+          </m.div>
+
+          <m.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto justify-center">
+            <Link href="/register" className="w-full sm:w-auto" id="hero-register-btn">
+              <Button size="lg" variant="primary" className="w-full sm:w-auto min-w-[160px] h-14 flex items-center justify-center">Register Now</Button>
+            </Link>
+            <a
+              href="/rulebook.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w-full sm:w-auto"
+              id="hero-rulebook-btn"
+            >
+              <Button size="lg" variant="secondary" className="w-full sm:w-auto min-w-[160px] h-14 flex items-center justify-center gap-2">
+                <svg className="h-5 w-5 opacity-70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                View Rules
+              </Button>
+            </a>
+          </m.div>
+        </m.div>
       </div>
     </section>
   );
 }
-
-
-
-

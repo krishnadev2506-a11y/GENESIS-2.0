@@ -4,20 +4,20 @@ export interface ITeamMember {
   name: string;
   role: string;
   email: string;
-  phone: string;
-  college: string;
-  semester: string;
-  foodPreference: 'veg' | 'non-veg';
+  phone?: string;
+  college?: string;
+  semester?: string;
+  foodPreference?: 'veg' | 'non-veg';
   isLeader: boolean;
 }
 
 export interface ITeam extends Document {
   teamName: string;
-  college: string;
-  semester: string;
-  contactNumber: string;
+  college?: string;
+  semester?: string;
+  contactNumber?: string;
   email: string;
-  foodPreference: 'veg' | 'non-veg';
+  foodPreference?: 'veg' | 'non-veg';
   members: ITeamMember[];
   paymentScreenshotUrl: string;
   paymentScreenshotPublicId: string;
@@ -37,21 +37,21 @@ const TeamMemberSchema = new Schema<ITeamMember>({
   name: { type: String, required: true },
   role: { type: String, required: true },
   email: { type: String, required: true },
-  phone: { type: String, required: true },
-  college: { type: String, required: true },
-  semester: { type: String, required: true },
-  foodPreference: { type: String, enum: ['veg', 'non-veg'], required: true },
+  phone: { type: String },
+  college: { type: String },
+  semester: { type: String },
+  foodPreference: { type: String, enum: ['veg', 'non-veg'] },
   isLeader: { type: Boolean, default: false },
 });
 
 const TeamSchema = new Schema<ITeam>(
   {
     teamName: { type: String, required: true, unique: true },
-    college: { type: String, required: true },
-    semester: { type: String, required: true },
-    contactNumber: { type: String, required: true },
+    college: { type: String },
+    semester: { type: String },
+    contactNumber: { type: String },
     email: { type: String, required: true },
-    foodPreference: { type: String, enum: ['veg', 'non-veg'], required: true },
+    foodPreference: { type: String, enum: ['veg', 'non-veg'] },
     members: [TeamMemberSchema],
     paymentScreenshotUrl: { type: String, required: true },
     paymentScreenshotPublicId: { type: String, required: true },
@@ -86,6 +86,8 @@ TeamSchema.index({ 'credentials.username': 1 });
 TeamSchema.index({ email: 1 });
 TeamSchema.index({ paymentStatus: 1 });
 TeamSchema.index({ createdAt: -1 });
+TeamSchema.index({ teamName: 1 }); // Fast duplicate check
+TeamSchema.index({ 'members.email': 1 }); // Fast cross-team duplicate member check
 
 // Compound Text Index for fast admin search
 TeamSchema.index(

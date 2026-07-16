@@ -46,9 +46,6 @@ export function PublicNav() {
             <ClubLogo className="h-10 w-10 shrink-0 sm:h-11 sm:w-11" />
             <div className="min-w-0 leading-none">
               <BrandWordmark className="text-[11px] tracking-[0.22em] text-white sm:text-base sm:tracking-[0.35em]" />
-              <div className="mt-1 text-[9px] uppercase tracking-[0.28em] text-text-muted sm:text-[10px] sm:tracking-[0.34em]">
-                FISAT Horizon Club
-              </div>
             </div>
           </Link>
 
