@@ -385,38 +385,52 @@ export async function GET(req: NextRequest) {
 
     const teams = await Team.find().sort({ createdAt: 1 }).lean();
 
-    const participants: ExportTeam[] = teams.map((team) => ({
-      id: team._id.toString(),
-      teamName: team.teamName,
-      college: team.college || '',
-      semester: team.semester || '',
-      contactNumber: team.contactNumber || '',
-      email: team.email,
-      foodPreference: team.foodPreference || 'veg',
-      members: (team.members || []).map((member) => ({
-        name: member.name,
-        role: member.role,
-        email: member.email,
-        phone: member.phone || '',
-        college: member.college || '',
-        semester: member.semester || '',
-        foodPreference: member.foodPreference || 'veg',
-        isLeader: member.isLeader,
-      })),
-      memberCount: team.members?.length || 0,
-      paymentScreenshotUrl: team.paymentScreenshotUrl,
-      paymentScreenshotPublicId: team.paymentScreenshotPublicId,
-      transactionId: team.transactionId,
-      paymentStatus: team.paymentStatus,
-      registrationStatus: team.registrationStatus,
-      checkedIn: team.checkedIn,
-      checkedInAt: toIsoString(team.checkedInAt),
-      credentialsUsername: team.credentials?.username || '',
-      scoreboardPoints: team.scoreboardPoints ?? 0,
-      mustResetPassword: team.mustResetPassword,
-      createdAt: toIsoString(team.createdAt) || '',
-      updatedAt: toIsoString(team.updatedAt) || '',
-    }));
+    const participants: ExportTeam[] = teams.map((team) => {
+      const college: string = team.college ?? '';
+      const semester: string = team.semester ?? '';
+      const contactNumber: string = team.contactNumber ?? '';
+      const foodPreference: 'veg' | 'non-veg' = team.foodPreference ?? 'veg';
+
+      return {
+        id: team._id.toString(),
+        teamName: team.teamName,
+        college,
+        semester,
+        contactNumber,
+        email: team.email,
+        foodPreference,
+        members: (team.members || []).map((member) => {
+          const memberCollege: string = member.college ?? '';
+          const memberSemester: string = member.semester ?? '';
+          const memberPhone: string = member.phone ?? '';
+          const memberFood: 'veg' | 'non-veg' = member.foodPreference ?? 'veg';
+
+          return {
+            name: member.name,
+            role: member.role,
+            email: member.email,
+            phone: memberPhone,
+            college: memberCollege,
+            semester: memberSemester,
+            foodPreference: memberFood,
+            isLeader: member.isLeader,
+          };
+        }),
+        memberCount: team.members?.length ?? 0,
+        paymentScreenshotUrl: team.paymentScreenshotUrl,
+        paymentScreenshotPublicId: team.paymentScreenshotPublicId,
+        transactionId: team.transactionId,
+        paymentStatus: team.paymentStatus,
+        registrationStatus: team.registrationStatus,
+        checkedIn: team.checkedIn,
+        checkedInAt: toIsoString(team.checkedInAt),
+        credentialsUsername: team.credentials?.username ?? '',
+        scoreboardPoints: team.scoreboardPoints ?? 0,
+        mustResetPassword: team.mustResetPassword,
+        createdAt: toIsoString(team.createdAt) ?? '',
+        updatedAt: toIsoString(team.updatedAt) ?? '',
+      };
+    });
 
     if (format === 'xlsx') {
       const workbook = buildXlsx(participants);

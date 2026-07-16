@@ -246,7 +246,6 @@ export function RegistrationWizard() {
       semester: leader.semester,
       contactNumber: leader.phone,
       email: leader.email,
-      foodPreference: leader.foodPreference,
       members: formData.members,
       paymentScreenshotUrl: formData.paymentScreenshotUrl,
       paymentScreenshotPublicId: formData.paymentScreenshotPublicId,
