@@ -10,20 +10,57 @@ async function registerTeam(index: number) {
   
   const payload = {
     teamName,
-    college: "Stress Test Institute",
+    college: "Stress Test Institute of Technology",
     semester: "6th",
     contactNumber: "9876543210",
     email: `stresstest${index}_${randomSuffix}@test.com`,
     foodPreference: "veg",
     members: [
-      { name: "Member 1", role: "Frontend", email: `m1_${randomSuffix}@test.com`, phone: "9876543210" },
-      { name: "Member 2", role: "Backend", email: `m2_${randomSuffix}@test.com`, phone: "9876543210" },
-      { name: "Member 3", role: "Design", email: `m3_${randomSuffix}@test.com`, phone: "9876543210" },
-      { name: "Member 4", role: "AI", email: `m4_${randomSuffix}@test.com`, phone: "9876543210" },
+      // Bug fix: all required fields are now included per teamMemberSchema
+      {
+        name: "Member One",
+        role: "Leader",
+        email: `m1_${randomSuffix}@test.com`,
+        phone: "9876543210",
+        college: "Stress Test Institute of Technology",
+        semester: "6th",
+        foodPreference: "veg",
+        isLeader: true
+      },
+      {
+        name: "Member Two",
+        role: "Member",
+        email: `m2_${randomSuffix}@test.com`,
+        phone: "9876543211",
+        college: "Stress Test Institute of Technology",
+        semester: "6th",
+        foodPreference: "veg",
+        isLeader: false
+      },
+      {
+        name: "Member Three",
+        role: "Member",
+        email: `m3_${randomSuffix}@test.com`,
+        phone: "9876543212",
+        college: "Stress Test Institute of Technology",
+        semester: "5th",
+        foodPreference: "non-veg",
+        isLeader: false
+      },
+      {
+        name: "Member Four",
+        role: "Member",
+        email: `m4_${randomSuffix}@test.com`,
+        phone: "9876543213",
+        college: "Stress Test Institute of Technology",
+        semester: "4th",
+        foodPreference: "veg",
+        isLeader: false
+      },
     ],
     paymentScreenshotUrl: "https://res.cloudinary.com/demo/image/upload/sample.jpg",
     paymentScreenshotPublicId: "sample",
-    transactionId: `TXN${randomSuffix.toUpperCase()}`
+    transactionId: `TXN${randomSuffix.toUpperCase().slice(0, 12)}`
   };
 
   try {
@@ -48,7 +85,7 @@ async function registerTeam(index: number) {
 }
 
 async function runStressTest() {
-  console.log(`Starting stress test: Registering ${NUM_TEAMS} teams in batches of ${BATCH_SIZE}...`);
+  console.log(`\n🚀 Starting stress test: Registering ${NUM_TEAMS} teams in batches of ${BATCH_SIZE}...`);
   
   const results = {
     total: NUM_TEAMS,
@@ -79,23 +116,30 @@ async function runStressTest() {
       }
     });
 
-    console.log(`Progress: ${Math.min(i + BATCH_SIZE, NUM_TEAMS)} / ${NUM_TEAMS} completed.`);
+    const done = Math.min(i + BATCH_SIZE, NUM_TEAMS);
+    const pct = Math.round((done / NUM_TEAMS) * 100);
+    console.log(`  Progress: ${done}/${NUM_TEAMS} (${pct}%) — Success: ${results.success} | Failed: ${results.failed}`);
   }
 
   const totalTime = Date.now() - startTime;
-  const avgTime = results.times.length ? results.times.reduce((a, b) => a + b, 0) / results.times.length : 0;
+  const avgTime = results.times.length
+    ? results.times.reduce((a, b) => a + b, 0) / results.times.length
+    : 0;
 
   console.log('\n--- STRESS TEST RESULTS ---');
-  console.log(`Total Time: ${(totalTime / 1000).toFixed(2)}s`);
-  console.log(`Successful Registrations: ${results.success}`);
-  console.log(`Failed Registrations: ${results.failed}`);
+  console.log(`Total Time:               ${(totalTime / 1000).toFixed(2)}s`);
+  console.log(`Successful Registrations: ${results.success} / ${NUM_TEAMS}`);
+  console.log(`Failed Registrations:     ${results.failed} / ${NUM_TEAMS}`);
   if (results.success > 0) {
-    console.log(`Average API Response Time: ${Math.round(avgTime)}ms`);
-    console.log(`Max API Response Time: ${Math.max(...results.times)}ms`);
-    console.log(`Min API Response Time: ${Math.min(...results.times)}ms`);
+    console.log(`Average Response Time:    ${Math.round(avgTime)}ms`);
+    console.log(`Max Response Time:        ${Math.max(...results.times)}ms`);
+    console.log(`Min Response Time:        ${Math.min(...results.times)}ms`);
   }
   if (results.failed > 0) {
-    console.log(`Errors encountered:`, results.errors);
+    console.log(`\nErrors encountered:`);
+    Object.entries(results.errors).forEach(([err, count]) => {
+      console.log(`  [${count}x] ${err}`);
+    });
   }
 }
 

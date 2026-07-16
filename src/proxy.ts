@@ -5,9 +5,15 @@ import * as jose from 'jose';
 // We have to use 'jose' in proxy because jsonwebtoken uses Node.js crypto module
 // which is not available in the Edge runtime (used by older middleware setups)
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'fallback_secret_for_development_only'
-);
+// SECURITY: Never use a fallback secret. If JWT_SECRET is missing in production,
+// forged tokens could be accepted. Throw hard to surface the misconfiguration immediately.
+const jwtSecretStr = process.env.JWT_SECRET;
+if (!jwtSecretStr) {
+  throw new Error(
+    'FATAL: JWT_SECRET environment variable is not set. The application cannot start securely.'
+  );
+}
+const secret = new TextEncoder().encode(jwtSecretStr);
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;

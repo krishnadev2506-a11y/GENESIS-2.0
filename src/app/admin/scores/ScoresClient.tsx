@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useDebounce } from '@/hooks/useDebounce';
 import { Search, Plus, Minus, Save } from 'lucide-react';
+import { useToast } from '@/components/ui/Toast';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export function ScoresClient() {
   const [search, setSearch] = useState('');
@@ -19,6 +21,7 @@ export function ScoresClient() {
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
+  const { error } = useToast();
 
   const { data, isLoading } = useQuery({
     queryKey: ['teams', 'scores', page, debouncedSearch],
@@ -50,9 +53,9 @@ export function ScoresClient() {
       queryClient.invalidateQueries({ queryKey: ['teams', 'scores'] });
       setSavingId(null);
     },
-    onError: () => {
+    onError: (err: Error) => {
       setSavingId(null);
-      alert('Failed to save score. Please try again.');
+      error('Failed to save score', getFriendlyErrorMessage(err));
     }
   });
 

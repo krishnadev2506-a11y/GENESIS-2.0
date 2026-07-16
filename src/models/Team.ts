@@ -79,32 +79,35 @@ const TeamSchema = new Schema<ITeam>(
   { timestamps: true }
 );
 
-const Team: Model<ITeam> = mongoose.models.Team || mongoose.model<ITeam>('Team', TeamSchema);
+// BUG FIX: Indexes MUST be defined on the schema BEFORE calling mongoose.model().
+// Previously they were defined after model creation inside an if-block that was
+// never entered after the first module load, so indexes were never registered.
+TeamSchema.index({ 'credentials.username': 1 });
+TeamSchema.index({ email: 1 });
+TeamSchema.index({ paymentStatus: 1 });
+TeamSchema.index({ createdAt: -1 });
 
-// Add indexes for performance optimization
-if (!mongoose.models.Team) {
-  TeamSchema.index({ 'credentials.username': 1 });
-  TeamSchema.index({ email: 1 });
-  TeamSchema.index({ paymentStatus: 1 });
-  TeamSchema.index({ createdAt: -1 });
-  
-  // Compound Text Index for fast admin search
-  TeamSchema.index({ 
-    teamName: 'text', 
-    email: 'text', 
-    college: 'text', 
+// Compound Text Index for fast admin search
+TeamSchema.index(
+  {
+    teamName: 'text',
+    email: 'text',
+    college: 'text',
     contactNumber: 'text',
     'members.name': 'text',
     'members.email': 'text',
-    'members.phone': 'text'
-  }, { 
+    'members.phone': 'text',
+  },
+  {
     name: 'team_search_text_idx',
     weights: {
       teamName: 10,
       email: 5,
-      college: 3
-    }
-  });
-}
+      college: 3,
+    },
+  }
+);
+
+const Team: Model<ITeam> = mongoose.models.Team || mongoose.model<ITeam>('Team', TeamSchema);
 
 export default Team;

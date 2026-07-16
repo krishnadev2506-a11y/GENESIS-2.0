@@ -4,6 +4,12 @@ import Team from '@/models/Team';
 import DeletedTeam from '@/models/DeletedTeam';
 import { requireAuth } from '@/lib/auth';
 
+// Allowlist of valid sort fields to prevent NoSQL/field injection
+const ALLOWED_SORT_FIELDS = new Set([
+  'createdAt', 'updatedAt', 'teamName', 'college',
+  'paymentStatus', 'scoreboardPoints', 'checkedIn',
+]);
+
 export async function GET(req: NextRequest) {
   try {
     await connectDB();
@@ -16,25 +22,33 @@ export async function GET(req: NextRequest) {
     const checkedIn = searchParams.get('checkedIn');
     const isDeleted = searchParams.get('deleted') === 'true';
     
-    const sortBy = searchParams.get('sortBy') || 'createdAt';
+    // Validate sortBy against allowlist to prevent field injection
+    const rawSortBy = searchParams.get('sortBy') || 'createdAt';
+    const sortBy = ALLOWED_SORT_FIELDS.has(rawSortBy) ? rawSortBy : 'createdAt';
     const sortOrder = searchParams.get('sortOrder') === 'asc' ? 1 : -1;
     
-    const page = parseInt(searchParams.get('page') || '1', 10);
-    const limit = parseInt(searchParams.get('limit') || '20', 10);
+    // Clamp page and limit to sane values
+    const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
+    const limit = Math.min(200, Math.max(1, parseInt(searchParams.get('limit') || '20', 10)));
     const skip = (page - 1) * limit;
     
     const query: Record<string, unknown> = {};
     
     if (search) {
-      // Use the newly created text index for lighting fast search
+      // Use the text index for fast search
       query.$text = { $search: search };
     }
     
     if (paymentStatus) {
-      query.paymentStatus = paymentStatus;
+      // Allowlist valid payment statuses
+      const validStatuses = ['pending_verification', 'verified', 'rejected'];
+      if (validStatuses.includes(paymentStatus)) {
+        query.paymentStatus = paymentStatus;
+      }
     }
     
-    if (checkedIn !== null) {
+    // Bug fix: check for non-empty string before applying filter
+    if (checkedIn !== null && checkedIn !== '') {
       query.checkedIn = checkedIn === 'true';
     }
     
@@ -75,4 +89,3 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-

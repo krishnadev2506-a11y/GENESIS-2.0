@@ -10,6 +10,8 @@ import { useToast } from '@/components/ui/Toast';
 import { slideLeft, slideRight } from '@/lib/motion-variants';
 import { useRouter } from 'next/navigation';
 import { z } from 'zod';
+import { AlertError } from '@/components/ui/AlertError';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 const step1Schema = z.object({
   teamName: z.string().min(2, "Team name must be at least 2 characters").max(50),
@@ -60,7 +62,7 @@ export function RegistrationWizard() {
       try {
         step1Schema.parse({ teamName: formData.teamName });
       } catch (err: any) {
-        setFormError(err.errors?.[0]?.message || err.message || 'Invalid input');
+        setFormError(getFriendlyErrorMessage(err.errors?.[0]?.message || err.message || 'Invalid input'));
         return;
       }
       
@@ -90,7 +92,7 @@ export function RegistrationWizard() {
     if (step === 2) {
       const leaderCount = formData.members.filter(m => m.isLeader).length;
       if (leaderCount !== 1) {
-        setFormError('Please select exactly one Team Leader');
+        setFormError('Every team needs exactly one designated Team Leader. Please select one.');
         return;
       }
 
@@ -98,7 +100,7 @@ export function RegistrationWizard() {
         try {
           memberSchema.parse(formData.members[i]);
         } catch (err: any) {
-          setFormError(`Participant ${i + 1}: ${err.errors?.[0]?.message || err.message || 'Invalid input'}`);
+          setFormError(`Participant ${i + 1}: ${getFriendlyErrorMessage(err.errors?.[0]?.message || err.message)}`);
           return;
         }
       }
@@ -131,53 +133,75 @@ export function RegistrationWizard() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setIsLoading(true);
-      try {
-        const options = {
-          maxSizeMB: 1,
-          maxWidthOrHeight: 1920,
-          useWebWorker: true,
-        };
-        const compressedFile = await imageCompression(file, options);
+    if (!file) return;
 
-        const sigRes = await fetch('/api/cloudinary/sign', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ folder: 'genesis2.0/payments' })
-        });
-        
-        if (!sigRes.ok) throw new Error('Failed to get signature');
-        const { timestamp, signature, api_key, cloud_name, folder } = await sigRes.json();
+    // --- Client-side validation before hitting the server ---
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    const MAX_FILE_BYTES = 10 * 1024 * 1024; // 10 MB raw limit
 
-        const uploadData = new FormData();
-        uploadData.append('file', compressedFile);
-        uploadData.append('api_key', api_key);
-        uploadData.append('timestamp', timestamp.toString());
-        uploadData.append('signature', signature);
-        uploadData.append('folder', folder);
+    if (!ALLOWED_TYPES.includes(file.type)) {
+      setFormError('Only JPG, PNG, WebP or GIF images are accepted as payment screenshots.');
+      e.target.value = ''; // Reset the input
+      return;
+    }
 
-        const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
-          method: 'POST',
-          body: uploadData,
-        });
+    if (file.size > MAX_FILE_BYTES) {
+      setFormError('The image is too large (max 10 MB). Please compress it and try again.');
+      e.target.value = '';
+      return;
+    }
 
-        if (!uploadRes.ok) throw new Error('Failed to upload image');
-        const result = await uploadRes.json();
+    setIsLoading(true);
+    setFormError(null);
+    try {
+      // Compress aggressively — 300 KB is plenty for a payment screenshot
+      const options = {
+        maxSizeMB: 0.3,
+        maxWidthOrHeight: 1280,
+        useWebWorker: true,
+        fileType: 'image/jpeg' as const,
+      };
+      const compressedFile = await imageCompression(file, options);
 
-        setFormData(prev => ({
-          ...prev,
-          paymentScreenshotUrl: result.secure_url,
-          paymentScreenshotPublicId: result.public_id
-        }));
-        setFormError(null);
-        success('Success', 'File uploaded successfully');
-      } catch (err) {
-        setFormError('Failed to upload file');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+      const sigRes = await fetch('/api/cloudinary/sign', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ folder: 'genesis2.0/payments' })
+      });
+      
+      if (!sigRes.ok) {
+        if (sigRes.status === 401) throw new Error('Your session has expired. Please refresh the page and try again.');
+        throw new Error('Failed to get upload signature');
       }
+      const { timestamp, signature, api_key, cloud_name, folder } = await sigRes.json();
+
+      const uploadData = new FormData();
+      uploadData.append('file', compressedFile);
+      uploadData.append('api_key', api_key);
+      uploadData.append('timestamp', timestamp.toString());
+      uploadData.append('signature', signature);
+      uploadData.append('folder', folder);
+
+      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
+        method: 'POST',
+        body: uploadData,
+      });
+
+      if (!uploadRes.ok) throw new Error('Failed to upload image');
+      const result = await uploadRes.json();
+
+      setFormData(prev => ({
+        ...prev,
+        paymentScreenshotUrl: result.secure_url,
+        paymentScreenshotPublicId: result.public_id
+      }));
+      setFormError(null);
+      success('Uploaded', 'Payment screenshot uploaded successfully.');
+    } catch (err: any) {
+      setFormError(err?.message || getFriendlyErrorMessage('Failed to upload'));
+      console.error(err);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -185,7 +209,7 @@ export function RegistrationWizard() {
     e.preventDefault();
     setFormError(null);
     if (!formData.transactionId || !formData.paymentScreenshotUrl) {
-      setFormError('Please provide payment details');
+      setFormError('Please upload a payment screenshot and enter the transaction ID.');
       return;
     }
 
@@ -219,11 +243,11 @@ export function RegistrationWizard() {
         success('Registration submitted!', 'Your team is registered. Wait for verification email.');
         setTimeout(() => router.push('/'), 2000);
       } else {
-        setFormError(data.error || 'Unknown error during registration');
+        setFormError(getFriendlyErrorMessage(data.error || 'Unknown error during registration'));
       }
     } catch (err: any) {
       console.error('Submission error:', err);
-      setFormError(err.message || 'An error occurred during registration');
+      setFormError(getFriendlyErrorMessage(err));
     } finally {
       setIsLoading(false);
     }
@@ -253,26 +277,7 @@ export function RegistrationWizard() {
       </div>
 
       <GlassCard hoverEffect={true} className="overflow-hidden relative min-h-[400px] max-w-2xl mx-auto">
-        <AnimatePresence>
-          {formError && (
-            <m.div 
-              initial={{ opacity: 0, y: -10 }} 
-              animate={{ opacity: 1, y: 0 }} 
-              exit={{ opacity: 0 }}
-              className="mb-6 p-4 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-3"
-            >
-              <div className="mt-0.5 text-danger">
-                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div>
-                <h4 className="text-sm font-bold text-danger">Registration Error</h4>
-                <p className="text-sm text-danger/80">{formError}</p>
-              </div>
-            </m.div>
-          )}
-        </AnimatePresence>
+        <AlertError error={formError} title="Registration Error" />
         
         <AnimatePresence mode="wait" custom={direction}>
           {step === 1 && (

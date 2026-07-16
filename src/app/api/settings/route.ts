@@ -3,16 +3,21 @@ import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 import { requireAuth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     await connectDB();
+    // Settings contain sensitive data (QR code, email templates, fee amounts)
+    // — restrict to admin only.
+    await requireAuth(req, 'admin');
     
-    // Use the static method we defined to get or create defaults
     // @ts-ignore - mongoose static method typing issues
     const settings = await Settings.getSettings();
     
     return NextResponse.json(settings);
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message === 'Authentication required' || error.message === 'Insufficient permissions') {
+      return NextResponse.json({ error: error.message }, { status: 403 });
+    }
     console.error('Settings GET error:', error);
     return NextResponse.json({ error: 'Failed to fetch settings' }, { status: 500 });
   }

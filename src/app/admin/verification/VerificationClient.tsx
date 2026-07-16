@@ -7,6 +7,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export function VerificationClient() {
   const queryClient = useQueryClient();
@@ -31,7 +32,7 @@ export function VerificationClient() {
       queryClient.invalidateQueries({ queryKey: ['teams', 'pending'] });
       success('Success', 'Team successfully verified!');
     },
-    onError: (err: Error) => error('Error', err.message)
+    onError: (err: Error) => error('Error', getFriendlyErrorMessage(err))
   });
 
   const rejectMutation = useMutation({
@@ -44,7 +45,7 @@ export function VerificationClient() {
       queryClient.invalidateQueries({ queryKey: ['teams', 'pending'] });
       success('Success', 'Team payment rejected.');
     },
-    onError: (err: Error) => error('Error', err.message)
+    onError: (err: Error) => error('Error', getFriendlyErrorMessage(err))
   });
 
   if (isLoading) {

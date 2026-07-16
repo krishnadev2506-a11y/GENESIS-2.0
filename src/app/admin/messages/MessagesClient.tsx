@@ -5,6 +5,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export function MessagesClient() {
   const { success, error } = useToast();
@@ -40,7 +41,7 @@ export function MessagesClient() {
       setSubject(''); setBody(''); setTargetParticipantEmail(''); setTargetTeamId('');
       setSendEmail(false);
     },
-    onError: (err: Error) => error('Error', err.message)
+    onError: (err: Error) => error('Error', getFriendlyErrorMessage(err))
   });
 
   const handleSubmit = (e: React.FormEvent) => {

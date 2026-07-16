@@ -1,8 +1,6 @@
-'use client';
-
 import { GlassCard } from '@/components/ui/GlassCard';
-import { m } from 'framer-motion';
-import { fadeUp, staggerContainer } from '@/lib/motion-variants';
+import { StaggerContainer } from '@/components/ui/StaggerContainer';
+import { FadeUp } from '@/components/ui/FadeUp';
 
 const processItems = [
   {
@@ -58,25 +56,19 @@ export function About() {
       <div className="section-glow left-[-10rem] top-[4rem] opacity-70" />
       <div className="section-glow right-[-8rem] bottom-[10rem] opacity-60" />
 
-      <m.div
-        variants={staggerContainer}
-        initial="hidden"
-        whileInView="visible"
-        viewport={{ once: true, margin: '0px' }}
-        className="space-y-16"
-      >
+      <StaggerContainer className="space-y-16">
         <div className="mx-auto max-w-3xl text-center">
-          <m.h2 variants={fadeUp as any} className="text-3xl md:text-5xl font-display font-bold text-white uppercase tracking-[0.16em]">
+          <FadeUp as="h2" className="text-3xl md:text-5xl font-display font-bold text-white uppercase tracking-[0.16em]">
             The Process
-          </m.h2>
-          <m.p variants={fadeUp as any} className="mt-5 text-text-muted text-lg">
+          </FadeUp>
+          <FadeUp as="p" className="mt-5 text-text-muted text-lg">
             A clean, high-energy path from team formation to launch, wrapped in the same cosmic system as the hero.
-          </m.p>
+          </FadeUp>
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {processItems.map((item) => (
-            <m.div key={item.num} variants={fadeUp as any}>
+            <FadeUp key={item.num}>
               <GlassCard hoverEffect className="h-full p-8">
                 <div className="mb-5 flex items-center gap-4">
                   <span className="text-6xl font-display font-bold text-transparent" style={{ WebkitTextStroke: '1.6px rgba(196,181,253,0.8)' }}>
@@ -87,12 +79,12 @@ export function About() {
                 <h3 className="text-2xl font-display font-bold text-white mb-3 uppercase tracking-[0.08em]">{item.title}</h3>
                 <p className="text-text-muted leading-7">{item.desc}</p>
               </GlassCard>
-            </m.div>
+            </FadeUp>
           ))}
         </div>
 
         <div className="grid grid-cols-1 gap-6 md:grid-cols-4 auto-rows-[250px]">
-          <m.div variants={fadeUp as any} className="md:col-span-2 md:row-span-2">
+          <FadeUp className="md:col-span-2 md:row-span-2">
             <GlassCard hoverEffect className="h-full flex flex-col justify-end p-8 md:p-10">
               <div className="mb-auto flex h-14 w-14 items-center justify-center rounded-[18px] border border-[rgba(167,139,250,0.3)] bg-[rgba(139,92,246,0.12)]">
                 <svg className="w-7 h-7 text-accent-secondary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,10 +95,10 @@ export function About() {
               <h3 className="mb-4 text-4xl font-display font-bold text-white uppercase tracking-[0.08em]">High-Tech Environment</h3>
               <p className="text-lg text-text-muted leading-8">Immerse yourself in a simulated product environment where teamwork, motion, glow, and pace all reinforce the brand.</p>
             </GlassCard>
-          </m.div>
+          </FadeUp>
 
           {features.map((feature) => (
-            <m.div key={feature.title} variants={fadeUp as any} className={feature.title === 'Role-Based Teamwork' ? 'md:col-span-2' : ''}>
+            <FadeUp key={feature.title} className={feature.title === 'Role-Based Teamwork' ? 'md:col-span-2' : ''}>
               <GlassCard hoverEffect className="h-full flex flex-col justify-center p-8">
                 <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-[16px] border border-[rgba(167,139,250,0.24)] bg-[rgba(139,92,246,0.1)]">
                   {feature.icon}
@@ -114,10 +106,10 @@ export function About() {
                 <h3 className="mb-2 text-xl font-display font-bold text-white uppercase tracking-[0.06em]">{feature.title}</h3>
                 <p className="text-text-muted">{feature.desc}</p>
               </GlassCard>
-            </m.div>
+            </FadeUp>
           ))}
         </div>
-      </m.div>
+      </StaggerContainer>
     </section>
   );
 }

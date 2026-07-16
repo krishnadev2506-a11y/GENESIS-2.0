@@ -6,6 +6,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export function ScheduleClient() {
   const queryClient = useQueryClient();
@@ -41,7 +42,7 @@ export function ScheduleClient() {
       success('Success', 'Event added to schedule!');
       setTime(''); setEventName(''); setSpeaker(''); setOrder('');
     },
-    onError: (err: Error) => error('Error', err.message)
+    onError: (err: Error) => error('Error', getFriendlyErrorMessage(err))
   });
 
   const deleteMutation = useMutation({
@@ -53,7 +54,8 @@ export function ScheduleClient() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['schedule'] });
       success('Success', 'Event deleted.');
-    }
+    },
+    onError: (err: Error) => error('Error', getFriendlyErrorMessage(err))
   });
 
   const handleSubmit = (e: React.FormEvent) => {

@@ -7,6 +7,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
 import { useToast } from '@/components/ui/Toast';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export function SettingsClient() {
   const queryClient = useQueryClient();
@@ -61,7 +62,7 @@ export function SettingsClient() {
       queryClient.invalidateQueries({ queryKey: ['settings'] });
       success('Success', 'Settings updated successfully!');
     },
-    onError: (err: Error) => error('Error', err.message)
+    onError: (err: Error) => error('Error', getFriendlyErrorMessage(err))
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

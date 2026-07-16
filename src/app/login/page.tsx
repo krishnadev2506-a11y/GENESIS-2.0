@@ -6,9 +6,11 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { m, AnimatePresence } from 'framer-motion';
+import { m } from 'framer-motion';
 import { fadeUp } from '@/lib/motion-variants';
 import { BrandWordmark } from '@/components/brand/BrandWordmark';
+import { AlertError } from '@/components/ui/AlertError';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export default function LoginPage() {
   const [identifier, setIdentifier] = useState('');
@@ -31,11 +33,11 @@ export default function LoginPage() {
     
     let hasError = false;
     if (!identifier) {
-      setIdentifierError('Username or Email is required');
+      setIdentifierError('Please enter your username or email address.');
       hasError = true;
     }
     if (!password) {
-      setPasswordError('Password is required');
+      setPasswordError('Please enter your password.');
       hasError = true;
     }
     
@@ -59,18 +61,19 @@ export default function LoginPage() {
         }
         // Do not set isLoading to false on success, so the spinner stays while navigating
       } else {
-        if (data.error.toLowerCase().includes('password')) {
-          setPasswordError(data.error);
-        } else if (data.error.toLowerCase().includes('identifier') || data.error.toLowerCase().includes('user') || data.error.toLowerCase().includes('credentials')) {
-          setIdentifierError(data.error);
-          setPasswordError(data.error);
+        if (data.error && data.error.toLowerCase().includes('password')) {
+          setPasswordError(getFriendlyErrorMessage(data.error));
+        } else if (data.error && (data.error.toLowerCase().includes('identifier') || data.error.toLowerCase().includes('user') || data.error.toLowerCase().includes('credentials'))) {
+          const friendly = getFriendlyErrorMessage(data.error);
+          setIdentifierError(friendly);
+          setPasswordError(friendly);
         } else {
-          setGeneralError(data.error || 'Login failed');
+          setGeneralError(getFriendlyErrorMessage(data.error || 'Login failed'));
         }
         setIsLoading(false); // Only stop loading if there is an error
       }
-    } catch {
-      setGeneralError('An error occurred during login. Please try again.');
+    } catch (err) {
+      setGeneralError(getFriendlyErrorMessage(err));
       setIsLoading(false); // Only stop loading if there is an error
     }
   };
@@ -90,26 +93,7 @@ export default function LoginPage() {
             <h1 className="mb-2 text-center text-xl font-display font-bold uppercase tracking-[0.08em] text-white sm:text-2xl sm:tracking-[0.12em]">Login</h1>
             <p className="mb-6 text-center text-sm text-text-muted sm:mb-8">Access your dashboard</p>
             
-            <AnimatePresence>
-              {generalError && (
-                <m.div 
-                  initial={{ opacity: 0, y: -10 }} 
-                  animate={{ opacity: 1, y: 0 }} 
-                  exit={{ opacity: 0 }}
-                  className="mb-6 p-4 rounded-xl bg-danger/10 border border-danger/20 flex items-start gap-3"
-                >
-                  <div className="mt-0.5 text-danger">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-danger">Login Error</h4>
-                    <p className="text-sm text-danger/80">{generalError}</p>
-                  </div>
-                </m.div>
-              )}
-            </AnimatePresence>
+            <AlertError error={generalError} title="Login Error" />
             
             <form onSubmit={handleLogin} className="space-y-5 sm:space-y-6">
               <Input

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/Button';
 import { Badge } from '@/components/ui/Badge';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useToast } from '@/components/ui/Toast';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export function CheckInClient() {
   const [search, setSearch] = useState('');
@@ -45,7 +46,7 @@ export function CheckInClient() {
       queryClient.invalidateQueries({ queryKey: ['teams', 'checkin'] });
       success('Success', 'Team successfully checked in!');
     },
-    onError: (err: Error) => error('Error', err.message)
+    onError: (err: Error) => error('Error', getFriendlyErrorMessage(err))
   });
 
   return (

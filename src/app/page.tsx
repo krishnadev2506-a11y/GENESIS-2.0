@@ -1,6 +1,7 @@
 import { Hero } from '@/components/home/Hero';
 import { SpaceDust } from '@/components/home/SpaceDust';
 import dynamic from 'next/dynamic';
+import { LazyLoadSection } from '@/components/ui/LazyLoadSection';
 
 const About = dynamic(() => import('@/components/home/About').then(mod => mod.About), { ssr: true });
 const SkillUpSessions = dynamic(() => import('@/components/home/SkillUpSessions').then(mod => mod.SkillUpSessions), { ssr: true });
@@ -14,13 +15,22 @@ export default function Home() {
     <main className="cosmic-page flex-grow flex flex-col pb-16 overflow-hidden relative">
       <SpaceDust />
       <Hero />
-      <About />
-      <SkillUpSessions />
-      <CompetitionsGames />
-      <SchedulePreview />
-      <RegistrationCTA />
+      <LazyLoadSection minHeight="800px">
+        <About />
+      </LazyLoadSection>
+      <LazyLoadSection minHeight="600px">
+        <SkillUpSessions />
+      </LazyLoadSection>
+      <LazyLoadSection minHeight="500px">
+        <CompetitionsGames />
+      </LazyLoadSection>
+      <LazyLoadSection minHeight="400px">
+        <SchedulePreview />
+      </LazyLoadSection>
+      <LazyLoadSection minHeight="400px">
+        <RegistrationCTA />
+      </LazyLoadSection>
       <Footer />
     </main>
   );
 }
-

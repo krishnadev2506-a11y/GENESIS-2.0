@@ -5,8 +5,20 @@ import { sendRegistrationReceived, sendAdminRegistrationAlert } from '@/lib/mail
 import { z } from 'zod';
 import { teamRegistrationSchema } from '@/lib/validations/team';
 
+// Max request body size: 1MB. Prevents memory exhaustion from huge payloads.
+const MAX_BODY_BYTES = 1 * 1024 * 1024;
+
 export async function POST(req: NextRequest) {
   try {
+    // Guard against oversized payloads before reading the body
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength, 10) > MAX_BODY_BYTES) {
+      return NextResponse.json(
+        { error: 'Request payload is too large.' },
+        { status: 413 }
+      );
+    }
+
     await connectDB();
     
     const body = await req.json();
@@ -14,20 +26,13 @@ export async function POST(req: NextRequest) {
     // Validate input using centralized Zod schema
     const validatedData = teamRegistrationSchema.parse(body);
     
-    // Check duplicates
+    // Check for duplicate team name (case-insensitive)
     const existingTeam = await Team.findOne({
-      teamName: { $regex: new RegExp(`^${validatedData.teamName}$`, 'i') }
+      teamName: { $regex: new RegExp(`^${validatedData.teamName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') }
     });
     
     if (existingTeam) {
-      return NextResponse.json({ error: 'Team name already taken' }, { status: 400 });
-    }
-    
-    // Ensure the old unique email index is dropped so duplicate emails are allowed
-    try {
-      await Team.collection.dropIndex('email_1');
-    } catch (e) {
-      // Ignore if index doesn't exist
+      return NextResponse.json({ error: 'Team name already taken. Please choose a different name.' }, { status: 400 });
     }
     
     // Create team
@@ -37,7 +42,7 @@ export async function POST(req: NextRequest) {
       registrationStatus: 'submitted',
     });
     
-    // Send email (await it to ensure serverless functions don't terminate prematurely)
+    // Send emails (await to prevent premature serverless termination)
     try {
       const allMemberEmails = validatedData.members.map(m => m.email).filter(Boolean);
       await Promise.allSettled([

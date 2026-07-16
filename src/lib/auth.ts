@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 
 export interface AuthPayload {
@@ -40,13 +41,16 @@ export async function comparePassword(plain: string, hash: string): Promise<bool
 
 export function generateCredentials(teamName: string): { username: string; password: string } {
   const usernameBase = teamName.toLowerCase().replace(/[^a-z0-9]/g, '');
-  const randomSuffix = Math.floor(1000 + Math.random() * 9000).toString();
+  // Use crypto for a cryptographically secure 4-digit suffix
+  const randomSuffix = (crypto.randomBytes(2).readUInt16BE(0) % 9000 + 1000).toString();
   const username = `${usernameBase}${randomSuffix}`;
   
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  // Generate a 12-char password from a safe alphabet using crypto
+  const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  const bytes = crypto.randomBytes(12);
   let password = '';
-  for (let i = 0; i < 10; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (let i = 0; i < 12; i++) {
+    password += alphabet[bytes[i] % alphabet.length];
   }
   
   return { username, password };

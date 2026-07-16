@@ -203,6 +203,16 @@ h1, h2, h3, h4, h5, h6, .font-display {
   animation: twinkle 5s ease-in-out infinite;
 }
 
+@keyframes dust-float-0 {
+  0% { transform: translateY(0vh) translateX(0px); }
+  100% { transform: translateY(-100vh) translateX(80px); }
+}
+
+@keyframes dust-float-1 {
+  0% { transform: translateY(0vh) translateX(0px); }
+  100% { transform: translateY(-100vh) translateX(-80px); }
+}
+
 @media (max-width: 640px) {
   body::before {
     opacity: 0.05;

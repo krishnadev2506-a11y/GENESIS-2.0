@@ -10,6 +10,8 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useDebounce } from '@/hooks/useDebounce';
+import { useToast } from '@/components/ui/Toast';
+import { getFriendlyErrorMessage } from '@/lib/errors';
 
 export function TeamsClient() {
   const [page, setPage] = useState(1);
@@ -23,6 +25,7 @@ export function TeamsClient() {
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
+  const { error: toastError, success } = useToast();
   
   const debouncedSearch = useDebounce(search, 500);
 
@@ -54,9 +57,10 @@ export function TeamsClient() {
       setSelectedTeam(data.team);
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['teams'] });
+      success('Team Updated', 'The team details have been updated.');
     } catch (error) {
       console.error(error);
-      alert('Failed to update team');
+      toastError('Update Failed', getFriendlyErrorMessage(error));
     } finally {
       setIsSaving(false);
     }
@@ -94,9 +98,10 @@ export function TeamsClient() {
       setSelectedTeam(null);
       setIsEditing(false);
       queryClient.invalidateQueries({ queryKey: ['teams'] });
+      success('Team Deleted', 'The team has been successfully deleted.');
     } catch (error) {
       console.error(error);
-      alert('Failed to delete team');
+      toastError('Delete Failed', getFriendlyErrorMessage(error));
     } finally {
       setIsDeleting(false);
     }
@@ -153,7 +158,7 @@ export function TeamsClient() {
         {isLoading ? (
           <div className="py-20 flex justify-center"><LoadingSpinner size="lg" /></div>
         ) : error ? (
-          <EmptyState title="Error Loading Teams" description={(error as Error).message} />
+          <EmptyState title="Error Loading Teams" description={getFriendlyErrorMessage(error)} />
         ) : data?.teams?.length === 0 ? (
           <EmptyState title="No Teams Found" description="Try adjusting your search or filters." />
         ) : (
@@ -348,16 +353,12 @@ export function TeamsClient() {
                                     const res = await fetch(`/api/teams/${selectedTeam._id}/reset-credentials`, { method: 'POST' });
                                     if (!res.ok) throw new Error('Failed to reset credentials');
                                     const data = await res.json();
-                                    alert("Credentials reset and email sent successfully!");
-                                    // Let TeamsClient handle setSelectedTeam state by passing it the updated team
+                                    success("Credentials Reset", "New credentials have been generated and emailed successfully.");
                                     if (data.team) {
-                                      // It's a bit hacky to use a global window function, but in React we should trigger a state update.
-                                      // Since we are inside the component render method, we can't directly call setSelectedTeam here without closures, 
-                                      // but wait, we ARE inside the render method so we HAVE access to setSelectedTeam!
                                       setSelectedTeam(data.team);
                                     }
                                   } catch (err) {
-                                    alert("Error resetting credentials. Check console.");
+                                    toastError("Reset Failed", getFriendlyErrorMessage(err));
                                   } finally {
                                     btn.disabled = false;
                                     btn.innerText = originalText;

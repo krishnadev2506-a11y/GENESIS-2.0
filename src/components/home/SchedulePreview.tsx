@@ -1,8 +1,7 @@
 import { connectDB } from '@/lib/db';
 import ScheduleItem from '@/models/ScheduleItem';
 import Link from 'next/link';
-import { unstable_noStore as noStore } from 'next/cache';
-
+export const revalidate = 60; // Revalidate every minute
 interface ScheduleItemRecord {
   _id: string;
   day: 1 | 2;
@@ -13,7 +12,6 @@ interface ScheduleItemRecord {
 }
 
 export async function SchedulePreview() {
-  noStore();
 
   let items: ScheduleItemRecord[] = [];
   let loadError = false;
