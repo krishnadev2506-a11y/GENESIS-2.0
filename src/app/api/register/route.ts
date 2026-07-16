@@ -62,7 +62,7 @@ export async function POST(req: NextRequest) {
       const allMemberEmails = validatedData.members.map(m => m.email).filter(Boolean);
       await Promise.allSettled([
         sendRegistrationReceived(allMemberEmails, validatedData.teamName),
-        sendAdminRegistrationAlert(validatedData.teamName, validatedData.college, validatedData.members.length)
+        sendAdminRegistrationAlert(validatedData.teamName, validatedData.college || 'N/A', validatedData.members.length)
       ]);
       } catch (err) {
         logger.error('Failed to send registration email', err);
