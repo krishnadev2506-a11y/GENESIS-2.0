@@ -38,7 +38,8 @@ export async function PATCH(
     const emailBody = `Hi Team ${team.teamName},\n\nWe encountered an issue while verifying your payment for GENESIS 2.0.\n\nReason: ${reason}\n\nPlease reply to this email or contact the organizers to resolve this issue and complete your registration.\n\nBest regards,\nThe GENESIS 2.0 Team`;
     
     try {
-      await sendAdminMessage(team.email, subject, emailBody);
+      const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
+      await Promise.allSettled(allMemberEmails.map(email => sendAdminMessage(email, subject, emailBody)));
     } catch (err) {
       console.error('Failed to send rejection email:', err);
     }

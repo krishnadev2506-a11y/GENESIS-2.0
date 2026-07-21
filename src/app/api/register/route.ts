@@ -53,7 +53,7 @@ export async function POST(req: NextRequest) {
     // Strip foodPreference from members if food is not required
     const processedMembers = validatedData.members.map(member => {
       if (!validatedData.foodRequired) {
-        const { foodPreference, ...rest } = member;
+        const { foodPreference: _foodPreference, ...rest } = member;
         return rest;
       }
       return member;

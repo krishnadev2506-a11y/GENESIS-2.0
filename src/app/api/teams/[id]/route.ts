@@ -100,11 +100,11 @@ export async function DELETE(
     }
     
     const teamData = team.toObject();
-    
+
     // Archive the team data before deleting
     await DeletedTeam.create({
       ...teamData,
-      _id: undefined, // Let MongoDB generate a new ID or keep the old one? Better to keep it or just omit. Actually, keeping the old _id can be useful.
+      deletedAt: new Date(),
     });
     
     await Team.findByIdAndDelete(id);

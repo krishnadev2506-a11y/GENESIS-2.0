@@ -39,7 +39,7 @@ export function RegistrationCTA() {
               </Button>
             </Link>
             <a
-              href="/rulebook.pdf"
+              href="/rulebook.html"
               target="_blank"
               rel="noopener noreferrer"
               id="cta-rulebook-btn"

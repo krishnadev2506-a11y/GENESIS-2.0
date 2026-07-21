@@ -62,8 +62,6 @@ export async function SchedulePreview() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
             </div>
-            <h3 className="mb-2 text-xl font-display font-semibold text-white">No schedule planned yet</h3>
-            <p className="mb-6 max-w-sm text-text-muted">We are still working on the event agenda. Please check back soon.</p>
           </div>
         ) : (
           <div className="divide-y divide-white/10">

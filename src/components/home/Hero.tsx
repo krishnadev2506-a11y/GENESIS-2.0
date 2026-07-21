@@ -115,25 +115,18 @@ export function Hero() {
           initial="hidden"
           animate="visible"
         >
-          {/* Event badge */}
-          <m.div variants={fadeUp} className="mb-8 inline-flex items-center gap-2 rounded-full border border-[rgba(167,139,250,0.3)] bg-[rgba(139,92,246,0.1)] px-4 py-2">
-            <span className="h-1.5 w-1.5 rounded-full bg-accent-primary animate-pulse" />
-            <span className="text-xs font-semibold uppercase tracking-[0.28em] text-accent-secondary">Buildathon 2026</span>
-          </m.div>
-
           <m.h1 variants={fadeUp} className="mb-6">
             <BrandWordmark className="text-[2.5rem] sm:text-7xl lg:text-[6rem] tracking-[0.15em] sm:tracking-[0.2em] lg:tracking-[0.22em] leading-none text-transparent bg-clip-text bg-gradient-to-br from-[#c4b5fd] via-white to-[#a855f7]" />
           </m.h1>
 
           <m.p
-            variants={fadeUp}
-            className="mb-12 text-lg sm:text-xl lg:text-2xl font-light text-text-muted tracking-wide font-body leading-relaxed max-w-2xl drop-shadow-sm"
+            variants={fadeUp as any}
+            className="mx-auto mt-5 max-w-3xl text-base leading-7 text-text-muted sm:mt-6 sm:text-xl sm:leading-8 lg:text-2xl uppercase tracking-wider"
           >
-            Build.Innovate.Compete.Win
+            CODE THE FUTURE, CODE THE IMPOSSIBLE
           </m.p>
 
-          {/* Event meta */}
-          <m.div variants={fadeUp} className="mb-14 flex flex-wrap justify-center gap-5 sm:gap-16">
+          <m.div variants={fadeUp} className="mb-14 mt-10 flex flex-wrap justify-center gap-5 sm:gap-16">
             <div className="flex flex-col items-center">
               <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Date</span>
               <span className="mt-1 text-base font-semibold text-white">August 7 & 8</span>
@@ -155,7 +148,7 @@ export function Hero() {
               <Button size="lg" variant="primary" className="w-full sm:w-auto min-w-[160px] h-14 flex items-center justify-center">Register Now</Button>
             </Link>
             <a
-              href="/rulebook.pdf"
+              href="/rulebook.html"
               target="_blank"
               rel="noopener noreferrer"
               className="w-full sm:w-auto"

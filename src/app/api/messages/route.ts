@@ -60,11 +60,11 @@ export async function POST(req: NextRequest) {
     // Optional: send email as well
     if (sendEmail) {
       if (scope === 'broadcast') {
-        const teams = await Team.find({ registrationStatus: 'confirmed' }).select('email').lean();
-        const emails = teams.map(t => t.email);
+        const teams = await Team.find({ registrationStatus: 'confirmed' }).select('members').lean();
+        // Collect all member emails from all confirmed teams, deduplicate
+        const emails = Array.from(new Set(teams.flatMap(t => t.members?.map((m: any) => m.email) || []).filter(Boolean)));
         
         // Use batch sending to avoid rate limits and timeouts during stress testing
-        // Resend allows up to 100 emails per batch
         const chunkSize = 100;
         const chunks = [];
         for (let i = 0; i < emails.length; i += chunkSize) {

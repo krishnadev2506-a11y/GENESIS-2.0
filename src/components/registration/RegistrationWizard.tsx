@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { m, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
@@ -41,18 +42,34 @@ export function RegistrationWizard() {
 
   const [settings, setSettings] = useState<any>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
+  const [settingsError, setSettingsError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/settings/public')
-      .then(res => res.json())
-      .then(data => {
-        setSettings(data);
-        setSettingsLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setSettingsLoading(false);
-      });
+    const controller = new AbortController();
+
+    async function loadSettings() {
+      try {
+        const response = await fetch('/api/settings/public', { signal: controller.signal });
+        const contentType = response.headers.get('content-type') || '';
+
+        if (!response.ok || !contentType.includes('application/json')) {
+          throw new Error('Registration details are temporarily unavailable.');
+        }
+
+        setSettings(await response.json());
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          setSettingsError('We could not load the registration details. Please refresh the page and try again.');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setSettingsLoading(false);
+        }
+      }
+    }
+
+    loadSettings();
+    return () => controller.abort();
   }, []);
 
   // Basic state for the form
@@ -289,13 +306,16 @@ export function RegistrationWizard() {
         body: JSON.stringify(submissionPayload),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get('content-type') || '';
+      const data = contentType.includes('application/json')
+        ? await response.json()
+        : null;
 
       if (response.ok) {
         success('Registration submitted!', 'Your team is registered. Wait for verification email.');
         setTimeout(() => router.push('/'), 2000);
       } else {
-        setFormError(getFriendlyErrorMessage(data.error || 'Unknown error during registration'));
+        setFormError(getFriendlyErrorMessage(data?.error || 'The server returned an unexpected response. Please try again.'));
       }
     } catch (err: any) {
       console.error('Submission error:', err);
@@ -335,6 +355,17 @@ export function RegistrationWizard() {
     );
   }
 
+  if (settingsError) {
+    return (
+      <div className="w-full max-w-4xl mx-auto mt-12">
+        <GlassCard className="max-w-md mx-auto p-8 text-center">
+          <h2 className="mb-4 text-2xl font-display font-bold text-white">Unable to Load Registration</h2>
+          <p className="text-text-muted">{settingsError}</p>
+        </GlassCard>
+      </div>
+    );
+  }
+
   if (settings && settings.registrationOpen === false) {
     return (
       <div className="w-full max-w-4xl mx-auto text-center mt-12">
@@ -367,7 +398,7 @@ export function RegistrationWizard() {
         </div>
       </div>
 
-      <GlassCard hoverEffect={true} className="overflow-hidden relative min-h-[400px] max-w-2xl mx-auto">
+      <GlassCard hoverEffect={true} className="relative min-h-[400px] max-w-2xl mx-auto min-w-0 overflow-hidden">
         <AlertError error={formError} title="Registration Error" />
         
         <AnimatePresence mode="wait" custom={direction}>
@@ -559,9 +590,15 @@ export function RegistrationWizard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h4 className="font-semibold mb-2">Scan to Pay</h4>
-                  <div className="w-full aspect-square bg-white/10 rounded-xl flex items-center justify-center border-2 border-dashed border-white/20 mb-4 overflow-hidden">
+                  <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-white/20 bg-white/10">
                     {settings?.qrCodeImageUrl ? (
-                      <img src={settings.qrCodeImageUrl} alt="Payment QR Code" className="w-full h-full object-contain" />
+                      <Image
+                        src={settings.qrCodeImageUrl}
+                        alt="Payment QR Code"
+                        fill
+                        sizes="(max-width: 767px) calc(100vw - 3rem), 384px"
+                        className="object-contain"
+                      />
                     ) : (
                       <span className="text-text-muted">No QR Code available</span>
                     )}

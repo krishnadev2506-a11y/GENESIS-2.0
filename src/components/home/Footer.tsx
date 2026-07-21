@@ -47,7 +47,7 @@ export function Footer() {
       <div className="relative z-10 mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 border-t border-[rgba(255,255,255,0.06)] pt-8 text-sm text-text-muted/80 sm:flex-row">
         <p>&copy; 2026 GENESIS 2.0 Buildathon. All rights reserved.</p>
         <a
-          href="/rulebook.pdf"
+          href="/rulebook.html"
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 text-text-muted/60 transition-colors hover:text-accent-secondary text-xs uppercase tracking-[0.18em]"

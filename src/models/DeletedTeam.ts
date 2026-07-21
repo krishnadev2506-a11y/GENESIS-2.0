@@ -3,11 +3,12 @@ import { ITeamMember } from './Team';
 
 export interface IDeletedTeam extends Document {
   teamName: string;
-  college: string;
-  semester: string;
-  contactNumber: string;
+  route: 'foundation' | 'professional';
+  college?: string;
+  semester?: string;
+  contactNumber?: string;
   email: string;
-  foodPreference: 'veg' | 'non-veg';
+  foodRequired: boolean;
   members: ITeamMember[];
   paymentScreenshotUrl: string;
   paymentScreenshotPublicId: string;
@@ -17,6 +18,7 @@ export interface IDeletedTeam extends Document {
   checkedIn: boolean;
   checkedInAt: Date | null;
   credentials: { username: string; passwordHash: string; temporaryPassword?: string } | null;
+  stationScores: any;
   scoreboardPoints: number;
   mustResetPassword: boolean;
   createdAt: Date;
@@ -28,21 +30,22 @@ const TeamMemberSchema = new Schema<ITeamMember>({
   name: { type: String, required: true },
   role: { type: String, required: true },
   email: { type: String, required: true },
-  phone: { type: String, required: true },
-  college: { type: String, required: true },
-  semester: { type: String, required: true },
-  foodPreference: { type: String, enum: ['veg', 'non-veg'], required: true },
+  phone: { type: String },
+  college: { type: String },
+  semester: { type: String },
+  foodPreference: { type: String, enum: ['veg', 'non-veg'] },
   isLeader: { type: Boolean, default: false },
 });
 
 const DeletedTeamSchema = new Schema<IDeletedTeam>(
   {
     teamName: { type: String, required: true },
-    college: { type: String, required: true },
-    semester: { type: String, required: true },
-    contactNumber: { type: String, required: true },
+    route: { type: String, enum: ['foundation', 'professional'], required: true },
+    college: { type: String },
+    semester: { type: String },
+    contactNumber: { type: String },
     email: { type: String, required: true },
-    foodPreference: { type: String, enum: ['veg', 'non-veg'], required: true },
+    foodRequired: { type: Boolean, default: true },
     members: [TeamMemberSchema],
     paymentScreenshotUrl: { type: String, required: true },
     paymentScreenshotPublicId: { type: String, required: true },
@@ -64,6 +67,7 @@ const DeletedTeamSchema = new Schema<IDeletedTeam>(
       passwordHash: { type: String },
       temporaryPassword: { type: String },
     },
+    stationScores: { type: Schema.Types.Mixed, default: {} },
     scoreboardPoints: { type: Number, default: 0 },
     mustResetPassword: { type: Boolean, default: true },
     deletedAt: { type: Date, default: Date.now },

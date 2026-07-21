@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         hostname: 'res.cloudinary.com',
         pathname: '/dkhkzijpe/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'collection.cloudinary.com',
+        pathname: '/dkhkzijpe/**',
+      },
     ],
   },
 

@@ -25,18 +25,18 @@ export async function POST(
       return NextResponse.json({ error: 'Team must be verified to have credentials' }, { status: 400 });
     }
     
-    const beforeData = team.toObject();
-    
+    const _beforeData = team.toObject();
+
     // Generate new credentials
     const { username, password } = generateCredentials(team.teamName);
     const passwordHash = await hashPassword(password);
-    
+
     // Update team
     team.credentials = { username, passwordHash, temporaryPassword: password };
     team.mustResetPassword = true;
-    
+
     await team.save();
-    
+
     // Send email with credentials
     try {
       const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
@@ -44,7 +44,7 @@ export async function POST(
     } catch (err) {
       console.error('Failed to send confirmation email:', err);
     }
-    
+
     // Audit log
     await AuditLog.create({
       adminId: new mongoose.Types.ObjectId(payload.id),

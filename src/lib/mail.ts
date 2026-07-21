@@ -1,6 +1,7 @@
 import nodemailer from 'nodemailer';
 import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
+import { logger } from '@/lib/logger';
 
 let transporter: nodemailer.Transporter | null = null;
 
@@ -31,7 +32,7 @@ function getFromEmail(): string {
   return `GENESIS 2.0 <${user}>`;
 }
 
-// Strip HTML tags for the plain-text fallback
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function stripHtml(html: string): string {
   return html
     .replace(/<br\s*\/?>/gi, '\n')
@@ -80,7 +81,7 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
     const settings = await Settings.getSettings();
     contentStr = settings.registrationReceivedEmailTemplate || 'Registration received for {{teamName}}';
   } catch (err) {
-    console.error('Error fetching settings for email template', err);
+    logger.error('Error fetching settings for email template', err);
     contentStr = 'Registration received for {{teamName}}';
   }
 
@@ -121,7 +122,7 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     const settings = await Settings.getSettings();
     contentStr = settings.registrationConfirmedEmailTemplate || 'Confirmed! User: {{username}}, Pass: {{password}}';
   } catch (err) {
-    console.error('Error fetching settings for email template', err);
+    logger.error('Error fetching settings for email template', err);
     contentStr = 'Confirmed! User: {{username}}, Pass: {{password}}';
   }
 
@@ -229,6 +230,6 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
       html: emailTemplate(content),
     });
   } catch (err) {
-    console.error('Failed to send admin alert email:', err);
+    logger.error('Failed to send admin alert email', err);
   }
 }

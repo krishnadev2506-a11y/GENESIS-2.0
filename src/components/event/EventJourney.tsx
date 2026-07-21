@@ -15,19 +15,17 @@ export function EventJourney({ route, theme }: EventJourneyProps) {
 
   const stations = isProfessional
     ? [
-        { name: 'Debug Arena', icon: '🐛' },
-        { name: 'System Design Sprint', icon: '🏗️' },
-        { name: 'Code Review Challenge', icon: '👀' },
-        { name: 'AI Engineering Challenge', icon: '🤖' },
-        { name: 'Deployment Sprint', icon: '🚀' },
+        { name: 'AI Engineering Battle', icon: '🤖' },
+        { name: 'Constraint Drop', icon: '⚡' },
+        { name: 'Red Team Attack', icon: '🛡️' },
+        { name: 'Lightning Feature', icon: '⏱️' },
         { name: 'Mock Technical Interview', icon: '🗣️' },
       ]
     : [
-        { name: 'Debug Arena', icon: '🐛' },
-        { name: 'System Design Sprint', icon: '🏗️' },
-        { name: 'Code Review Challenge', icon: '👀' },
-        { name: 'AI Engineering Challenge', icon: '🤖' },
-        { name: 'Deployment Sprint', icon: '🚀' },
+        { name: 'AI Engineering Battle', icon: '🤖' },
+        { name: 'Constraint Drop', icon: '⚡' },
+        { name: 'Lightning Feature', icon: '⏱️' },
+        { name: 'Best UI/UX', icon: '✨' },
       ];
 
   const colorPrimary = isProfessional ? 'text-pulse-bright' : 'text-emerald-400';

@@ -7,6 +7,11 @@ import Settings from '@/models/Settings';
  * Returns only non-sensitive settings needed by the registration form
  * and event pages: pricing, early bird, food toggle, themes, registration status.
  */
+
+// Add static generation with revalidation!
+export const revalidate = 3600; // Revalidate once an hour!
+export const dynamic = 'force-static';
+
 export async function GET() {
   try {
     await connectDB();
@@ -27,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json(publicSettings, {
       headers: {
-        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=120',
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
       },
     });
   } catch (error) {
