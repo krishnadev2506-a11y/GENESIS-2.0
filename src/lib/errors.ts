@@ -61,7 +61,16 @@ export function getFriendlyErrorMessage(error: unknown): string {
     return 'Please check your input. Some fields may be missing or incorrectly formatted.';
   }
 
+  if (lowerMsg.includes('unexpected token') || lowerMsg.includes('json') || lowerMsg.includes('syntaxerror')) {
+    return 'We encountered an unexpected response from the server. Please try again.';
+  }
+
+  // If the message contains technical jargon like "at ", "TypeError", "ReferenceError", etc., mask it
+  if (lowerMsg.includes('typeerror') || lowerMsg.includes('referenceerror') || lowerMsg.includes(' at ')) {
+    return 'An unexpected technical error occurred. Please try again.';
+  }
+
   // Return original error if it seems safe and friendly enough, otherwise a generic fallback
   // (We'll assume if it doesn't match our harsh error list, it might be a clean validation message from our backend)
-  return message;
+  return message || 'An unexpected error occurred. Please try again.';
 }

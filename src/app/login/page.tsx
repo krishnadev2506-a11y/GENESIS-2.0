@@ -61,10 +61,11 @@ export default function LoginPage() {
         }
         // Do not set isLoading to false on success, so the spinner stays while navigating
       } else {
-        if (data.error && data.error.toLowerCase().includes('password')) {
-          setPasswordError(getFriendlyErrorMessage(data.error));
-        } else if (data.error && (data.error.toLowerCase().includes('identifier') || data.error.toLowerCase().includes('user') || data.error.toLowerCase().includes('credentials'))) {
-          const friendly = getFriendlyErrorMessage(data.error);
+        const errorString = typeof data.error === 'string' ? data.error : String(data.error || '');
+        if (errorString && errorString.toLowerCase().includes('password')) {
+          setPasswordError(getFriendlyErrorMessage(errorString));
+        } else if (errorString && (errorString.toLowerCase().includes('identifier') || errorString.toLowerCase().includes('user') || errorString.toLowerCase().includes('credentials'))) {
+          const friendly = getFriendlyErrorMessage(errorString);
           setIdentifierError(friendly);
           setPasswordError(friendly);
         } else {
