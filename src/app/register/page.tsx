@@ -15,9 +15,6 @@ export default function RegisterPage() {
           <h1 className="mb-4 text-3xl font-display font-bold text-white uppercase tracking-[0.1em] sm:text-4xl md:text-5xl md:tracking-[0.14em]">
             Register Your Team
           </h1>
-          <p className="mx-auto max-w-2xl text-base text-text-muted sm:text-lg">
-            Join the ultimate 2-day buildathon with the new cosmic visual system. Fill out the details below to secure your spot.
-          </p>
         </div>
 
         <RegistrationWizard />

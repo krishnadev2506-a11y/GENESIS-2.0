@@ -21,6 +21,7 @@ export async function GET(req: NextRequest) {
     const paymentStatus = searchParams.get('paymentStatus');
     const checkedIn = searchParams.get('checkedIn');
     const isDeleted = searchParams.get('deleted') === 'true';
+    const route = searchParams.get('route');
     
     // Validate sortBy against allowlist to prevent field injection
     const rawSortBy = searchParams.get('sortBy') || 'createdAt';
@@ -39,6 +40,13 @@ export async function GET(req: NextRequest) {
       query.$text = { $search: search };
     }
     
+    if (route) {
+      const validRoutes = ['foundation', 'professional'];
+      if (validRoutes.includes(route)) {
+        query.route = route;
+      }
+    }
+
     if (paymentStatus) {
       // Allowlist valid payment statuses
       const validStatuses = ['pending_verification', 'verified', 'rejected'];
@@ -51,6 +59,8 @@ export async function GET(req: NextRequest) {
     if (checkedIn !== null && checkedIn !== '') {
       query.checkedIn = checkedIn === 'true';
     }
+
+    // Removed duplicated block
     
     let total: number;
     let teams: any[];

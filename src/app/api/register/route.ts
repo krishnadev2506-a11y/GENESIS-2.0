@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
     const ip = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || 'unknown';
     const rateLimitResult = limiter.check(ip);
     
-    if (!rateLimitResult.success) {
+    if (!rateLimitResult.success && process.env.NODE_ENV !== 'development') {
       logger.security('Rate limit exceeded for registration', { ip });
       return NextResponse.json(
         { error: 'Too many registration attempts. Please try again later.' },
@@ -49,10 +49,20 @@ export async function POST(req: NextRequest) {
     if (existingTeam) {
       return NextResponse.json({ error: 'Team name already taken. Please choose a different name.' }, { status: 400 });
     }
+
+    // Strip foodPreference from members if food is not required
+    const processedMembers = validatedData.members.map(member => {
+      if (!validatedData.foodRequired) {
+        const { foodPreference, ...rest } = member;
+        return rest;
+      }
+      return member;
+    });
     
     // Create team
     const newTeam = await Team.create({
       ...validatedData,
+      members: processedMembers,
       paymentStatus: 'pending_verification',
       registrationStatus: 'submitted',
     });
@@ -60,15 +70,16 @@ export async function POST(req: NextRequest) {
     // Send emails (await to prevent premature serverless termination)
     try {
       const allMemberEmails = validatedData.members.map(m => m.email).filter(Boolean);
+      const allMemberNames = validatedData.members.map(m => m.name).filter(Boolean);
       await Promise.allSettled([
-        sendRegistrationReceived(allMemberEmails, validatedData.teamName),
+        sendRegistrationReceived(allMemberEmails, validatedData.teamName, allMemberNames),
         sendAdminRegistrationAlert(validatedData.teamName, validatedData.college || 'N/A', validatedData.members.length)
       ]);
       } catch (err) {
         logger.error('Failed to send registration email', err);
       }
       
-      logger.info('Team registered successfully', { teamId: newTeam._id, teamName: newTeam.teamName });
+      logger.info('Team registered successfully', { teamId: newTeam._id, teamName: newTeam.teamName, route: newTeam.route });
       return NextResponse.json({ success: true, teamId: newTeam._id }, { status: 201 });
     } catch (error) {
       if (error instanceof z.ZodError) {

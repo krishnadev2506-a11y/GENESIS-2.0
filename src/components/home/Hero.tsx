@@ -129,7 +129,7 @@ export function Hero() {
             variants={fadeUp}
             className="mb-12 text-lg sm:text-xl lg:text-2xl font-light text-text-muted tracking-wide font-body leading-relaxed max-w-2xl drop-shadow-sm"
           >
-            Engineering-First Buildathon
+            Build.Innovate.Compete.Win
           </m.p>
 
           {/* Event meta */}

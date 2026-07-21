@@ -141,7 +141,6 @@ export function EvaluationCriteria() {
               <p className="text-lg font-display font-semibold text-white leading-relaxed tracking-wide">
                 A simple application built with excellent engineering practices may score higher than an innovative app with poor implementation.
               </p>
-              <p className="mt-4 text-xs uppercase tracking-[0.28em] text-accent-secondary">Genesis 2.0 Rulebook</p>
             </div>
           </div>
         </FadeUp>

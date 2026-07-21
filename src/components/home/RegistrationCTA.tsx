@@ -23,17 +23,12 @@ export function RegistrationCTA() {
           <div className="mb-10 flex flex-col items-center justify-center gap-6 md:flex-row md:gap-12">
             <div className="flex flex-col items-center">
               <span className="mb-1 text-sm uppercase tracking-[0.22em] text-text-muted">Event Date</span>
-              <span className="text-xl font-medium text-white">[DATE TBD]</span>
+              <span className="text-xl font-medium text-white">7th & 8th August</span>
             </div>
             <div className="hidden h-12 w-px bg-white/20 md:block"></div>
             <div className="flex flex-col items-center">
               <span className="mb-1 text-sm uppercase tracking-[0.22em] text-text-muted">Venue</span>
-              <span className="text-xl font-medium text-white">[VENUE TBD]</span>
-            </div>
-            <div className="hidden h-12 w-px bg-white/20 md:block"></div>
-            <div className="flex flex-col items-center">
-              <span className="mb-1 text-sm uppercase tracking-[0.22em] text-text-muted">Reg. Deadline</span>
-              <span className="text-xl font-medium text-white">[DEADLINE TBD]</span>
+              <span className="text-xl font-medium text-white">CCF LABS FISAT</span>
             </div>
           </div>
 

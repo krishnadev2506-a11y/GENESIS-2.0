@@ -1,77 +1,87 @@
+'use client';
+
+import { useQuery } from '@tanstack/react-query';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { StaggerContainer } from '@/components/ui/StaggerContainer';
 import { FadeUp } from '@/components/ui/FadeUp';
-
-const tracks = [
-  {
-    id: 'foundation',
-    badge: 'F',
-    year: '2nd Year Students',
-    title: 'Foundation',
-    color: 'from-[#4ade80] to-[#22c55e]',
-    borderColor: 'rgba(74,222,128,0.25)',
-    glowColor: 'rgba(74,222,128,0.12)',
-    iconBg: 'rgba(74,222,128,0.12)',
-    iconBorder: 'rgba(74,222,128,0.3)',
-    checkColor: '#4ade80',
-    badgeText: 'text-[#4ade80]',
-    expectations: [
-      'CRUD Application',
-      'Database Integration',
-      'Basic Authentication',
-      'Input Validation',
-      'Clean Structure',
-      'Basic Deployment',
-    ],
-    note: 'Cloud infra not expected.',
-  },
-  {
-    id: 'intermediate',
-    badge: 'I',
-    year: '3rd Year Students',
-    title: 'Intermediate',
-    color: 'from-[#c4b5fd] to-[#a855f7]',
-    borderColor: 'rgba(167,139,250,0.35)',
-    glowColor: 'rgba(139,92,246,0.15)',
-    iconBg: 'rgba(139,92,246,0.12)',
-    iconBorder: 'rgba(167,139,250,0.3)',
-    checkColor: '#c4b5fd',
-    badgeText: 'text-[#c4b5fd]',
-    expectations: [
-      'MVC Architecture',
-      'ORM & REST API',
-      'Error Handling',
-      'Role-based Auth',
-      'Rate Limiting',
-      'API Docs',
-    ],
-    note: 'Docker/CI-CD is a bonus.',
-  },
-  {
-    id: 'professional',
-    badge: 'P',
-    year: '4th Year Students',
-    title: 'Professional',
-    color: 'from-[#fbbf24] to-[#f59e0b]',
-    borderColor: 'rgba(251,191,36,0.25)',
-    glowColor: 'rgba(245,158,11,0.1)',
-    iconBg: 'rgba(251,191,36,0.1)',
-    iconBorder: 'rgba(251,191,36,0.3)',
-    checkColor: '#fbbf24',
-    badgeText: 'text-[#fbbf24]',
-    expectations: [
-      'Cloud Deployment',
-      'Docker & CI/CD',
-      'Caching Strategy',
-      'Scalable Design',
-      'Monitoring & Logs',
-      'Architecture Docs',
-    ],
-    note: 'Must justify technical choices.',
-  },
-];
+import Link from 'next/link';
+import { Button } from '@/components/ui/Button';
 
 export function Tracks() {
+  const { data: settings, isLoading } = useQuery({
+    queryKey: ['settings-public'],
+    queryFn: async () => {
+      const res = await fetch('/api/settings/public');
+      if (!res.ok) throw new Error('Failed to fetch settings');
+      return res.json();
+    },
+  });
+
+  const getThemeText = (themeKey: 'themeFoundation' | 'themeProfessional') => {
+    if (isLoading || !settings) return { title: 'Loading...', tagline: 'Please wait' };
+    const theme = settings[themeKey];
+    if (theme?.published) {
+      return { title: theme.title, tagline: theme.tagline };
+    }
+    return { title: 'Will be released soon', tagline: 'Stay tuned for updates' };
+  };
+
+  const foundationTheme = getThemeText('themeFoundation');
+  const professionalTheme = getThemeText('themeProfessional');
+
+  const tracks = [
+    {
+      id: 'foundation',
+      badge: 'F',
+      year: '2nd & 3rd Year Students',
+      title: 'Foundation Track',
+      themeTitle: foundationTheme.title,
+      themeTagline: foundationTheme.tagline,
+      route: '/event/foundation',
+      color: 'from-[#4ade80] to-[#22c55e]',
+      borderColor: 'rgba(74,222,128,0.25)',
+      glowColor: 'rgba(74,222,128,0.12)',
+      iconBg: 'rgba(74,222,128,0.12)',
+      iconBorder: 'rgba(74,222,128,0.3)',
+      checkColor: '#4ade80',
+      badgeText: 'text-[#4ade80]',
+      expectations: [
+        'MVC Architecture',
+        'Database Integration',
+        'Basic Authentication',
+        'Input Validation',
+        'Clean Structure',
+        'Basic Deployment',
+      ],
+      note: 'Cloud infra not expected.',
+    },
+    {
+      id: 'professional',
+      badge: 'P',
+      year: '4th Year Students',
+      title: 'Professional Track',
+      themeTitle: professionalTheme.title,
+      themeTagline: professionalTheme.tagline,
+      route: '/event/professional',
+      color: 'from-[#c4b5fd] to-[#a855f7]',
+      borderColor: 'rgba(167,139,250,0.35)',
+      glowColor: 'rgba(139,92,246,0.15)',
+      iconBg: 'rgba(139,92,246,0.12)',
+      iconBorder: 'rgba(167,139,250,0.3)',
+      checkColor: '#c4b5fd',
+      badgeText: 'text-[#c4b5fd]',
+      expectations: [
+        'System Design',
+        'Cloud Deployment',
+        'Docker & CI/CD',
+        'AI Integration',
+        'Scalable Architecture',
+        'Monitoring & Logs',
+      ],
+      note: 'Must justify technical choices.',
+    },
+  ];
+
   return (
     <section id="tracks" className="relative z-10 mx-auto max-w-7xl overflow-hidden px-4 py-24 sm:px-6 lg:px-8">
       <div className="section-glow left-[-8rem] top-[6rem] opacity-65" />
@@ -90,13 +100,13 @@ export function Tracks() {
           </FadeUp>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
           {tracks.map((track, index) => (
             <FadeUp key={track.id}>
               <GlassCard
                 delay={index * 0.12}
                 hoverEffect
-                className="min-h-[480px] flex flex-col p-6 sm:p-8 hover:-translate-y-1 transition-all duration-300 group"
+                className="min-h-[580px] flex flex-col p-6 sm:p-8 hover:-translate-y-1 transition-all duration-300 group"
                 style={{
                   borderColor: track.borderColor,
                   boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.38), 0 0 40px ${track.glowColor}`,
@@ -110,13 +120,17 @@ export function Tracks() {
                   >
                     <span className={`text-xl ${track.badgeText}`}>{track.badge}</span>
                   </div>
-                  <div>
+                  <div className="w-full">
                     <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${track.badgeText} mb-2`}>
                       {track.year}
                     </p>
-                    <h3 className="text-2xl font-display font-bold text-white uppercase tracking-[0.06em]">
+                    <h3 className="text-2xl font-display font-bold text-white uppercase tracking-[0.06em] mb-2">
                       {track.title}
                     </h3>
+                    <div className="rounded-lg bg-black/40 border border-white/5 p-4 mb-2">
+                      <h4 className="text-lg font-display text-white mb-1">{track.themeTitle}</h4>
+                      <p className="text-sm text-text-muted italic">{track.themeTagline}</p>
+                    </div>
                   </div>
                 </div>
 
@@ -127,7 +141,7 @@ export function Tracks() {
                 />
 
                 {/* Expectations */}
-                <ul className="flex-grow space-y-3 mb-6">
+                <ul className="flex-grow space-y-3 mb-8">
                   {track.expectations.map((item) => (
                     <li key={item} className="flex items-start gap-2.5 text-sm text-text-muted leading-relaxed">
                       <svg
@@ -144,9 +158,32 @@ export function Tracks() {
                 </ul>
 
                 {/* Note */}
-                <p className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-xs text-text-muted/70 italic leading-relaxed">
-                  {track.note}
-                </p>
+                <div className="mt-auto space-y-4">
+                  <p className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-xs text-text-muted/70 italic leading-relaxed">
+                    {track.note}
+                  </p>
+                  
+                  <Link href={track.route} className="block w-full">
+                    <Button 
+                      variant="secondary" 
+                      className="w-full justify-center group/btn"
+                      style={{ 
+                        borderColor: track.borderColor, 
+                        color: track.checkColor 
+                      }}
+                    >
+                      View Event Details
+                      <svg
+                        className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                      </svg>
+                    </Button>
+                  </Link>
+                </div>
               </GlassCard>
             </FadeUp>
           ))}

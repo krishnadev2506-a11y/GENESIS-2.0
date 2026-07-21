@@ -24,7 +24,7 @@ type ExportTeam = {
   semester: string;
   contactNumber: string;
   email: string;
-  foodPreference: 'veg' | 'non-veg';
+  foodRequired: boolean;
   members: ExportMember[];
   memberCount: number;
   paymentScreenshotUrl: string;
@@ -51,7 +51,7 @@ const csvColumns: Array<keyof ExportTeam> = [
   'semester',
   'contactNumber',
   'email',
-  'foodPreference',
+  'foodRequired',
   'memberCount',
   'members',
   'paymentScreenshotUrl',
@@ -75,7 +75,7 @@ const teamSheetColumns = [
   { key: 'semester', header: 'Semester' },
   { key: 'contactNumber', header: 'Contact Number' },
   { key: 'email', header: 'Team Email' },
-  { key: 'foodPreference', header: 'Food Preference' },
+  { key: 'foodRequired', header: 'Food Required' },
   { key: 'memberCount', header: 'Member Count' },
   { key: 'membersJson', header: 'Members JSON' },
   { key: 'paymentScreenshotUrl', header: 'Payment Screenshot URL' },
@@ -289,7 +289,7 @@ function buildXlsx(rows: ExportTeam[]) {
     semester: row.semester,
     contactNumber: row.contactNumber,
     email: row.email,
-    foodPreference: row.foodPreference,
+    foodRequired: row.foodRequired,
     memberCount: row.memberCount,
     membersJson: JSON.stringify(row.members),
     paymentScreenshotUrl: row.paymentScreenshotUrl,
@@ -389,7 +389,7 @@ export async function GET(req: NextRequest) {
       const college: string = team.college ?? '';
       const semester: string = team.semester ?? '';
       const contactNumber: string = team.contactNumber ?? '';
-      const foodPreference: 'veg' | 'non-veg' = team.foodPreference ?? 'veg';
+      const foodRequired: boolean = team.foodRequired ?? false;
 
       return {
         id: team._id.toString(),
@@ -398,7 +398,7 @@ export async function GET(req: NextRequest) {
         semester,
         contactNumber,
         email: team.email,
-        foodPreference,
+        foodRequired,
         members: (team.members || []).map((member) => {
           const memberCollege: string = member.college ?? '';
           const memberSemester: string = member.semester ?? '';

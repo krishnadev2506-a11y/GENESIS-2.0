@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { X, Eye, Pencil, Save, Trash2, Plus } from 'lucide-react';
@@ -215,7 +216,7 @@ export function TeamsClient() {
       </GlassCard>
 
       {/* Team Details Modal */}
-      {selectedTeam && (
+      {selectedTeam && typeof document !== 'undefined' && createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-void/80 backdrop-blur-md">
           <div className="w-full max-w-4xl max-h-[90vh] flex flex-col bg-bg-elevated/95 border border-glass-border shadow-2xl rounded-[24px] overflow-hidden">
             {/* Header */}
@@ -300,6 +301,29 @@ export function TeamsClient() {
                         <div className="flex flex-col gap-1">
                           <label className="text-text-muted uppercase text-[10px] tracking-wider">Points</label>
                           <input type="number" className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.scoreboardPoints} onChange={e => handleTeamChange('scoreboardPoints', parseInt(e.target.value) || 0)} />
+                        </div>
+                        <div className="flex flex-col gap-1 mt-4">
+                          <label className="text-text-muted uppercase text-[10px] tracking-wider">Route</label>
+                          <select className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.route || 'foundation'} onChange={e => handleTeamChange('route', e.target.value)}>
+                            <option value="foundation">Foundation</option>
+                            <option value="professional">Professional</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1 mt-2">
+                          <label className="text-text-muted uppercase text-[10px] tracking-wider">Payment Status</label>
+                          <select className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.paymentStatus} onChange={e => handleTeamChange('paymentStatus', e.target.value)}>
+                            <option value="pending_verification">Pending</option>
+                            <option value="verified">Verified</option>
+                            <option value="rejected">Rejected</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-col gap-1 mt-2">
+                          <label className="text-text-muted uppercase text-[10px] tracking-wider">Transaction ID</label>
+                          <input className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.transactionId || ''} onChange={e => handleTeamChange('transactionId', e.target.value)} />
+                        </div>
+                        <div className="flex flex-col gap-1 mt-2">
+                          <label className="text-text-muted uppercase text-[10px] tracking-wider">Screenshot URL</label>
+                          <input className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.paymentScreenshotUrl || ''} onChange={e => handleTeamChange('paymentScreenshotUrl', e.target.value)} />
                         </div>
                         <div className="flex flex-col gap-1 mt-4">
                           <label className="flex items-center gap-2 text-white cursor-pointer">
@@ -460,6 +484,26 @@ export function TeamsClient() {
                               <input className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white text-sm" value={member.semester} onChange={e => handleMemberChange(idx, 'semester', e.target.value)} />
                             </div>
                           </div>
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            <div className="flex flex-col gap-1">
+                              <label className="text-text-muted text-[10px] uppercase tracking-wider">Food Pref</label>
+                              <select className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white text-sm" value={member.foodPreference || 'veg'} onChange={e => handleMemberChange(idx, 'foodPreference', e.target.value)}>
+                                <option value="veg">Veg</option>
+                                <option value="non-veg">Non-Veg</option>
+                              </select>
+                            </div>
+                            <div className="flex flex-col justify-end pb-1">
+                              <label className="flex items-center gap-2 text-white cursor-pointer text-sm">
+                                <input 
+                                  type="checkbox" 
+                                  checked={member.isLeader} 
+                                  onChange={e => handleMemberChange(idx, 'isLeader', e.target.checked)}
+                                  className="w-4 h-4 rounded border-glass-border bg-void text-pulse focus:ring-pulse"
+                                />
+                                Leader
+                              </label>
+                            </div>
+                          </div>
                         </div>
                       ) : (
                         <>
@@ -498,7 +542,8 @@ export function TeamsClient() {
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

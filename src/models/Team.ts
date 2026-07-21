@@ -1,5 +1,18 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
+// ----- Station Scores -----
+
+export interface IStationScores {
+  debugArena: number;
+  systemDesignSprint: number;
+  codeReviewChallenge: number;
+  aiEngineeringChallenge: number;
+  deploymentSprint: number;
+  mockTechnicalInterview: number; // Only used for 'professional' route
+}
+
+// ----- Team Member -----
+
 export interface ITeamMember {
   name: string;
   role: string;
@@ -11,13 +24,16 @@ export interface ITeamMember {
   isLeader: boolean;
 }
 
+// ----- Team -----
+
 export interface ITeam extends Document {
   teamName: string;
+  route: 'foundation' | 'professional';
   college?: string;
   semester?: string;
   contactNumber?: string;
   email: string;
-  foodPreference?: 'veg' | 'non-veg';
+  foodRequired: boolean;
   members: ITeamMember[];
   paymentScreenshotUrl: string;
   paymentScreenshotPublicId: string;
@@ -27,11 +43,26 @@ export interface ITeam extends Document {
   checkedIn: boolean;
   checkedInAt: Date | null;
   credentials: { username: string; passwordHash: string; temporaryPassword?: string } | null;
+  stationScores: IStationScores;
   scoreboardPoints: number;
   mustResetPassword: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
+
+// ----- Sub-schemas -----
+
+const StationScoresSchema = new Schema<IStationScores>(
+  {
+    debugArena: { type: Number, default: 0 },
+    systemDesignSprint: { type: Number, default: 0 },
+    codeReviewChallenge: { type: Number, default: 0 },
+    aiEngineeringChallenge: { type: Number, default: 0 },
+    deploymentSprint: { type: Number, default: 0 },
+    mockTechnicalInterview: { type: Number, default: 0 },
+  },
+  { _id: false }
+);
 
 const TeamMemberSchema = new Schema<ITeamMember>({
   name: { type: String, required: true },
@@ -44,14 +75,17 @@ const TeamMemberSchema = new Schema<ITeamMember>({
   isLeader: { type: Boolean, default: false },
 });
 
+// ----- Main schema -----
+
 const TeamSchema = new Schema<ITeam>(
   {
     teamName: { type: String, required: true, unique: true },
+    route: { type: String, enum: ['foundation', 'professional'], required: true },
     college: { type: String },
     semester: { type: String },
     contactNumber: { type: String },
     email: { type: String, required: true },
-    foodPreference: { type: String, enum: ['veg', 'non-veg'] },
+    foodRequired: { type: Boolean, default: true },
     members: [TeamMemberSchema],
     paymentScreenshotUrl: { type: String, required: true },
     paymentScreenshotPublicId: { type: String, required: true },
@@ -73,21 +107,31 @@ const TeamSchema = new Schema<ITeam>(
       passwordHash: { type: String },
       temporaryPassword: { type: String },
     },
+    stationScores: {
+      type: StationScoresSchema,
+      default: () => ({
+        debugArena: 0,
+        systemDesignSprint: 0,
+        codeReviewChallenge: 0,
+        aiEngineeringChallenge: 0,
+        deploymentSprint: 0,
+        mockTechnicalInterview: 0,
+      }),
+    },
     scoreboardPoints: { type: Number, default: 0 },
     mustResetPassword: { type: Boolean, default: true },
   },
   { timestamps: true }
 );
 
-// BUG FIX: Indexes MUST be defined on the schema BEFORE calling mongoose.model().
-// Previously they were defined after model creation inside an if-block that was
-// never entered after the first module load, so indexes were never registered.
+// Indexes
 TeamSchema.index({ 'credentials.username': 1 });
 TeamSchema.index({ email: 1 });
 TeamSchema.index({ paymentStatus: 1 });
 TeamSchema.index({ createdAt: -1 });
-TeamSchema.index({ teamName: 1 }); // Fast duplicate check
-TeamSchema.index({ 'members.email': 1 }); // Fast cross-team duplicate member check
+TeamSchema.index({ 'members.email': 1 });
+TeamSchema.index({ route: 1 });
+TeamSchema.index({ route: 1, scoreboardPoints: -1 }); // Leaderboard queries per route
 
 // Compound Text Index for fast admin search
 TeamSchema.index(

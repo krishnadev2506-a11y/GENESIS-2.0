@@ -24,47 +24,55 @@ function getTransporter(): nodemailer.Transporter {
   return transporter;
 }
 
+// CRITICAL FIX: The From email address must match the authenticated Gmail account exactly
+// to pass SPF alignment. We can customize the display name, but the actual address must be EMAIL_USER.
 function getFromEmail(): string {
-  return process.env.EMAIL_FROM || 'GENESIS 2.0 <noreply@genesis2026.dev>';
+  const user = process.env.EMAIL_USER;
+  return `GENESIS 2.0 <${user}>`;
 }
 
+// Strip HTML tags for the plain-text fallback
+function stripHtml(html: string): string {
+  return html
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .trim();
+}
+
+// Email clients strip <style> blocks and external fonts. Everything must be inlined.
 const emailTemplate = (content: string) => `
 <!DOCTYPE html>
 <html>
 <head>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Outfit:wght@400;500;600&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet">
-  <style>
-    body { background-color: #0A0118; color: #F5F3FF; font-family: 'Outfit', sans-serif; margin: 0; padding: 40px 20px; }
-    .container { max-width: 600px; margin: 0 auto; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 24px; padding: 40px; }
-    .header { text-align: center; margin-bottom: 32px; }
-    .logo { font-family: 'Orbitron', sans-serif; font-size: 32px; font-weight: 700; letter-spacing: 0.14em; color: #F5F3FF; text-transform: uppercase; }
-    .accent { color: #A78BFA; text-shadow: 0 0 20px rgba(167, 139, 250, 0.6); }
-    .content { font-size: 16px; line-height: 1.6; color: #B9B0CF; }
-    .footer { margin-top: 40px; text-align: center; font-size: 14px; color: #B9B0CF; opacity: 0.7; }
-    h1 { font-family: 'Space Grotesk', sans-serif; color: #F5F3FF; font-size: 24px; margin-top: 0; letter-spacing: 0.06em; }
-    .btn { display: inline-block; background-color: #8B5CF6; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 12px; font-weight: bold; margin-top: 20px; }
-    .credentials { background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; margin: 20px 0; border: 1px solid rgba(139, 92, 246, 0.3); }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
-<body>
-  <div class="container">
-    <div class="header">
-      <div class="logo">Genesis <span class="accent">2.0</span></div>
+<body style="background-color: #0A0118; color: #F5F3FF; font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 40px 20px;">
+  <div style="max-width: 600px; margin: 0 auto; background-color: #110B1F; border: 1px solid #2D2342; border-radius: 16px; padding: 40px;">
+    
+    <div style="text-align: center; margin-bottom: 32px;">
+      <div style="font-size: 32px; font-weight: bold; letter-spacing: 2px; color: #F5F3FF; text-transform: uppercase;">
+        Genesis <span style="color: #A78BFA;">2.0</span>
+      </div>
       <div style="font-size: 14px; margin-top: 8px; color: #B3A8CC;">July 10-11, 2026</div>
     </div>
-    <div class="content">
+    
+    <div style="font-size: 16px; line-height: 1.6; color: #E5E7EB;">
       ${content}
     </div>
-    <div class="footer">
+    
+    <div style="margin-top: 40px; text-align: center; font-size: 14px; color: #B3A8CC;">
       Code The Future. Create the Impossible.<br>
-      © 2026 GENESIS Buildathon
+      &copy; 2026 GENESIS Buildathon
     </div>
   </div>
 </body>
 </html>
 `;
 
-export async function sendRegistrationReceived(toEmails: string[], teamName: string): Promise<void> {
+export async function sendRegistrationReceived(toEmails: string[], teamName: string, memberNames: string[] = []): Promise<void> {
   await connectDB();
   let contentStr = '';
   try {
@@ -77,15 +85,29 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
   }
 
   contentStr = contentStr.replace(/{{teamName}}/g, teamName);
-  const content = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
+  
+  if (memberNames.length > 0) {
+    contentStr += '\n\nRegistered Participants:\n' + memberNames.map(name => `- ${name}`).join('\n');
+  }
+  
+  // Create plain text fallback first
+  const textContent = contentStr;
+  
+  // Create HTML version
+  const content = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   const htmlContent = emailTemplate(content);
+  
   const fromEmail = getFromEmail();
 
   const promises = toEmails.map(to => getTransporter().sendMail({
     from: fromEmail,
     to,
-    subject: "We've received your GENESIS 2.0 registration",
+    subject: "We have received your GENESIS 2.0 registration",
+    text: textContent,
     html: htmlContent,
+    headers: {
+      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+    }
   }));
 
   await Promise.allSettled(promises);
@@ -109,22 +131,32 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     .replace(/{{password}}/g, password);
 
   const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/login`;
-  const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p>${p}</p>` : '').join('');
+  
+  // Create plain text fallback
+  const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
 
+  // Create HTML version
+  const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
+  
   const content = `
     ${formattedContent}
-    <p style="text-align: center;">
-      <a href="${loginUrl}" class="btn">Access Dashboard</a>
-    </p>
+    <div style="text-align: center; margin-top: 32px;">
+      <a href="${loginUrl}" style="display: inline-block; background-color: #8B5CF6; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
+    </div>
   `;
   const htmlContent = emailTemplate(content);
+  
   const fromEmail = getFromEmail();
 
   const promises = toEmails.map(to => getTransporter().sendMail({
     from: fromEmail,
     to,
-    subject: "You're confirmed for GENESIS 2.0 — Welcome!",
+    subject: "You are confirmed for GENESIS 2.0 - Welcome!",
+    text: textContent,
     html: htmlContent,
+    headers: {
+      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+    }
   }));
 
   await Promise.allSettled(promises);
@@ -132,23 +164,31 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
 
 export async function sendAdminMessage(to: string, subject: string, body: string): Promise<void> {
   const content = `
-    <h1>${subject}</h1>
-    ${body.split('\n').map(p => `<p>${p}</p>`).join('')}
+    <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">${subject}</h1>
+    ${body.split('\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
   `;
   
+  const textContent = `${subject}\n\n${body}`;
+
   await getTransporter().sendMail({
     from: getFromEmail(),
     to,
     subject,
+    text: textContent,
     html: emailTemplate(content),
+    headers: {
+      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+    }
   });
 }
 
 export async function sendAdminMessageBatch(toEmails: string[], subject: string, body: string): Promise<void> {
   const content = `
-    <h1>${subject}</h1>
-    ${body.split('\n').map(p => `<p>${p}</p>`).join('')}
+    <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">${subject}</h1>
+    ${body.split('\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
   `;
+  
+  const textContent = `${subject}\n\n${body}`;
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
 
@@ -156,7 +196,11 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
     from: fromEmail,
     to,
     subject,
+    text: textContent,
     html: htmlContent,
+    headers: {
+      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+    }
   }));
 
   await Promise.allSettled(promises);
@@ -164,21 +208,24 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
 
 export async function sendAdminRegistrationAlert(teamName: string, college: string, memberCount: number): Promise<void> {
   const content = `
-    <h1>New Team Registered!</h1>
-    <p>A new team has just submitted their registration for GENESIS 2.0.</p>
-    <ul>
-      <li><strong>Team Name:</strong> ${teamName}</li>
-      <li><strong>College:</strong> ${college}</li>
-      <li><strong>Members:</strong> ${memberCount}</li>
+    <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">New Team Registered!</h1>
+    <p style="margin: 0 0 16px 0;">A new team has just submitted their registration for GENESIS 2.0.</p>
+    <ul style="padding-left: 20px; margin-bottom: 24px; color: #E5E7EB;">
+      <li style="margin-bottom: 8px;"><strong>Team Name:</strong> ${teamName}</li>
+      <li style="margin-bottom: 8px;"><strong>College:</strong> ${college}</li>
+      <li style="margin-bottom: 8px;"><strong>Members:</strong> ${memberCount}</li>
     </ul>
-    <p>Please log in to the admin panel to review and verify their payment.</p>
+    <p style="margin: 0 0 16px 0;">Please log in to the admin panel to review and verify their payment.</p>
   `;
+  
+  const textContent = `New Team Registered!\n\nA new team has just submitted their registration for GENESIS 2.0.\n\nTeam Name: ${teamName}\nCollege: ${college}\nMembers: ${memberCount}\n\nPlease log in to the admin panel to review and verify their payment.`;
   
   try {
     await getTransporter().sendMail({
       from: getFromEmail(),
-      to: 'krishnadev2506@gmail.com',
-      subject: `🚨 New Registration: ${teamName}`,
+      to: process.env.EMAIL_USER || 'krishnadev2506@gmail.com',
+      subject: `New Registration Alert: ${teamName}`,
+      text: textContent,
       html: emailTemplate(content),
     });
   } catch (err) {

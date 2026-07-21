@@ -1,11 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: 'standalone',
   compress: true,
   poweredByHeader: false,
   reactStrictMode: true,
   experimental: {
     optimizeCss: true,
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'recharts'],
   },
 
   images: {
@@ -64,12 +66,7 @@ const nextConfig: NextConfig = {
           },
         ],
       },
-      {
-        source: '/api/(.*)',
-        headers: [
-          { key: 'Cache-Control', value: 'no-store, max-age=0' },
-        ],
-      },
+      // API cache control is handled individually by the routes now
       // Long cache for static assets is handled automatically by Next.js.
       // Do NOT set Cache-Control here — overriding it breaks dev HMR.
     ];

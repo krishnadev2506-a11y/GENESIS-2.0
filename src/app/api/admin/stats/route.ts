@@ -35,8 +35,19 @@ export async function GET(req: NextRequest) {
       totalParticipants += numMembers;
 
       if (team.paymentStatus === 'verified') {
-        const extraMembers = Math.max(0, numMembers - settings.baseTeamSize);
-        totalRevenue += settings.entryFee + (extraMembers * settings.extraMemberFee);
+        const p = settings.pricing;
+        let pricingObj = null;
+        if (numMembers === 4) pricingObj = p?.team4;
+        else if (numMembers === 5) pricingObj = p?.team5;
+        else if (numMembers >= 6) pricingObj = p?.team6;
+        
+        if (pricingObj) {
+          if (settings.earlyBirdEnabled) {
+            totalRevenue += Math.round(pricingObj.standardPrice * (1 - pricingObj.earlyBirdDiscountPercent / 100));
+          } else {
+            totalRevenue += pricingObj.standardPrice;
+          }
+        }
       }
     });
 

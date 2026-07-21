@@ -7,29 +7,43 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 import { useDebounce } from '@/hooks/useDebounce';
-import { Search, Plus, Minus, Save } from 'lucide-react';
+import { Search, Save } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { getFriendlyErrorMessage } from '@/lib/errors';
+type RouteType = 'foundation' | 'professional';
+
+const FOUNDATION_STATIONS = [
+  { key: 'debugArena', label: 'Debug Arena' },
+  { key: 'systemDesignSprint', label: 'System Design' },
+  { key: 'codeReviewChallenge', label: 'Code Review' },
+  { key: 'aiEngineeringChallenge', label: 'AI Eng.' },
+  { key: 'deploymentSprint', label: 'Deployment' },
+];
+
+const PROFESSIONAL_STATIONS = [
+  ...FOUNDATION_STATIONS,
+  { key: 'mockTechnicalInterview', label: 'Mock Interview' },
+];
 
 export function ScoresClient() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
+  const [route, setRoute] = useState<RouteType>('foundation');
   const debouncedSearch = useDebounce(search, 500);
   
-  // Local state to track point modifications before saving
-  const [pendingScores, setPendingScores] = useState<Record<string, number>>({});
+  const [pendingScores, setPendingScores] = useState<Record<string, Record<string, string>>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
 
   const queryClient = useQueryClient();
-  const { error } = useToast();
+  const { error, success } = useToast();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['teams', 'scores', page, debouncedSearch],
+    queryKey: ['teams', 'scores', page, debouncedSearch, route],
     queryFn: async () => {
       const params = new URLSearchParams({ 
         page: page.toString(), 
         limit: '20',
-        paymentStatus: 'verified', // Only show verified teams on leaderboard
+        route,
       });
       if (debouncedSearch) params.append('search', debouncedSearch);
       
@@ -40,18 +54,22 @@ export function ScoresClient() {
   });
 
   const updateScoreMutation = useMutation({
-    mutationFn: async ({ id, points }: { id: string, points: number }) => {
+    mutationFn: async ({ id, stationScores }: { id: string, stationScores: Record<string, number> }) => {
       const res = await fetch(`/api/teams/${id}/points`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ points }),
+        body: JSON.stringify({ stationScores }),
       });
-      if (!res.ok) throw new Error('Failed to update score');
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || 'Failed to update score');
+      }
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['teams', 'scores'] });
       setSavingId(null);
+      success('Scores updated successfully');
     },
     onError: (err: Error) => {
       setSavingId(null);
@@ -59,30 +77,36 @@ export function ScoresClient() {
     }
   });
 
-  const handleScoreChange = (teamId: string, currentPoints: number, delta: number) => {
-    setPendingScores(prev => ({
-      ...prev,
-      [teamId]: (prev[teamId] !== undefined ? prev[teamId] : currentPoints) + delta
+  const handleManualInput = (teamId: string, stationKey: string, value: string) => {
+    setPendingScores(prev => ({ 
+      ...prev, 
+      [teamId]: {
+        ...(prev[teamId] || {}),
+        [stationKey]: value
+      }
     }));
   };
 
-  const handleManualInput = (teamId: string, value: string) => {
-    const points = parseInt(value, 10);
-    if (!isNaN(points)) {
-      setPendingScores(prev => ({ ...prev, [teamId]: points }));
-    }
-  };
-
-  const saveScore = (teamId: string, currentPoints: number) => {
-    const pointsToSave = pendingScores[teamId] !== undefined ? pendingScores[teamId] : currentPoints;
-    setSavingId(teamId);
-    updateScoreMutation.mutate({ id: teamId, points: pointsToSave });
+  const saveScore = (teamId: string) => {
+    const stringScores = pendingScores[teamId] || {};
+    if (Object.keys(stringScores).length === 0) return;
     
-    // Clear from pending
+    // Parse strings to numbers for API
+    const parsedScores: Record<string, number> = {};
+    for (const [k, v] of Object.entries(stringScores)) {
+      const num = parseInt(v, 10);
+      parsedScores[k] = isNaN(num) ? 0 : Math.max(0, num);
+    }
+    
+    setSavingId(teamId);
+    updateScoreMutation.mutate({ id: teamId, stationScores: parsedScores });
+    
     const newPending = { ...pendingScores };
     delete newPending[teamId];
     setPendingScores(newPending);
   };
+
+  const stations = route === 'foundation' ? FOUNDATION_STATIONS : PROFESSIONAL_STATIONS;
 
   return (
     <div className="space-y-6">
@@ -100,6 +124,25 @@ export function ScoresClient() {
               className="pl-12"
             />
           </div>
+
+          <div className="flex bg-void/50 p-1 rounded-lg border border-glass-border">
+            <button
+              onClick={() => { setRoute('foundation'); setPage(1); }}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                route === 'foundation' ? "bg-pulse text-white shadow-sm" : "text-text-muted hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Foundation
+            </button>
+            <button
+              onClick={() => { setRoute('professional'); setPage(1); }}
+              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
+                route === 'professional' ? "bg-pulse text-white shadow-sm" : "text-text-muted hover:text-white hover:bg-white/5"
+              }`}
+            >
+              Professional
+            </button>
+          </div>
         </div>
       </GlassCard>
 
@@ -110,68 +153,77 @@ export function ScoresClient() {
           </div>
         ) : data?.teams?.length === 0 ? (
           <div className="py-16 text-center text-text-muted">
-            No verified teams found.
+            No teams found for this route.
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-text-primary">
+            <table className="w-full text-left text-sm text-text-primary whitespace-nowrap">
               <thead className="bg-void/40 border-b border-glass-border uppercase font-mono text-[10px] tracking-wider text-text-muted">
                 <tr>
-                  <th className="px-6 py-4">Team Name</th>
-                  <th className="px-6 py-4 hidden sm:table-cell">College</th>
-                  <th className="px-6 py-4 text-center">Score Control</th>
-                  <th className="px-6 py-4 text-right">Action</th>
+                  <th className="px-4 py-4 sticky left-0 bg-[#0a0a0a] z-10 border-r border-glass-border w-[200px]">Team Name</th>
+                  {stations.map(s => (
+                    <th key={s.key} className="px-2 py-4 text-center">{s.label}</th>
+                  ))}
+                  <th className="px-4 py-4 text-center">Total</th>
+                  <th className="px-4 py-4 text-right">Action</th>
                 </tr>
               </thead>
               <tbody>
                 {data?.teams.map((team: any) => {
-                  const currentScore = pendingScores[team._id] !== undefined 
-                    ? pendingScores[team._id] 
-                    : (team.scoreboardPoints || 0);
-                    
-                  const isModified = pendingScores[team._id] !== undefined && pendingScores[team._id] !== team.scoreboardPoints;
+                  const teamPendingScores = pendingScores[team._id] || {};
+                  const isModified = Object.keys(teamPendingScores).length > 0;
+                  
+                  // Calculate live total
+                  let liveTotal = 0;
+                  stations.forEach(s => {
+                    const rawVal = teamPendingScores[s.key] !== undefined 
+                      ? teamPendingScores[s.key] 
+                      : (team.stationScores?.[s.key] !== undefined ? team.stationScores[s.key] : 0);
+                      
+                    const num = parseInt(rawVal as string, 10);
+                    if (!isNaN(num)) {
+                      liveTotal += num;
+                    }
+                  });
 
                   return (
                     <tr key={team._id} className="border-b border-glass-border/50 hover:bg-glass/10 transition-colors">
-                      <td className="px-6 py-4">
-                        <div className="font-bold text-white">{team.teamName}</div>
+                      <td className="px-4 py-4 sticky left-0 bg-[#0a0a0a] z-10 border-r border-glass-border">
+                        <div className="font-bold text-white truncate max-w-[180px]" title={team.teamName}>{team.teamName}</div>
+                        <div className="text-xs text-text-muted truncate max-w-[180px]" title={team.college}>{team.college}</div>
                       </td>
-                      <td className="px-6 py-4 hidden sm:table-cell text-text-muted">
-                        {team.college}
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-3">
-                          <button 
-                            onClick={() => handleScoreChange(team._id, team.scoreboardPoints || 0, -10)}
-                            className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-white transition-colors"
-                            title="-10 Points"
-                          >
-                            <Minus className="w-4 h-4" />
-                          </button>
+                      
+                      {stations.map(s => {
+                        const currentVal = teamPendingScores[s.key] !== undefined 
+                          ? teamPendingScores[s.key] 
+                          : (team.stationScores?.[s.key] || 0);
                           
-                          <input 
-                            type="number" 
-                            className="w-20 bg-void/50 border border-glass-border rounded-lg text-center font-display font-bold text-xl py-1 focus:outline-none focus:border-pulse text-white"
-                            value={currentScore}
-                            onChange={(e) => handleManualInput(team._id, e.target.value)}
-                          />
-                          
-                          <button 
-                            onClick={() => handleScoreChange(team._id, team.scoreboardPoints || 0, 10)}
-                            className="p-1.5 rounded bg-white/5 hover:bg-white/10 text-white transition-colors"
-                            title="+10 Points"
-                          >
-                            <Plus className="w-4 h-4" />
-                          </button>
-                        </div>
+                        return (
+                          <td key={s.key} className="px-2 py-4">
+                            <div className="flex justify-center">
+                              <input 
+                                type="number" 
+                                min="0"
+                                className="w-16 bg-void/50 border border-glass-border rounded-md text-center font-display font-medium text-lg py-1 focus:outline-none focus:border-pulse text-white transition-colors"
+                                value={currentVal}
+                                onChange={(e) => handleManualInput(team._id, s.key, e.target.value)}
+                              />
+                            </div>
+                          </td>
+                        );
+                      })}
+                      
+                      <td className="px-4 py-4 text-center font-bold text-pulse-bright text-lg">
+                        {liveTotal}
                       </td>
-                      <td className="px-6 py-4 text-right">
+                      
+                      <td className="px-4 py-4 text-right">
                         <Button 
                           variant={isModified ? 'primary' : 'ghost'}
                           size="sm"
                           disabled={!isModified || savingId === team._id}
                           isLoading={savingId === team._id}
-                          onClick={() => saveScore(team._id, team.scoreboardPoints || 0)}
+                          onClick={() => saveScore(team._id)}
                           className={isModified ? 'animate-pulse shadow-[0_0_15px_rgba(139,92,246,0.5)]' : ''}
                         >
                           <Save className="w-4 h-4 mr-2" />

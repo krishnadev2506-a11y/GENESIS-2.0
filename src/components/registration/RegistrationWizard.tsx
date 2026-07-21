@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { m, AnimatePresence } from 'framer-motion';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { Button } from '@/components/ui/Button';
@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { AlertError } from '@/components/ui/AlertError';
 import { getFriendlyErrorMessage } from '@/lib/errors';
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner';
 
 const step1Schema = z.object({
   teamName: z.string().min(2, "Team name must be at least 2 characters").max(50),
@@ -23,6 +24,7 @@ const memberSchema = z.object({
   phone: z.string().regex(/^[0-9]{10}$/, 'Invalid phone number (10 digits)').optional().or(z.literal('')),
   college: z.string().optional().or(z.literal('')),
   semester: z.string().optional().or(z.literal('')),
+  foodPreference: z.enum(['veg', 'non-veg']).optional(),
 });
 
 
@@ -37,10 +39,28 @@ export function RegistrationWizard() {
   const router = useRouter();
   const [uploadProgress, setUploadProgress] = useState(0);
 
+  const [settings, setSettings] = useState<any>(null);
+  const [settingsLoading, setSettingsLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/settings/public')
+      .then(res => res.json())
+      .then(data => {
+        setSettings(data);
+        setSettingsLoading(false);
+      })
+      .catch(err => {
+        console.error(err);
+        setSettingsLoading(false);
+      });
+  }, []);
+
   // Basic state for the form
   const [formData, setFormData] = useState({
     teamName: '',
+    route: 'foundation',
     participantCount: 4,
+    foodRequired: true,
     members: Array.from({ length: 4 }).map((_, i) => ({ 
       name: '', 
       role: i === 0 ? 'Leader' : 'Member', 
@@ -48,6 +68,7 @@ export function RegistrationWizard() {
       phone: '',
       college: '',
       semester: '',
+      foodPreference: 'veg',
       isLeader: i === 0
     })),
     paymentScreenshotUrl: '',
@@ -74,7 +95,7 @@ export function RegistrationWizard() {
           for (let i = 0; i < toAdd; i++) {
             newMembers.push({
               name: '', role: 'Member', email: '', phone: '',
-              college: '', semester: '', isLeader: false
+              college: '', semester: '', foodPreference: 'veg', isLeader: false
             });
           }
         } else if (newMembers.length > prev.participantCount) {
@@ -162,7 +183,8 @@ export function RegistrationWizard() {
       // Compress aggressively — 300 KB is plenty for a payment screenshot
       const options = {
         maxSizeMB: 0.3,
-        maxWidthOrHeight: 1280,
+        maxWidthOrHeight: 800,
+        initialQuality: 0.7,
         useWebWorker: true,
         fileType: 'image/jpeg' as const,
       };
@@ -242,11 +264,18 @@ export function RegistrationWizard() {
 
     const submissionPayload = {
       teamName: formData.teamName,
+      route: formData.route,
+      foodRequired: formData.foodRequired,
       college: leader.college,
       semester: leader.semester,
       contactNumber: leader.phone,
       email: leader.email,
-      members: formData.members,
+      members: formData.members.map(m => {
+        const { foodPreference, ...rest } = m;
+        return (formData.foodRequired && settings?.foodEnabled) 
+          ? { ...rest, foodPreference } 
+          : rest;
+      }),
       paymentScreenshotUrl: formData.paymentScreenshotUrl,
       paymentScreenshotPublicId: formData.paymentScreenshotPublicId,
       transactionId: formData.transactionId,
@@ -276,7 +305,46 @@ export function RegistrationWizard() {
     }
   };
 
+  const getPricingDetails = () => {
+    if (!settings?.pricing) return { originalPrice: 0, finalPrice: 0, discount: 0 };
+    const teamKey = `team${formData.participantCount}`;
+    const pricing = settings.pricing[teamKey];
+    if (!pricing) return { originalPrice: 0, finalPrice: 0, discount: 0 };
+    
+    let finalPrice = pricing.standardPrice;
+    if (settings.earlyBirdEnabled) {
+      finalPrice = Math.round(pricing.standardPrice * (1 - pricing.earlyBirdDiscountPercent / 100));
+    }
+    
+    return {
+      originalPrice: pricing.standardPrice,
+      finalPrice,
+      discount: pricing.standardPrice - finalPrice
+    };
+  };
+
+  const pricingInfo = getPricingDetails();
+
   const variants = direction === 1 ? slideLeft : slideRight;
+
+  if (settingsLoading) {
+    return (
+      <div className="w-full max-w-4xl mx-auto flex justify-center mt-20">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (settings && settings.registrationOpen === false) {
+    return (
+      <div className="w-full max-w-4xl mx-auto text-center mt-12">
+        <GlassCard className="p-8 max-w-md mx-auto">
+          <h2 className="text-2xl font-display font-bold text-white mb-4">Registration Closed</h2>
+          <p className="text-text-muted">We are currently not accepting new registrations. Please check back later.</p>
+        </GlassCard>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -322,6 +390,19 @@ export function RegistrationWizard() {
                   onChange={(e) => setFormData({...formData, teamName: e.target.value})}
                   placeholder="e.g. Byte Benders"
                 />
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-text-primary block">Track</label>
+                  <SegmentedToggle
+                    options={[
+                      { label: 'Foundation (2nd/3rd Yr)', value: 'foundation' },
+                      { label: 'Professional (4th Yr)', value: 'professional' }
+                    ]}
+                    value={formData.route}
+                    onChange={(val) => setFormData({ ...formData, route: val as 'foundation' | 'professional' })}
+                  />
+                </div>
+
                 <div>
                   <label className="text-sm font-medium text-text-primary block mb-2">Number of Participants</label>
                   <select 
@@ -334,6 +415,20 @@ export function RegistrationWizard() {
                     <option value={6}>6 Members</option>
                   </select>
                 </div>
+
+                {settings?.foodEnabled && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-text-primary block">Food required for your team?</label>
+                    <SegmentedToggle
+                      options={[
+                        { label: 'Yes', value: 'yes' },
+                        { label: 'No', value: 'no' }
+                      ]}
+                      value={formData.foodRequired ? 'yes' : 'no'}
+                      onChange={(val) => setFormData({ ...formData, foodRequired: val === 'yes' })}
+                    />
+                  </div>
+                )}
               </div>
             </m.div>
           )}
@@ -407,6 +502,20 @@ export function RegistrationWizard() {
                         </>
                       )}
                     </div>
+                    
+                    {formData.foodRequired && settings?.foodEnabled && (
+                      <div className="mt-4 max-w-[200px]">
+                        <label className="text-sm font-medium text-text-primary block mb-2">Food Preference</label>
+                        <SegmentedToggle
+                          options={[
+                            { label: 'Veg', value: 'veg' },
+                            { label: 'Non-Veg', value: 'non-veg' }
+                          ]}
+                          value={member.foodPreference || 'veg'}
+                          onChange={(val) => updateMember(index, 'foodPreference', val)}
+                        />
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -425,29 +534,37 @@ export function RegistrationWizard() {
             >
               <h2 className="text-2xl font-display font-bold text-white mb-6">Payment Details</h2>
               
-              <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-8">
-                <h3 className="font-semibold text-lg mb-4">Fee Summary</h3>
-                <div className="flex justify-between py-2 border-b border-white/10">
-                  <span className="text-text-muted">Base Entry (4 Members)</span>
-                  <span className="text-white font-mono">₹600</span>
-                </div>
-                {formData.participantCount > 4 && (
-                  <div className="flex justify-between py-2 border-b border-white/10">
-                    <span className="text-text-muted">Extra Members ({formData.participantCount - 4} × ₹125)</span>
-                    <span className="text-white font-mono">₹{(formData.participantCount - 4) * 125}</span>
+              <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-8 relative">
+                {settings?.earlyBirdEnabled && (
+                  <div className="absolute -top-3 -right-3 bg-pulse text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-pulse-bright/50">
+                    Early Bird Active!
                   </div>
                 )}
+                <h3 className="font-semibold text-lg mb-4">Fee Summary</h3>
+                <div className="flex justify-between py-2 border-b border-white/10">
+                  <span className="text-text-muted">Registration ({formData.participantCount} Members)</span>
+                  <span className="text-white font-mono">
+                    {settings?.earlyBirdEnabled && (
+                      <span className="line-through text-text-muted mr-3">₹{pricingInfo.originalPrice}</span>
+                    )}
+                    ₹{pricingInfo.finalPrice}
+                  </span>
+                </div>
                 <div className="flex justify-between py-3 font-bold text-lg">
                   <span className="text-pulse">Total Amount</span>
-                  <span className="text-pulse font-mono">₹{600 + (formData.participantCount - 4) * 125}</span>
+                  <span className="text-pulse font-mono">₹{pricingInfo.finalPrice}</span>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h4 className="font-semibold mb-2">Scan to Pay</h4>
-                  <div className="w-full aspect-square bg-white/10 rounded-xl flex items-center justify-center border-2 border-dashed border-white/20 mb-4">
-                    <span className="text-text-muted">QR Code from Settings</span>
+                  <div className="w-full aspect-square bg-white/10 rounded-xl flex items-center justify-center border-2 border-dashed border-white/20 mb-4 overflow-hidden">
+                    {settings?.qrCodeImageUrl ? (
+                      <img src={settings.qrCodeImageUrl} alt="Payment QR Code" className="w-full h-full object-contain" />
+                    ) : (
+                      <span className="text-text-muted">No QR Code available</span>
+                    )}
                   </div>
                   <p className="text-xs text-text-muted">Or pay via UPI ID: example@upi</p>
                 </div>

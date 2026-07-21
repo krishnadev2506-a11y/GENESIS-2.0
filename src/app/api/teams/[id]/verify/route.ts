@@ -28,6 +28,11 @@ export async function PATCH(
     
     const beforeData = team.toObject();
     
+    // Fallback for older teams that registered before route was required
+    if (!team.route) {
+      team.route = 'foundation';
+    }
+    
     // Generate credentials
     const { username, password } = generateCredentials(team.teamName);
     const passwordHash = await hashPassword(password);

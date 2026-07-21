@@ -4,10 +4,21 @@ import Team from '@/models/Team';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
 
+const STATION_KEYS = [
+  'debugArena',
+  'systemDesignSprint',
+  'codeReviewChallenge',
+  'aiEngineeringChallenge',
+  'deploymentSprint',
+  'mockTechnicalInterview',
+] as const;
+
+const FOUNDATION_STATION_KEYS = STATION_KEYS.filter(k => k !== 'mockTechnicalInterview');
+
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
     const cookieStore = await cookies();
-    const token = cookieStore.get('genesis_admin_token')?.value;
+    const token = cookieStore.get('genesis_token')?.value || cookieStore.get('genesis_admin_token')?.value;
 
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -20,22 +31,84 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
     const { id } = await params;
     const body = await req.json();
-    const { points } = body;
-
-    if (typeof points !== 'number') {
-      return NextResponse.json({ error: 'Points must be a number' }, { status: 400 });
-    }
 
     await connectDB();
-    const updatedTeam = await Team.findByIdAndUpdate(
-      id,
-      { scoreboardPoints: points },
-      { new: true }
-    );
 
-    if (!updatedTeam) {
+    // Support both legacy single-points update and new per-station update
+    if (typeof body.points === 'number') {
+      // Legacy: set scoreboardPoints directly
+      const updatedTeam = await Team.findByIdAndUpdate(
+        id,
+        { scoreboardPoints: body.points },
+        { returnDocument: 'after' }
+      );
+      if (!updatedTeam) {
+        return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+      }
+      return NextResponse.json({ success: true, team: updatedTeam });
+    }
+
+    // New: per-station scores
+    const { stationScores } = body;
+    if (!stationScores || typeof stationScores !== 'object') {
+      return NextResponse.json({ error: 'stationScores object is required' }, { status: 400 });
+    }
+
+    // Fetch team to check route
+    const team = await Team.findById(id);
+    if (!team) {
       return NextResponse.json({ error: 'Team not found' }, { status: 404 });
     }
+
+    // Validate: mockTechnicalInterview only allowed for professional route
+    if (team.route === 'foundation' && stationScores.mockTechnicalInterview && stationScores.mockTechnicalInterview > 0) {
+      return NextResponse.json(
+        { error: 'Mock Technical Interview scores are only available for Professional route teams' },
+        { status: 400 }
+      );
+    }
+
+    // Build update object, only updating provided fields
+    const allowedKeys = team.route === 'foundation' ? FOUNDATION_STATION_KEYS : STATION_KEYS;
+    const updateObj: Record<string, number> = {};
+    let totalPoints = 0;
+
+    for (const key of allowedKeys) {
+      const value = stationScores[key];
+      if (value !== undefined) {
+        if (typeof value !== 'number' || value < 0) {
+          return NextResponse.json({ error: `Invalid score for ${key}: must be a non-negative number` }, { status: 400 });
+        }
+        updateObj[`stationScores.${key}`] = value;
+      }
+    }
+
+    // Re-read all station scores after applying updates to compute total
+    const currentScores = team.stationScores || {
+      debugArena: 0, systemDesignSprint: 0, codeReviewChallenge: 0,
+      aiEngineeringChallenge: 0, deploymentSprint: 0, mockTechnicalInterview: 0,
+    };
+
+    for (const key of STATION_KEYS) {
+      if (updateObj[`stationScores.${key}`] !== undefined) {
+        totalPoints += updateObj[`stationScores.${key}`];
+      } else {
+        totalPoints += (currentScores as any)[key] || 0;
+      }
+    }
+
+    // For foundation route, zero out mock interview in total
+    if (team.route === 'foundation') {
+      totalPoints -= (currentScores.mockTechnicalInterview || 0);
+    }
+
+    updateObj['scoreboardPoints'] = totalPoints;
+
+    const updatedTeam = await Team.findByIdAndUpdate(
+      id,
+      { $set: updateObj },
+      { returnDocument: 'after' }
+    );
 
     return NextResponse.json({ success: true, team: updatedTeam });
   } catch (error: any) {
