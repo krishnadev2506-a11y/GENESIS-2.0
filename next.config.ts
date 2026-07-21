@@ -16,12 +16,12 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'res.cloudinary.com',
-        pathname: '/dkhkzijpe/**',
+        pathname: '/**',
       },
       {
         protocol: 'https',
         hostname: 'collection.cloudinary.com',
-        pathname: '/dkhkzijpe/**',
+        pathname: '/**',
       },
     ],
   },
