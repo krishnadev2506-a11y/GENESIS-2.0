@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ClubLogo } from '@/components/brand/ClubLogo';
+import Image from 'next/image';
 import { BrandWordmark } from '@/components/brand/BrandWordmark';
 
 export function Footer() {
@@ -13,12 +13,16 @@ export function Footer() {
           <p className="mb-5 text-sm text-text-muted leading-relaxed">
             A Buildathon focused on software engineering &amp; implementation quality — not just ideas.
           </p>
-          <div className="flex items-center gap-4 rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-4 py-3 shadow-[0_0_24px_rgba(139,92,246,0.08)]">
-            <ClubLogo className="h-12 w-12 shrink-0 sm:h-14 sm:w-14" />
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.28em] text-text-muted sm:text-[11px] sm:tracking-[0.34em]">Organized by</p>
-              <p className="text-sm uppercase tracking-[0.18em] text-white sm:text-[13px] sm:tracking-[0.24em]">FISAT Horizon Club</p>
-            </div>
+          <div className="rounded-[22px] border border-[rgba(255,255,255,0.08)] bg-[rgba(255,255,255,0.04)] px-4 py-3 shadow-[0_0_24px_rgba(139,92,246,0.08)]">
+            <p className="mb-2 text-[10px] uppercase tracking-[0.28em] text-text-muted sm:text-[11px] sm:tracking-[0.34em]">Organized by</p>
+            <Image
+              src="/fisat-horizon-club-footer.jpg"
+              alt="FISAT Horizon Club"
+              width={320}
+              height={120}
+              sizes="(max-width: 640px) 48px, 56px"
+              className="h-auto w-full max-w-[56px] rounded-lg bg-white object-contain"
+            />
           </div>
         </div>
 
