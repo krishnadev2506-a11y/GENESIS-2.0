@@ -25,8 +25,6 @@ function getTransporter(): nodemailer.Transporter {
   return transporter;
 }
 
-// CRITICAL FIX: The From email address must match the authenticated Gmail account exactly
-// to pass SPF alignment. We can customize the display name, but the actual address must be EMAIL_USER.
 function getFromEmail(): string {
   const user = process.env.EMAIL_USER;
   return `GENESIS 2.0 <${user}>`;
@@ -109,9 +107,12 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
     headers: {
       'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
     }
+  }).catch(err => {
+    logger.error(`Failed to send registration received email to ${to}:`, err);
   }));
 
   await Promise.allSettled(promises);
+  logger.info(`Sent registration received emails to ${toEmails.length} recipients for team ${teamName}`);
 }
 
 export async function sendRegistrationConfirmed(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
@@ -158,9 +159,12 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     headers: {
       'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
     }
+  }).catch(err => {
+    logger.error(`Failed to send registration confirmed email to ${to}:`, err);
   }));
 
   await Promise.allSettled(promises);
+  logger.info(`Sent registration confirmed emails to ${toEmails.length} recipients for team ${teamName}`);
 }
 
 export async function sendAdminMessage(to: string, subject: string, body: string): Promise<void> {
@@ -202,9 +206,15 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
     headers: {
       'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
     }
+  }).catch(err => {
+    logger.error(`Failed to send batch email to ${to}:`, err);
   }));
 
-  await Promise.allSettled(promises);
+  const results = await Promise.allSettled(promises);
+  const succeeded = results.filter(r => r.status === 'fulfilled').length;
+  const failed = results.filter(r => r.status === 'rejected').length;
+  
+  logger.info(`Batch email sent: ${succeeded}/${toEmails.length} succeeded, ${failed} failed - Subject: ${subject}`);
 }
 
 export async function sendAdminRegistrationAlert(teamName: string, college: string, memberCount: number): Promise<void> {
@@ -231,5 +241,47 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
     });
   } catch (err) {
     logger.error('Failed to send admin alert email', err);
+  }
+}
+
+/**
+ * Send verification confirmation email to all team members after payment verification
+ */
+export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
+  const content = `
+    <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Verification Confirmed! 🎉</h2>
+    <p style="margin: 0 0 16px 0;">Great news! Your team <strong>${teamName}</strong> has been verified for GENESIS 2.0.</p>
+    <p style="margin: 0 0 16px 0;">Your team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.</p>
+    <div style="text-align: center; margin-top: 32px;">
+      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/dashboard" style="display: inline-block; background-color: #8B5CF6; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
+    </div>
+    <p style="margin: 24px 0 0 0; color: #B3A8CC; font-size: 14px;">If you have any questions, reach out to the organizing team.</p>
+  `;
+  
+  const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\n\nYour team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.\n\nAccess Dashboard: ${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/dashboard`;
+  const htmlContent = emailTemplate(content);
+  const fromEmail = getFromEmail();
+
+  const promises = toEmails.map(to => 
+    getTransporter().sendMail({
+      from: fromEmail,
+      to,
+      subject: `Your Team ${teamName} is Verified for GENESIS 2.0!`,
+      text: textContent,
+      html: htmlContent,
+      headers: {
+        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+      }
+    }).catch(err => {
+      logger.error(`Failed to send verification email to ${to}:`, err);
+      return null;
+    })
+  );
+
+  const results = await Promise.allSettled(promises);
+  
+  const failed = results.filter(r => r.status === 'rejected');
+  if (failed.length > 0) {
+    logger.warn(`${failed.length} verification emails failed to send`);
   }
 }

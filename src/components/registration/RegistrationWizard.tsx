@@ -43,6 +43,8 @@ export function RegistrationWizard() {
   const [settings, setSettings] = useState<any>(null);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [settingsError, setSettingsError] = useState<string | null>(null);
+  const [qrCodeLoaded, setQrCodeLoaded] = useState(true);
+  const [qrCodeFailed, setQrCodeFailed] = useState(false);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -590,17 +592,31 @@ export function RegistrationWizard() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
                   <h4 className="font-semibold mb-2">Scan to Pay</h4>
-                  <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-white/20 bg-white/10">
-                    {settings?.qrCodeImageUrl ? (
+                  <div className="relative mb-4 flex aspect-square w-full items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-white/20 bg-white/10 p-4">
+                    {settings?.qrCodeImageUrl && !qrCodeFailed ? (
                       <Image
                         src={settings.qrCodeImageUrl}
                         alt="Payment QR Code"
                         fill
+                        priority
                         sizes="(max-width: 767px) calc(100vw - 3rem), 384px"
-                        className="object-contain"
+                        className="object-contain p-4"
+                        unoptimized
+                        onLoadingComplete={() => setQrCodeLoaded(true)}
+                        onError={() => {
+                          console.error('QR Code image failed to load:', settings.qrCodeImageUrl);
+                          setQrCodeFailed(true);
+                        }}
                       />
+                    ) : qrCodeFailed ? (
+                      <div className="flex flex-col items-center justify-center h-full gap-2">
+                        <svg className="w-12 h-12 text-text-muted opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 9v2m0 4v2m0 4v2M4 12a8 8 0 1116 0 8 8 0 01-16 0z" />
+                        </svg>
+                        <span className="text-center text-text-muted text-sm">QR Code unavailable</span>
+                      </div>
                     ) : (
-                      <span className="text-text-muted">No QR Code available</span>
+                      <span className="text-text-muted">No QR Code configured</span>
                     )}
                   </div>
                   <p className="text-xs text-text-muted">Or pay via UPI ID: example@upi</p>

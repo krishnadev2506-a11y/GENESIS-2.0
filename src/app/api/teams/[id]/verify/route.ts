@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import AuditLog from '@/models/AuditLog';
 import { requireAuth, generateCredentials, hashPassword } from '@/lib/auth';
-import { sendRegistrationConfirmed } from '@/lib/mail';
+import { sendRegistrationConfirmed, sendVerificationConfirmation } from '@/lib/mail';
 import mongoose from 'mongoose';
 
 export async function PATCH(
@@ -48,9 +48,14 @@ export async function PATCH(
     // Send email with credentials
     try {
       const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
+      
+      // Send credentials to team leader/all members
       await sendRegistrationConfirmed(allMemberEmails, team.teamName, username, password);
+      
+      // Send verification confirmation to all team members
+      await sendVerificationConfirmation(allMemberEmails, team.teamName);
     } catch (err) {
-      console.error('Failed to send confirmation email:', err);
+      console.error('Failed to send confirmation emails:', err);
     }
     
     // Audit log
