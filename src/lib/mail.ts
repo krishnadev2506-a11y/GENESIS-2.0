@@ -1,5 +1,7 @@
 import nodemailer from 'nodemailer';
 import { logger } from '@/lib/logger';
+import { connectDB } from '@/lib/db';
+import Settings from '@/models/Settings';
 
 // Use Gmail SMTP
 const transporter = nodemailer.createTransport({
@@ -158,6 +160,48 @@ export async function sendTeamCredentials(toEmails: string[], teamName: string, 
   await Promise.allSettled(promises);
 }
 
+export async function sendRegistrationConfirmed(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
+  await connectDB();
+  let contentStr = '';
+  try {
+    // @ts-ignore
+    const settings = await Settings.getSettings();
+    contentStr = settings.registrationConfirmedEmailTemplate || 'Confirmed! User: {{username}}, Pass: {{password}}';
+  } catch (err) {
+    logger.error('Error fetching settings for email template', err);
+    contentStr = 'Confirmed! User: {{username}}, Pass: {{password}}';
+  }
+
+  contentStr = contentStr
+    .replace(/{{teamName}}/g, teamName)
+    .replace(/{{username}}/g, username)
+    .replace(/{{password}}/g, password);
+
+  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/login`;
+  const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
+  const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
+  
+  const content = `
+    ${formattedContent}
+    <div style="text-align: center; margin-top: 32px;">
+      <a href="${loginUrl}" style="display: inline-block; background-color: #4F46E5; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
+    </div>
+  `;
+  const htmlContent = emailTemplate(content);
+
+  const promises = toEmails.map(to => 
+    sendEmail({
+      toEmails: [to],
+      subject: "You are confirmed for GENESIS 2.0 - Welcome!",
+      textContent,
+      htmlContent
+    }).catch(err => logger.error(`Failed to send registration confirmed email to ${to}:`, err))
+  );
+
+  await Promise.allSettled(promises);
+  logger.info(`Sent registration confirmed emails to ${toEmails.length} recipients for team ${teamName}`);
+}
+
 export async function sendAdminMessage(to: string, subject: string, body: string): Promise<void> {
   const content = `
     <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">${subject}</h1>
@@ -238,4 +282,26 @@ export async function sendVerificationConfirmation(toEmails: string[], teamName:
   );
 
   await Promise.allSettled(promises);
+}
+
+export async function sendAdminVerificationAlert(teamName: string, verifiedBy: string = 'Admin'): Promise<void> {
+  const content = `
+    <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Team Verified!</h1>
+    <p style="margin: 0 0 16px 0;">The team <strong>${teamName}</strong> has been successfully verified.</p>
+    <p style="margin: 0 0 16px 0;">Verification handled by: ${verifiedBy}</p>
+    <p style="margin: 0 0 16px 0;">A confirmation email along with their dashboard login credentials has been automatically sent to all members of the team.</p>
+  `;
+  
+  const textContent = `Team Verified!\n\nThe team ${teamName} has been successfully verified.\nVerification handled by: ${verifiedBy}\n\nA confirmation email along with their dashboard login credentials has been automatically sent to all members of the team.`;
+  
+  try {
+    await sendEmail({
+      toEmails: ['krishnadev2506@gmail.com'],
+      subject: `Team Verified: ${teamName}`,
+      textContent,
+      htmlContent: emailTemplate(content)
+    });
+  } catch (err) {
+    logger.error('Failed to send admin verification alert email', err);
+  }
 }
