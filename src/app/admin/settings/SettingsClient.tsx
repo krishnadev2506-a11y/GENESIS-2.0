@@ -44,10 +44,7 @@ export function SettingsClient() {
       releaseDate: '',
       published: false
     },
-    prizePool: {
-      foundation: 'Will be released soon..',
-      professional: 'Will be released soon..'
-    }
+    prizePool: 'Will be released soon..'
   });
 
   const { data: settings, isLoading } = useQuery({
@@ -109,10 +106,7 @@ export function SettingsClient() {
           releaseDate: formatLocalDate(settings.themeProfessional?.releaseDate),
           published: settings.themeProfessional?.published ?? false,
         },
-        prizePool: {
-          foundation: settings.prizePool?.foundation ?? 'Will be released soon..',
-          professional: settings.prizePool?.professional ?? 'Will be released soon..'
-        }
+        prizePool: settings.prizePool ?? 'Will be released soon..'
       });
     }
   }, [settings]);
@@ -464,21 +458,13 @@ export function SettingsClient() {
         <GlassCard className="p-8">
           <h2 className="text-2xl font-display font-bold text-white mb-6 uppercase">Prize Pool</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <div>
-              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Foundation Track Prize Pool</label>
+              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Combined Prize Pool</label>
               <input 
-                type="text" name="prizePool.foundation" required
+                type="text" name="prizePool" required
                 className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
-                value={formData.prizePool.foundation} onChange={handleChange}
-              />
-            </div>
-            <div>
-              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Professional Track Prize Pool</label>
-              <input 
-                type="text" name="prizePool.professional" required
-                className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
-                value={formData.prizePool.professional} onChange={handleChange}
+                value={formData.prizePool} onChange={handleChange}
               />
             </div>
           </div>
