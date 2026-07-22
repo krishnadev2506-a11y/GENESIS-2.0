@@ -28,14 +28,11 @@ export function PrizePoolBanner() {
 
           {/* Text Content */}
           <div className="relative z-10 flex-1 text-center md:text-left">
-            <div className="inline-block px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 mb-4 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
+            <div className="inline-block px-4 py-1.5 rounded-full border border-purple-500/30 bg-purple-500/10 shadow-[0_0_15px_rgba(168,85,247,0.15)]">
               <h3 className="text-[10px] sm:text-xs font-display font-bold uppercase tracking-[0.25em] text-purple-200">
                 Prize Pool
               </h3>
             </div>
-            <p className="text-base sm:text-lg text-white/90 max-w-md mx-auto md:mx-0 font-medium leading-relaxed">
-              Reward for exceptional execution, clean code, and true innovation.
-            </p>
           </div>
 
           {/* The Money Element */}
@@ -65,12 +62,9 @@ export function PrizePoolBanner() {
               </m.div>
 
               {/* Amount */}
-              <div className="flex items-start">
+              <div className="flex items-center">
                 <span className="text-[2.75rem] leading-none sm:text-6xl font-display font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-purple-50 to-teal-200 drop-shadow-[0_0_25px_rgba(45,212,191,0.5)] tracking-tight">
                   15k
-                </span>
-                <span className="text-2xl sm:text-4xl font-display font-bold text-teal-400 ml-1 drop-shadow-[0_0_15px_rgba(45,212,191,0.6)]">
-                  +
                 </span>
               </div>
               
