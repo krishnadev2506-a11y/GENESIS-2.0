@@ -20,7 +20,6 @@ export async function GET() {
 
     const publicSettings = {
       registrationOpen: settings.registrationOpen,
-      earlyBirdEnabled: settings.earlyBirdEnabled,
       pricing: settings.pricing,
       foodEnabled: settings.foodEnabled,
       eventDate: settings.eventDate,

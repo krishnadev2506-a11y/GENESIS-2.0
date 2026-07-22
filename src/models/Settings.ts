@@ -5,7 +5,6 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface ITeamSizePricing {
   withFoodPrice: number;
   withoutFoodPrice: number;
-  earlyBirdDiscountPercent: number;
 }
 
 export interface IPricing {
@@ -40,8 +39,7 @@ export interface ISettings extends Document {
   upiId: string;
   adminContactNumber: string;
 
-  // Pricing (replaces old entryFee / extraMemberFee / baseTeamSize / maxTeamSize)
-  earlyBirdEnabled: boolean;
+  // Pricing
   pricing: IPricing;
 
   // Food
@@ -65,7 +63,6 @@ const TeamSizePricingSchema = new Schema<ITeamSizePricing>(
   {
     withFoodPrice: { type: Number, required: true },
     withoutFoodPrice: { type: Number, required: true },
-    earlyBirdDiscountPercent: { type: Number, required: true, min: 0, max: 100 },
   },
   { _id: false }
 );
@@ -107,17 +104,16 @@ const SettingsSchema = new Schema<ISettings>(
     adminContactNumber: { type: String, default: '' },
 
     // Pricing
-    earlyBirdEnabled: { type: Boolean, default: false },
     pricing: {
       type: {
-        team4: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 600, withoutFoodPrice: 400, earlyBirdDiscountPercent: 20 }) },
-        team5: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 725, withoutFoodPrice: 500, earlyBirdDiscountPercent: 20 }) },
-        team6: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 850, withoutFoodPrice: 600, earlyBirdDiscountPercent: 20 }) },
+        team4: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 600, withoutFoodPrice: 400 }) },
+        team5: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 725, withoutFoodPrice: 500 }) },
+        team6: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 850, withoutFoodPrice: 600 }) },
       },
       default: () => ({
-        team4: { withFoodPrice: 600, withoutFoodPrice: 400, earlyBirdDiscountPercent: 20 },
-        team5: { withFoodPrice: 725, withoutFoodPrice: 500, earlyBirdDiscountPercent: 20 },
-        team6: { withFoodPrice: 850, withoutFoodPrice: 600, earlyBirdDiscountPercent: 20 },
+        team4: { withFoodPrice: 600, withoutFoodPrice: 400 },
+        team5: { withFoodPrice: 725, withoutFoodPrice: 500 },
+        team6: { withFoodPrice: 850, withoutFoodPrice: 600 },
       }),
     },
 

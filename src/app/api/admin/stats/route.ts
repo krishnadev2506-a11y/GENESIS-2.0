@@ -45,11 +45,7 @@ export async function GET(req: NextRequest) {
           const isFoodSelected = team.foodRequired !== false && settings?.foodEnabled;
           const basePrice = isFoodSelected ? pricingObj.withFoodPrice : pricingObj.withoutFoodPrice;
 
-          if (settings.earlyBirdEnabled) {
-            totalRevenue += Math.round(basePrice * (1 - pricingObj.earlyBirdDiscountPercent / 100));
-          } else {
-            totalRevenue += basePrice;
-          }
+          totalRevenue += basePrice;
         }
       }
     });

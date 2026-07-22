@@ -337,15 +337,10 @@ export function RegistrationWizard() {
     const isFoodSelected = formData.foodRequired && settings?.foodEnabled;
     const basePrice = isFoodSelected ? pricing.withFoodPrice : pricing.withoutFoodPrice;
 
-    let finalPrice = basePrice;
-    if (settings.earlyBirdEnabled) {
-      finalPrice = Math.round(basePrice * (1 - pricing.earlyBirdDiscountPercent / 100));
-    }
-    
     return {
       originalPrice: basePrice,
-      finalPrice,
-      discount: basePrice - finalPrice
+      finalPrice: basePrice,
+      discount: 0
     };
   };
 
@@ -627,18 +622,10 @@ export function RegistrationWizard() {
               <h2 className="text-2xl font-display font-bold text-white mb-6">Payment Details</h2>
               
               <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-8 relative">
-                {settings?.earlyBirdEnabled && (
-                  <div className="absolute -top-3 -right-3 bg-pulse text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-pulse-bright/50">
-                    Early Bird Active!
-                  </div>
-                )}
                 <h3 className="font-semibold text-lg mb-4">Fee Summary</h3>
                 <div className="flex justify-between py-2 border-b border-white/10">
                   <span className="text-text-muted">Registration ({formData.participantCount} Members)</span>
                   <span className="text-white font-mono">
-                    {settings?.earlyBirdEnabled && (
-                      <span className="line-through text-text-muted mr-3">₹{pricingInfo.originalPrice}</span>
-                    )}
                     ₹{pricingInfo.finalPrice}
                   </span>
                 </div>

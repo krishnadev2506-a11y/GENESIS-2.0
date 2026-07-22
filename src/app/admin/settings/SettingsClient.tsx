@@ -21,11 +21,10 @@ export function SettingsClient() {
     registrationReceivedEmailTemplate: '',
     registrationConfirmedEmailTemplate: '',
     
-    earlyBirdEnabled: false,
     pricing: {
-      team4: { withFoodPrice: 0, withoutFoodPrice: 0, earlyBirdDiscountPercent: 0 },
-      team5: { withFoodPrice: 0, withoutFoodPrice: 0, earlyBirdDiscountPercent: 0 },
-      team6: { withFoodPrice: 0, withoutFoodPrice: 0, earlyBirdDiscountPercent: 0 },
+      team4: { withFoodPrice: 0, withoutFoodPrice: 0 },
+      team5: { withFoodPrice: 0, withoutFoodPrice: 0 },
+      team6: { withFoodPrice: 0, withoutFoodPrice: 0 },
     },
     upiId: '',
     adminContactNumber: '',
@@ -76,22 +75,18 @@ export function SettingsClient() {
         registrationReceivedEmailTemplate: settings.registrationReceivedEmailTemplate ?? '',
         registrationConfirmedEmailTemplate: settings.registrationConfirmedEmailTemplate ?? '',
         
-        earlyBirdEnabled: settings.earlyBirdEnabled ?? false,
         pricing: {
           team4: {
             withFoodPrice: settings.pricing?.team4?.withFoodPrice ?? 600,
             withoutFoodPrice: settings.pricing?.team4?.withoutFoodPrice ?? 400,
-            earlyBirdDiscountPercent: settings.pricing?.team4?.earlyBirdDiscountPercent ?? 20,
           },
           team5: {
             withFoodPrice: settings.pricing?.team5?.withFoodPrice ?? 725,
             withoutFoodPrice: settings.pricing?.team5?.withoutFoodPrice ?? 500,
-            earlyBirdDiscountPercent: settings.pricing?.team5?.earlyBirdDiscountPercent ?? 20,
           },
           team6: {
             withFoodPrice: settings.pricing?.team6?.withFoodPrice ?? 850,
             withoutFoodPrice: settings.pricing?.team6?.withoutFoodPrice ?? 600,
-            earlyBirdDiscountPercent: settings.pricing?.team6?.earlyBirdDiscountPercent ?? 20,
           },
         },
         upiId: settings.upiId ?? '',
@@ -235,11 +230,9 @@ export function SettingsClient() {
 
   const renderPricingRow = (teamSize: 'team4' | 'team5' | 'team6', label: string) => {
     const p = formData.pricing[teamSize];
-    const ebWithFood = p.withFoodPrice - (p.withFoodPrice * (p.earlyBirdDiscountPercent / 100));
-    const ebWithoutFood = p.withoutFoodPrice - (p.withoutFoodPrice * (p.earlyBirdDiscountPercent / 100));
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end bg-void/30 p-4 border border-glass-border rounded-[14px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end bg-void/30 p-4 border border-glass-border rounded-[14px]">
         <div>
           <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - With Food (₹)</label>
           <input 
@@ -255,18 +248,6 @@ export function SettingsClient() {
             className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
             value={p.withoutFoodPrice} onChange={handleChange}
           />
-        </div>
-        <div>
-          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">Early Bird (%)</label>
-          <input 
-            type="number" name={`pricing.${teamSize}.earlyBirdDiscountPercent`} required min="0" max="100" step="any"
-            className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
-            value={p.earlyBirdDiscountPercent} onChange={handleChange}
-          />
-        </div>
-        <div className="pb-3 text-pulse font-medium text-sm flex flex-col justify-center h-full">
-          <span>EB With Food: ₹{Math.round(ebWithFood)}</span>
-          <span>EB Without: ₹{Math.round(ebWithoutFood)}</span>
         </div>
       </div>
     );
@@ -431,17 +412,11 @@ export function SettingsClient() {
 
         {/* Pricing */}
         <GlassCard className="p-8">
-          <h2 className="text-2xl font-display font-bold text-white mb-6 uppercase">Pricing</h2>
-          
-          <div className="flex items-center justify-between p-4 bg-void/50 border border-glass-border rounded-[14px] mb-8">
+          <div className="flex justify-between items-center mb-6">
             <div>
-              <h3 className="font-bold text-white text-lg">Early Bird Pricing</h3>
-              <p className="text-text-muted text-sm">Enable early bird discounts for registrations.</p>
+              <h2 className="text-2xl font-display font-bold text-white uppercase">Pricing Configuration</h2>
+              <p className="text-text-muted text-sm mt-1">Set the entry fees based on team sizes.</p>
             </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" name="earlyBirdEnabled" className="sr-only peer" checked={formData.earlyBirdEnabled} onChange={handleChange} />
-              <div className="w-14 h-7 bg-void border border-glass-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-text-muted peer-checked:after:bg-pulse after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:border-pulse"></div>
-            </label>
           </div>
 
           <div className="space-y-6">
