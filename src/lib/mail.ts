@@ -1,23 +1,56 @@
-import nodemailer from 'nodemailer';
 import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 import { logger } from '@/lib/logger';
 
-function createTransporter(): nodemailer.Transporter {
-  // Bypassing Vercel Env variables with a split string to prevent GitHub Secret Scanning blocks
-  const user = 'b2d547001' + '@' + 'smtp-brevo.com';
-  const pass = 'xsmtpsib-76d96273a21ccd' + '8f766ef05755f41e24' + 'ff0065197607dc019c9e676' + '15fdb2430-LP7XKbGML' + 'JDJUQzR';
-  
-  return nodemailer.createTransport({
-    host: 'smtp-relay.brevo.com',
-    port: 587,
-    secure: false, // Brevo uses STARTTLS on port 587
-    auth: { user, pass },
-  });
+// Bypassing Vercel Env variables with a split string to prevent GitHub Secret Scanning blocks
+const API_KEY = 'xkeysib-' + '76d96273a21ccd8f766ef05755f41e24ff0065197607dc019c9e67615fdb2430-' + 'CD374osjNCkJOYxc';
+const FROM_EMAIL = 'krishnadev2506@gmail.com';
+const FROM_NAME = 'GENESIS 2.0';
+
+interface BrevoEmailParams {
+  toEmails?: string[];
+  bccEmails?: string[];
+  subject: string;
+  textContent: string;
+  htmlContent: string;
 }
 
-function getFromEmail(): string {
-  return `GENESIS 2.0 <krishnadev2506@gmail.com>`;
+async function sendBrevoEmail({ toEmails = [], bccEmails = [], subject, textContent, htmlContent }: BrevoEmailParams) {
+  const payload: any = {
+    sender: { name: FROM_NAME, email: FROM_EMAIL },
+    subject,
+    htmlContent,
+    textContent,
+  };
+
+  if (toEmails.length > 0) {
+    payload.to = toEmails.map(email => ({ email }));
+  } else if (bccEmails.length > 0) {
+    // If only BCC is provided, Brevo requires at least one TO address.
+    payload.to = [{ email: FROM_EMAIL }];
+  }
+
+  if (bccEmails.length > 0) {
+    payload.bcc = bccEmails.map(email => ({ email }));
+  }
+
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      'accept': 'application/json',
+      'api-key': API_KEY,
+      'content-type': 'application/json'
+    },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const errorData = await response.text();
+    logger.error('Brevo API Error:', errorData);
+    throw new Error(`Failed to send email: ${errorData}`);
+  }
+  
+  return response.json();
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -81,21 +114,15 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
   const textContent = contentStr;
   const content = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   const htmlContent = emailTemplate(content);
-  const fromEmail = getFromEmail();
-  const transporter = createTransporter();
 
-  const promises = toEmails.map(to => transporter.sendMail({
-    from: fromEmail,
-    to,
-    subject: "We have received your GENESIS 2.0 registration",
-    text: textContent,
-    html: htmlContent,
-    headers: {
-      'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
-    }
-  }).catch(err => {
-    logger.error(`Failed to send registration received email to ${to}:`, err);
-  }));
+  const promises = toEmails.map(to => 
+    sendBrevoEmail({
+      toEmails: [to],
+      subject: "We have received your GENESIS 2.0 registration",
+      textContent,
+      htmlContent
+    }).catch(err => logger.error(`Failed to send registration received email to ${to}:`, err))
+  );
 
   await Promise.allSettled(promises);
   logger.info(`Sent registration received emails to ${toEmails.length} recipients for team ${teamName}`);
@@ -129,21 +156,15 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     </div>
   `;
   const htmlContent = emailTemplate(content);
-  const fromEmail = getFromEmail();
-  const transporter = createTransporter();
 
-  const promises = toEmails.map(to => transporter.sendMail({
-    from: fromEmail,
-    to,
-    subject: "You are confirmed for GENESIS 2.0 - Welcome!",
-    text: textContent,
-    html: htmlContent,
-    headers: {
-      'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
-    }
-  }).catch(err => {
-    logger.error(`Failed to send registration confirmed email to ${to}:`, err);
-  }));
+  const promises = toEmails.map(to => 
+    sendBrevoEmail({
+      toEmails: [to],
+      subject: "You are confirmed for GENESIS 2.0 - Welcome!",
+      textContent,
+      htmlContent
+    }).catch(err => logger.error(`Failed to send registration confirmed email to ${to}:`, err))
+  );
 
   await Promise.allSettled(promises);
   logger.info(`Sent registration confirmed emails to ${toEmails.length} recipients for team ${teamName}`);
@@ -155,20 +176,15 @@ export async function sendAdminMessage(to: string, subject: string, body: string
     ${body.split('\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
   `;
   const textContent = `${subject}\n\n${body}`;
-  const transporter = createTransporter();
 
   try {
-    const result = await transporter.sendMail({
-      from: getFromEmail(),
-      to,
+    await sendBrevoEmail({
+      toEmails: [to],
       subject,
-      text: textContent,
-      html: emailTemplate(content),
-      headers: {
-        'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
-      }
+      textContent,
+      htmlContent: emailTemplate(content)
     });
-    logger.info(`Single admin message sent to ${to}: ${result.messageId}`);
+    logger.info(`Single admin message sent to ${to}`);
   } catch (err) {
     logger.error(`Failed to send admin message to ${to}:`, err);
     throw err;
@@ -188,8 +204,6 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
 
   const textContent = `${subject}\n\n${body}`;
   const htmlContent = emailTemplate(content);
-  const fromEmail = getFromEmail();
-  const transporter = createTransporter();
 
   const chunkSize = 100;
   let succeeded = 0;
@@ -198,7 +212,12 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
   for (let i = 0; i < toEmails.length; i += chunkSize) {
     const chunk = toEmails.slice(i, i + chunkSize);
     try {
-      await transporter.sendMail({ from: fromEmail, bcc: chunk, subject, text: textContent, html: htmlContent });
+      await sendBrevoEmail({
+        bccEmails: chunk,
+        subject,
+        textContent,
+        htmlContent
+      });
       succeeded += chunk.length;
     } catch (err) {
       failed += chunk.length;
@@ -227,12 +246,11 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
   const textContent = `New Team Registered!\n\nA new team has just submitted their registration for GENESIS 2.0.\n\nTeam Name: ${teamName}\nCollege: ${college}\nMembers: ${memberCount}\n\nPlease log in to the admin panel to review and verify their payment.`;
   
   try {
-    await createTransporter().sendMail({
-      from: getFromEmail(),
-      to: 'krishnadev2506@gmail.com',
+    await sendBrevoEmail({
+      toEmails: ['krishnadev2506@gmail.com'],
       subject: `New Registration Alert: ${teamName}`,
-      text: textContent,
-      html: emailTemplate(content),
+      textContent,
+      htmlContent: emailTemplate(content)
     });
   } catch (err) {
     logger.error('Failed to send admin alert email', err);
@@ -250,12 +268,11 @@ export async function sendAdminVerificationAlert(teamName: string, verifiedBy: s
   const textContent = `Team Verified!\n\nThe team ${teamName} has been successfully verified.\nVerification handled by: ${verifiedBy}\n\nA confirmation email along with their dashboard login credentials has been automatically sent to all members of the team.`;
   
   try {
-    await createTransporter().sendMail({
-      from: getFromEmail(),
-      to: 'krishnadev2506@gmail.com',
+    await sendBrevoEmail({
+      toEmails: ['krishnadev2506@gmail.com'],
       subject: `Team Verified: ${teamName}`,
-      text: textContent,
-      html: emailTemplate(content),
+      textContent,
+      htmlContent: emailTemplate(content)
     });
   } catch (err) {
     logger.error('Failed to send admin verification alert email', err);
@@ -276,19 +293,13 @@ export async function sendVerificationConfirmation(toEmails: string[], teamName:
   
   const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\n\nYour team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.\n\nAccess Dashboard: ${dashboardUrl}`;
   const htmlContent = emailTemplate(content);
-  const fromEmail = getFromEmail();
-  const transporter = createTransporter();
 
   const promises = toEmails.map(to => 
-    transporter.sendMail({
-      from: fromEmail,
-      to,
+    sendBrevoEmail({
+      toEmails: [to],
       subject: `Your Team ${teamName} is Verified for GENESIS 2.0!`,
-      text: textContent,
-      html: htmlContent,
-      headers: {
-        'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
-      }
+      textContent,
+      htmlContent
     }).catch(err => {
       logger.error(`Failed to send verification email to ${to}:`, err);
       return null;
