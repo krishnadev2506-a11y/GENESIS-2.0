@@ -333,7 +333,16 @@ export function RegistrationWizard() {
     const pricing = settings.pricing[teamKey];
     if (!pricing) return { originalPrice: 0, finalPrice: 0, discount: 0 };
     
-    // Choose base price depending on whether food is required and enabled
+    // If Early Bird is enabled, use earlyBirdPrice (food is implicitly included)
+    if (settings.earlyBirdEnabled) {
+      return {
+        originalPrice: pricing.earlyBirdPrice,
+        finalPrice: pricing.earlyBirdPrice,
+        discount: 0
+      };
+    }
+
+    // Otherwise, choose base price depending on whether food is required and enabled
     const isFoodSelected = formData.foodRequired && settings?.foodEnabled;
     const basePrice = isFoodSelected ? pricing.withFoodPrice : pricing.withoutFoodPrice;
 
@@ -503,8 +512,9 @@ export function RegistrationWizard() {
                   </select>
                 </div>
 
-                {settings?.foodEnabled && (
-                  <div className="space-y-2">
+                {/* Food Requirement (Hidden if Early Bird is active, as it includes food by default) */}
+                {!settings?.earlyBirdEnabled && settings?.foodEnabled && (
+                  <div className="space-y-4 pt-4 border-t border-white/10">
                     <label className="text-sm font-medium text-text-primary block">Food required for your team?</label>
                     <SegmentedToggle
                       options={[
@@ -622,6 +632,11 @@ export function RegistrationWizard() {
               <h2 className="text-2xl font-display font-bold text-white mb-6">Payment Details</h2>
               
               <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-8 relative">
+                {settings?.earlyBirdEnabled && (
+                  <div className="absolute -top-3 -right-3 bg-pulse text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-pulse-bright/50">
+                    Early Bird Active!
+                  </div>
+                )}
                 <h3 className="font-semibold text-lg mb-4">Fee Summary</h3>
                 <div className="flex justify-between py-2 border-b border-white/10">
                   <span className="text-text-muted">Registration ({formData.participantCount} Members)</span>
@@ -629,6 +644,14 @@ export function RegistrationWizard() {
                     ₹{pricingInfo.finalPrice}
                   </span>
                 </div>
+                
+                {settings?.earlyBirdEnabled && (
+                  <div className="flex justify-between py-2 border-b border-white/10 text-sm">
+                    <span className="text-text-muted">Food Included</span>
+                    <span className="text-emerald-400 font-medium">Yes</span>
+                  </div>
+                )}
+
                 <div className="flex justify-between py-3 font-bold text-lg">
                   <span className="text-pulse">Total Amount</span>
                   <span className="text-pulse font-mono">₹{pricingInfo.finalPrice}</span>

@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       Team.countDocuments({ paymentStatus: 'verified' }),
       Team.countDocuments({ paymentStatus: 'rejected' }),
       Team.countDocuments({ checkedIn: true }),
-      Team.find({}, { members: 1, paymentStatus: 1, foodRequired: 1 })
+      Team.find({}, { members: 1, paymentStatus: 1, foodRequired: 1, amountPaid: 1 })
     ]);
 
     let totalParticipants = 0;
@@ -35,17 +35,22 @@ export async function GET(req: NextRequest) {
       totalParticipants += numMembers;
 
       if (team.paymentStatus === 'verified') {
-        const p = settings.pricing;
-        let pricingObj = null;
-        if (numMembers === 4) pricingObj = p?.team4;
-        else if (numMembers === 5) pricingObj = p?.team5;
-        else if (numMembers >= 6) pricingObj = p?.team6;
-        
-        if (pricingObj) {
-          const isFoodSelected = team.foodRequired !== false && settings?.foodEnabled;
-          const basePrice = isFoodSelected ? pricingObj.withFoodPrice : pricingObj.withoutFoodPrice;
+        // Use historical amountPaid if available, else calculate fallback
+        if (team.amountPaid && team.amountPaid > 0) {
+          totalRevenue += team.amountPaid;
+        } else {
+          const p = settings.pricing;
+          let pricingObj = null;
+          if (numMembers === 4) pricingObj = p?.team4;
+          else if (numMembers === 5) pricingObj = p?.team5;
+          else if (numMembers >= 6) pricingObj = p?.team6;
+          
+          if (pricingObj) {
+            const isFoodSelected = team.foodRequired !== false && settings?.foodEnabled;
+            const basePrice = isFoodSelected ? pricingObj.withFoodPrice : pricingObj.withoutFoodPrice;
 
-          totalRevenue += basePrice;
+            totalRevenue += basePrice;
+          }
         }
       }
     });

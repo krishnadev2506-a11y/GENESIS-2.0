@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 // ----- Sub-document interfaces -----
 
 export interface ITeamSizePricing {
+  earlyBirdPrice: number;
   withFoodPrice: number;
   withoutFoodPrice: number;
 }
@@ -40,6 +41,7 @@ export interface ISettings extends Document {
   adminContactNumber: string;
 
   // Pricing
+  earlyBirdEnabled: boolean;
   pricing: IPricing;
 
   // Food
@@ -61,6 +63,7 @@ interface ISettingsModel extends Model<ISettings> {
 
 const TeamSizePricingSchema = new Schema<ITeamSizePricing>(
   {
+    earlyBirdPrice: { type: Number, required: true },
     withFoodPrice: { type: Number, required: true },
     withoutFoodPrice: { type: Number, required: true },
   },
@@ -104,16 +107,17 @@ const SettingsSchema = new Schema<ISettings>(
     adminContactNumber: { type: String, default: '' },
 
     // Pricing
+    earlyBirdEnabled: { type: Boolean, default: false },
     pricing: {
       type: {
-        team4: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 600, withoutFoodPrice: 400 }) },
-        team5: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 725, withoutFoodPrice: 500 }) },
-        team6: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 850, withoutFoodPrice: 600 }) },
+        team4: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 500, withFoodPrice: 600, withoutFoodPrice: 400 }) },
+        team5: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 600, withFoodPrice: 725, withoutFoodPrice: 500 }) },
+        team6: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 700, withFoodPrice: 850, withoutFoodPrice: 600 }) },
       },
       default: () => ({
-        team4: { withFoodPrice: 600, withoutFoodPrice: 400 },
-        team5: { withFoodPrice: 725, withoutFoodPrice: 500 },
-        team6: { withFoodPrice: 850, withoutFoodPrice: 600 },
+        team4: { earlyBirdPrice: 500, withFoodPrice: 600, withoutFoodPrice: 400 },
+        team5: { earlyBirdPrice: 600, withFoodPrice: 725, withoutFoodPrice: 500 },
+        team6: { earlyBirdPrice: 700, withFoodPrice: 850, withoutFoodPrice: 600 },
       }),
     },
 

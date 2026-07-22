@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
+import Settings from '@/models/Settings';
 import { sendRegistrationReceived, sendAdminRegistrationAlert } from '@/lib/mail';
 import { z } from 'zod';
 import { teamRegistrationSchema } from '@/lib/validations/team';
@@ -50,9 +51,31 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Team name already taken. Please choose a different name.' }, { status: 400 });
     }
 
+    let finalFoodRequired = validatedData.foodRequired;
+    let amountPaid = 0;
+    let isEarlyBird = false;
+    const settings = await Settings.findOne({});
+    const participantCount = validatedData.members.length;
+
+    if (settings?.pricing) {
+      const teamKey = `team${participantCount}` as 'team4' | 'team5' | 'team6';
+      const pricingObj = settings.pricing[teamKey];
+      
+      if (pricingObj) {
+        if (settings.earlyBirdEnabled) {
+          amountPaid = pricingObj.earlyBirdPrice;
+          isEarlyBird = true;
+          // If early bird is active, food is implicitly included
+          finalFoodRequired = true;
+        } else {
+          amountPaid = (finalFoodRequired && settings.foodEnabled) ? pricingObj.withFoodPrice : pricingObj.withoutFoodPrice;
+        }
+      }
+    }
+
     // Strip foodPreference from members if food is not required
     const processedMembers = validatedData.members.map(member => {
-      if (!validatedData.foodRequired) {
+      if (!finalFoodRequired) {
         const { foodPreference: _foodPreference, ...rest } = member;
         return rest;
       }
@@ -62,9 +85,12 @@ export async function POST(req: NextRequest) {
     // Create team
     const newTeam = await Team.create({
       ...validatedData,
+      foodRequired: finalFoodRequired,
       members: processedMembers,
       paymentStatus: 'pending_verification',
       registrationStatus: 'submitted',
+      amountPaid,
+      isEarlyBird
     });
     
     // Send emails (await to prevent premature serverless termination)
