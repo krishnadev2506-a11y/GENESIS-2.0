@@ -398,8 +398,8 @@ export function RegistrationWizard() {
           </div>
 
           <div>
-            <h2 className="text-3xl font-display font-bold text-white mb-2">Registration Submitted!</h2>
-            <p className="text-text-muted text-lg">Your team has been registered for GENESIS 2.0.</p>
+            <h2 className="text-3xl font-display font-bold text-white mb-2">Thank you for registering!</h2>
+            <p className="text-text-muted text-lg">Your team has been successfully registered for GENESIS 2.0.</p>
           </div>
 
           {/* Spam warning banner */}
@@ -410,9 +410,9 @@ export function RegistrationWizard() {
               </svg>
             </div>
             <div>
-              <p className="font-bold text-[#F59E0B] mb-1">Check your Spam / Junk folder!</p>
+              <p className="font-bold text-[#F59E0B] mb-1">Please check your email</p>
               <p className="text-sm text-[#FCD34D]/80 leading-relaxed">
-                We have sent a confirmation email to all registered members. If you don&apos;t see it in your inbox within a few minutes, please check your <strong>Spam</strong> or <strong>Junk</strong> folder and mark it as &quot;Not Spam&quot;.
+                We have sent a confirmation email to the Team Leader. If you don&apos;t see it in your inbox within a few minutes, please check your <strong>Spam</strong> or <strong>Junk</strong> folder and mark it as &quot;Not Spam&quot; for future updates!
               </p>
             </div>
           </div>

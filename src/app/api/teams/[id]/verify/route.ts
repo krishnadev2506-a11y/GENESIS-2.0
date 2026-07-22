@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import AuditLog from '@/models/AuditLog';
 import { requireAuth, generateCredentials, hashPassword } from '@/lib/auth';
-import { sendRegistrationConfirmed, sendVerificationConfirmation } from '@/lib/mail';
+import { sendRegistrationConfirmed, sendVerificationConfirmation, sendAdminVerificationAlert } from '@/lib/mail';
 import mongoose from 'mongoose';
 import { logger } from '@/lib/logger';
 
@@ -52,11 +52,12 @@ export async function PATCH(
     // Send emails concurrently (we must await to prevent serverless termination)
     await Promise.allSettled([
       sendRegistrationConfirmed(allMemberEmails, team.teamName, username, password),
-      sendVerificationConfirmation(allMemberEmails, team.teamName)
+      sendVerificationConfirmation(allMemberEmails, team.teamName),
+      sendAdminVerificationAlert(team.teamName)
     ]).then(results => {
       results.forEach((result, index) => {
         if (result.status === 'rejected') {
-          logger.error(`Failed to send confirmation email type ${index === 0 ? 'RegistrationConfirmed' : 'VerificationConfirmation'} for team ${team._id}:`, result.reason);
+          logger.error(`Failed to send confirmation email type ${index === 0 ? 'RegistrationConfirmed' : index === 1 ? 'VerificationConfirmation' : 'AdminVerificationAlert'} for team ${team._id}:`, result.reason);
         }
       });
     });

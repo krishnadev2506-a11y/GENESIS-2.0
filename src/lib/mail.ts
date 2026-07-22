@@ -231,13 +231,36 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
   try {
     await createTransporter().sendMail({
       from: getFromEmail(),
-      to: process.env.EMAIL_USER || 'krishnadev2506@gmail.com',
+      to: 'krishnadev2506@gmail.com',
       subject: `New Registration Alert: ${teamName}`,
       text: textContent,
       html: emailTemplate(content),
     });
   } catch (err) {
     logger.error('Failed to send admin alert email', err);
+  }
+}
+
+export async function sendAdminVerificationAlert(teamName: string, verifiedBy: string = 'Admin'): Promise<void> {
+  const content = `
+    <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Team Verified!</h1>
+    <p style="margin: 0 0 16px 0;">The team <strong>${teamName}</strong> has been successfully verified.</p>
+    <p style="margin: 0 0 16px 0;">Verification handled by: ${verifiedBy}</p>
+    <p style="margin: 0 0 16px 0;">A confirmation email along with their dashboard login credentials has been automatically sent to all members of the team.</p>
+  `;
+  
+  const textContent = `Team Verified!\n\nThe team ${teamName} has been successfully verified.\nVerification handled by: ${verifiedBy}\n\nA confirmation email along with their dashboard login credentials has been automatically sent to all members of the team.`;
+  
+  try {
+    await createTransporter().sendMail({
+      from: getFromEmail(),
+      to: 'krishnadev2506@gmail.com',
+      subject: `Team Verified: ${teamName}`,
+      text: textContent,
+      html: emailTemplate(content),
+    });
+  } catch (err) {
+    logger.error('Failed to send admin verification alert email', err);
   }
 }
 

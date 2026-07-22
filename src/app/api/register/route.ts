@@ -69,10 +69,11 @@ export async function POST(req: NextRequest) {
     
     // Send emails (await to prevent premature serverless termination)
     try {
-      const allMemberEmails = validatedData.members.map(m => m.email).filter(Boolean);
-      const allMemberNames = validatedData.members.map(m => m.name).filter(Boolean);
+      const leader = validatedData.members.find(m => m.isLeader) || validatedData.members[0];
+      const leaderEmails = [leader.email].filter(Boolean);
+      const leaderNames = [leader.name].filter(Boolean);
       await Promise.allSettled([
-        sendRegistrationReceived(allMemberEmails, validatedData.teamName, allMemberNames),
+        sendRegistrationReceived(leaderEmails, validatedData.teamName, leaderNames),
         sendAdminRegistrationAlert(validatedData.teamName, validatedData.college || 'N/A', validatedData.members.length)
       ]);
       } catch (err) {
