@@ -1,7 +1,6 @@
 import { Hero } from '@/components/home/Hero';
 import { EventIntro } from '@/components/home/EventIntro';
 import { SpaceDust } from '@/components/home/SpaceDust';
-import { PrizePool } from '@/components/home/PrizePool';
 import dynamic from 'next/dynamic';
 import { LazyLoadSection } from '@/components/ui/LazyLoadSection';
 
@@ -17,9 +16,6 @@ export default function Home() {
       <EventIntro />
       <LazyLoadSection minHeight="600px">
         <Tracks />
-      </LazyLoadSection>
-      <LazyLoadSection minHeight="400px">
-        <PrizePool />
       </LazyLoadSection>
       <LazyLoadSection minHeight="300px">
         <RegistrationCTA />

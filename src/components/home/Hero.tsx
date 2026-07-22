@@ -6,12 +6,23 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { BrandWordmark } from '@/components/brand/BrandWordmark';
 import { useEffect, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 
 export function Hero() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   const smoothX = useSpring(mouseX, { stiffness: 40, damping: 18 });
   const smoothY = useSpring(mouseY, { stiffness: 40, damping: 18 });
+
+  const { data: settings } = useQuery({
+    queryKey: ['publicSettings'],
+    queryFn: async () => {
+      const res = await fetch('/api/settings/public');
+      if (!res.ok) throw new Error('Failed to fetch settings');
+      return res.json();
+    }
+  });
+  const prizePool = settings?.prizePool || 'Will be released soon..';
 
   useEffect(() => {
     if (typeof window === 'undefined' || !window.matchMedia('(pointer: fine)').matches) {
@@ -140,6 +151,23 @@ export function Hero() {
             <div className="flex flex-col items-center">
               <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Deadline</span>
               <span className="mt-1 text-base font-semibold text-white">Aug 5</span>
+            </div>
+          </m.div>
+
+          {/* Animated Prize Pool Badge */}
+          <m.div 
+            variants={fadeUp} 
+            className="mb-12 relative group cursor-default"
+            whileHover={{ scale: 1.05 }}
+            transition={{ type: "spring", stiffness: 400, damping: 10 }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-r from-[#c4b5fd] via-[#a855f7] to-[#34d399] rounded-full blur-[16px] opacity-40 group-hover:opacity-75 transition-opacity duration-500 animate-pulse" />
+            <div className="relative px-8 py-4 bg-void/80 backdrop-blur-md border border-white/20 rounded-full flex flex-col sm:flex-row items-center gap-2 sm:gap-6 shadow-2xl">
+              <span className="text-xs sm:text-sm uppercase tracking-[0.25em] text-accent-secondary font-bold">Prize Pool</span>
+              <div className="hidden sm:block w-px h-6 bg-white/20" />
+              <span className="text-2xl sm:text-4xl font-display font-bold text-transparent bg-clip-text bg-gradient-to-br from-white to-[#6ee7b7] drop-shadow-[0_0_10px_rgba(52,211,153,0.3)]">
+                {prizePool}
+              </span>
             </div>
           </m.div>
 
