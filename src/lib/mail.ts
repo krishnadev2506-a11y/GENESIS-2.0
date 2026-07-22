@@ -175,46 +175,60 @@ export async function sendAdminMessage(to: string, subject: string, body: string
   
   const textContent = `${subject}\n\n${body}`;
 
-  await getTransporter().sendMail({
-    from: getFromEmail(),
-    to,
-    subject,
-    text: textContent,
-    html: emailTemplate(content),
-    headers: {
-      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
-    }
-  });
+  try {
+    const result = await getTransporter().sendMail({
+      from: getFromEmail(),
+      to,
+      subject,
+      text: textContent,
+      html: emailTemplate(content),
+      headers: {
+        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+      }
+    });
+    logger.info(`Single admin message sent to ${to}: ${result.messageId}`);
+  } catch (err) {
+    logger.error(`Failed to send admin message to ${to}:`, err);
+    throw err;
+  }
 }
 
 export async function sendAdminMessageBatch(toEmails: string[], subject: string, body: string): Promise<void> {
+  if (toEmails.length === 0) {
+    logger.info('sendAdminMessageBatch called with no emails to send.');
+    return;
+  }
+
   const content = `
     <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">${subject}</h1>
     ${body.split('\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
   `;
-  
+
   const textContent = `${subject}\n\n${body}`;
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
+  const transporter = getTransporter();
 
-  const promises = toEmails.map(to => getTransporter().sendMail({
-    from: fromEmail,
-    to,
-    subject,
-    text: textContent,
-    html: htmlContent,
-    headers: {
-      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+  // Use BCC for batch sending to protect recipient privacy and improve efficiency
+  const chunkSize = 100; // Gmail BCC limit is around 100
+  let succeeded = 0;
+  let failed = 0;
+
+  for (let i = 0; i < toEmails.length; i += chunkSize) {
+    const chunk = toEmails.slice(i, i + chunkSize);
+    try {
+      await transporter.sendMail({ from: fromEmail, bcc: chunk, subject, text: textContent, html: htmlContent });
+      succeeded += chunk.length;
+    } catch (err) {
+      failed += chunk.length;
+      logger.error(`Failed to send batch email chunk:`, err);
     }
-  }).catch(err => {
-    logger.error(`Failed to send batch email to ${to}:`, err);
-  }));
+  }
 
-  const results = await Promise.allSettled(promises);
-  const succeeded = results.filter(r => r.status === 'fulfilled').length;
-  const failed = results.filter(r => r.status === 'rejected').length;
-  
-  logger.info(`Batch email sent: ${succeeded}/${toEmails.length} succeeded, ${failed} failed - Subject: ${subject}`);
+  logger.info(`Batch email task finished: ${succeeded}/${toEmails.length} succeeded, ${failed} failed - Subject: ${subject}`);
+  if (failed > 0) {
+    throw new Error(`${failed} emails failed to send in batch.`);
+  }
 }
 
 export async function sendAdminRegistrationAlert(teamName: string, college: string, memberCount: number): Promise<void> {

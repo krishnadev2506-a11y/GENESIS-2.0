@@ -355,7 +355,17 @@ export function SettingsClient() {
 
               {formData.qrCodeImageUrl && (
                 <div className="mt-4 w-48 h-48 bg-void border border-glass-border rounded-[14px] overflow-hidden relative">
-                  <Image src={formData.qrCodeImageUrl} alt="QR Code Preview" fill className="object-cover" />
+                  <Image 
+                    src={formData.qrCodeImageUrl} 
+                    alt="QR Code Preview" 
+                    fill 
+                    className="object-contain"
+                    unoptimized
+                    onError={(e) => {
+                      console.error('QR Code image failed to load:', formData.qrCodeImageUrl);
+                      e.currentTarget.style.display = 'none';
+                    }}
+                  />
                 </div>
               )}
             </div>

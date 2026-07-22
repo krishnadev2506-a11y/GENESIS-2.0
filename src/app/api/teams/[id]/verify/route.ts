@@ -46,17 +46,19 @@ export async function PATCH(
     await team.save();
     
     // Send email with credentials
-    try {
-      const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
-      
-      // Send credentials to team leader/all members
-      await sendRegistrationConfirmed(allMemberEmails, team.teamName, username, password);
-      
-      // Send verification confirmation to all team members
-      await sendVerificationConfirmation(allMemberEmails, team.teamName);
-    } catch (err) {
-      console.error('Failed to send confirmation emails:', err);
-    }
+    const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
+    
+    // Send emails concurrently and log errors without stopping the response
+    Promise.allSettled([
+      sendRegistrationConfirmed(allMemberEmails, team.teamName, username, password),
+      sendVerificationConfirmation(allMemberEmails, team.teamName)
+    ]).then(results => {
+      results.forEach((result, index) => {
+        if (result.status === 'rejected') {
+          logger.error(`Failed to send confirmation email type ${index === 0 ? 'RegistrationConfirmed' : 'VerificationConfirmation'} for team ${team._id}:`, result.reason);
+        }
+      });
+    });
     
     // Audit log
     await AuditLog.create({

@@ -77,60 +77,45 @@ export async function POST(req: NextRequest) {
     // Optional: send email as well
     if (sendEmail) {
       logger.info(`Sending ${scope} message emails...`);
-      
-      if (scope === 'broadcast') {
-        try {
-          const teams = await Team.find({ registrationStatus: 'confirmed' }).select('members').lean();
-          // Collect all member emails from all confirmed teams, deduplicate
-          const emails = Array.from(new Set(teams.flatMap(t => t.members?.map((m: any) => m.email) || []).filter(Boolean)));
-          
-          logger.info(`Broadcast message: sending to ${emails.length} participants`);
-          
-          // Use batch sending to avoid rate limits and timeouts during stress testing
-          const chunkSize = 100;
-          const chunks = [];
-          for (let i = 0; i < emails.length; i += chunkSize) {
-            chunks.push(emails.slice(i, i + chunkSize));
-          }
-          
-          const promises = chunks.map(chunk => sendAdminMessageBatch(chunk, subject, messageBody));
-          const results = await Promise.allSettled(promises);
-          
-          const succeeded = results.filter(r => r.status === 'fulfilled').length;
-          const failed = results.filter(r => r.status === 'rejected').length;
-          
-          logger.info(`Broadcast email results: ${succeeded} batches succeeded, ${failed} failed`);
-        } catch (err) {
-          logger.error('Failed to send broadcast emails:', err);
-          console.error('Failed to send broadcast emails:', err);
+      try {
+        if (scope === 'broadcast') {
+            const teams = await Team.find({ registrationStatus: 'confirmed' }).select('members.email').lean();
+            // Collect all member emails from all confirmed teams, deduplicate
+            const emails = Array.from(new Set(teams.flatMap(t => t.members?.map((m: any) => m.email) || []).filter(Boolean)));
+            
+            logger.info(`Broadcast message: sending to ${emails.length} participants`);
+            await sendAdminMessageBatch(emails, subject, messageBody);
+            logger.info(`Broadcast message emails sent.`);
+        } else if (scope === 'team' && targetTeamId) {
+            const team = await Team.findById(targetTeamId).select('members.email teamName').lean();
+            if (team && team.members && team.members.length > 0) {
+              const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
+              logger.info(`Team message: sending to ${allMemberEmails.length} members of team ${team.teamName}`);
+              await sendAdminMessageBatch(allMemberEmails, subject, messageBody);
+              logger.info(`Team message sent successfully`);
+            }
+        } else if (scope === 'participant' && targetParticipantEmail) {
+            logger.info(`Participant message: sending to ${targetParticipantEmail}`);
+            await sendAdminMessage(targetParticipantEmail, subject, messageBody);
+            logger.info(`Participant message sent successfully to ${targetParticipantEmail}`);
         }
-      } else if (scope === 'team' && targetTeamId) {
-        try {
-          const team = await Team.findById(targetTeamId);
-          if (team && team.members && team.members.length > 0) {
-            const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
-            logger.info(`Team message: sending to ${allMemberEmails.length} members of team ${team.teamName}`);
-            await sendAdminMessageBatch(allMemberEmails, subject, messageBody);
-            logger.info(`Team message sent successfully`);
-          }
-        } catch (err) {
-          logger.error(`Failed to send team message for team ${targetTeamId}:`, err);
-          console.error('Failed to send team message:', err);
-        }
-      } else if (scope === 'participant' && targetParticipantEmail) {
-        try {
-          logger.info(`Participant message: sending to ${targetParticipantEmail}`);
-          await sendAdminMessage(targetParticipantEmail, subject, messageBody);
-          logger.info(`Participant message sent successfully to ${targetParticipantEmail}`);
-        } catch (err) {
-          logger.error(`Failed to send participant email to ${targetParticipantEmail}:`, err);
-          console.error('Failed to send participant email:', err);
-        }
+      } catch (emailError) {
+        logger.error(`Failed to send ${scope} message emails:`, emailError);
+        // The message is saved, but emailing failed.
+        // We can return a partial success or a specific error to the admin.
+        return NextResponse.json({ 
+          success: false, 
+          message: newMessage,
+          error: 'Message saved, but failed to send emails. Please check the logs.'
+        }, { status: 207 }); // 207 Multi-Status
       }
     }
     
     return NextResponse.json({ success: true, message: newMessage }, { status: 201 });
   } catch (error: any) {
+    if (error instanceof mongoose.Error.ValidationError) {
+      return NextResponse.json({ error: error.message }, { status: 400 });
+    }
     if (error.message === 'Authentication required' || error.message === 'Insufficient permissions') {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
@@ -139,4 +124,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 }
-
