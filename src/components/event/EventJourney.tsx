@@ -20,10 +20,12 @@ export function EventJourney({ route, theme }: EventJourneyProps) {
         { name: 'Red Team Attack', icon: '🛡️' },
         { name: 'Lightning Feature', icon: '⏱️' },
         { name: 'Mock Technical Interview', icon: '🗣️' },
+        { name: 'Resume Analysis', icon: '📄' },
       ]
     : [
         { name: 'AI Engineering Battle', icon: '🤖' },
         { name: 'Constraint Drop', icon: '⚡' },
+        { name: 'Red Team Attack', icon: '🛡️' },
         { name: 'Lightning Feature', icon: '⏱️' },
         { name: 'Best UI/UX', icon: '✨' },
       ];
@@ -113,24 +115,24 @@ export function EventJourney({ route, theme }: EventJourneyProps) {
             </p>
           </FadeUp>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {stations.map((station, i) => (
               <FadeUp key={station.name}>
                 <GlassCard
                   delay={i * 0.1}
                   hoverEffect
-                  className="p-6 h-full flex flex-col items-center text-center justify-center gap-4 transition-all duration-300 hover:scale-105"
+                  className="p-4 md:p-6 h-full flex flex-col items-center text-center justify-center gap-3 md:gap-4 transition-all duration-300 hover:scale-105"
                   style={{
                     borderColor: 'rgba(255,255,255,0.08)',
                   }}
                 >
                   <div 
-                    className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl mb-2"
+                    className="w-12 h-12 md:w-16 md:h-16 rounded-xl md:rounded-2xl flex items-center justify-center text-2xl md:text-3xl mb-1 md:mb-2"
                     style={{ background: colorGlow, border: `1px solid ${colorBorder}` }}
                   >
                     {station.icon}
                   </div>
-                  <h4 className="text-lg font-display font-semibold text-white">{station.name}</h4>
+                  <h4 className="text-sm md:text-lg font-display font-semibold text-white">{station.name}</h4>
                 </GlassCard>
               </FadeUp>
             ))}

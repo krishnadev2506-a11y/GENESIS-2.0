@@ -106,29 +106,52 @@ export function Tracks() {
               <GlassCard
                 delay={index * 0.12}
                 hoverEffect
-                className="min-h-[580px] flex flex-col p-6 sm:p-8 hover:-translate-y-1 transition-all duration-300 group"
+                className="relative min-h-[620px] flex flex-col p-6 sm:p-8 md:p-10 hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
                 style={{
                   borderColor: track.borderColor,
-                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.38), 0 0 40px ${track.glowColor}`,
+                  boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.4), 0 0 40px ${track.glowColor}`,
                 }}
               >
+                {/* Subtle background glow that intensifies on hover */}
+                <div 
+                  className="absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-500 pointer-events-none"
+                  style={{ background: `radial-gradient(circle at top right, ${track.checkColor}20, transparent 60%)` }}
+                />
+
                 {/* Header */}
-                <div className="mb-6 flex flex-col items-start gap-4">
+                <div className="mb-8 flex flex-col items-start gap-5 relative z-10">
+                  {/* Background glow for the badge */}
+                  <div 
+                    className="absolute -top-4 -left-4 w-24 h-24 rounded-full blur-2xl opacity-40 mix-blend-screen transition-opacity duration-500 group-hover:opacity-70 pointer-events-none" 
+                    style={{ background: track.checkColor }} 
+                  />
+                  
                   <div
-                    className="flex h-14 w-14 items-center justify-center rounded-2xl text-lg font-display font-bold group-hover:scale-110 transition-transform duration-300"
+                    className="relative z-10 flex h-16 w-16 items-center justify-center rounded-2xl text-2xl font-display font-bold group-hover:scale-110 group-hover:rotate-3 transition-transform duration-500 shadow-xl"
                     style={{ background: track.iconBg, border: `1px solid ${track.iconBorder}` }}
                   >
-                    <span className={`text-xl ${track.badgeText}`}>{track.badge}</span>
+                    <span className={`text-2xl ${track.badgeText} drop-shadow-md`}>{track.badge}</span>
                   </div>
-                  <div className="w-full">
-                    <p className={`text-xs font-semibold uppercase tracking-[0.24em] ${track.badgeText} mb-2`}>
+                  
+                  <div className="w-full relative z-10 mt-2">
+                    <p className={`text-xs font-bold uppercase tracking-[0.24em] ${track.badgeText} mb-3`}>
                       {track.year}
                     </p>
-                    <h3 className="text-2xl font-display font-bold text-white uppercase tracking-[0.06em] mb-2">
+                    <h3 className={`text-3xl md:text-4xl font-display font-bold uppercase tracking-wide mb-5 bg-gradient-to-r ${track.color} bg-clip-text text-transparent drop-shadow-sm`}>
                       {track.title}
                     </h3>
-                    <div className="rounded-lg bg-black/40 border border-white/5 p-4 mb-2">
-                      <h4 className="text-lg font-display text-white mb-1">{track.themeTitle}</h4>
+                    
+                    <div className="relative overflow-hidden rounded-xl border border-white/10 bg-black/50 p-5 mb-2 backdrop-blur-sm group-hover:border-white/20 transition-all duration-500">
+                      <div className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity duration-500" style={{ background: `linear-gradient(135deg, ${track.checkColor}, transparent)` }} />
+                      <h4 className="text-xl font-display text-white mb-1.5 font-medium tracking-wide flex items-center gap-3">
+                        {track.themeTitle === 'Will be released soon' && (
+                          <span className="relative flex h-3 w-3">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: track.checkColor }}></span>
+                            <span className="relative inline-flex rounded-full h-3 w-3" style={{ backgroundColor: track.checkColor }}></span>
+                          </span>
+                        )}
+                        {track.themeTitle}
+                      </h4>
                       <p className="text-sm text-text-muted italic">{track.themeTagline}</p>
                     </div>
                   </div>
@@ -136,52 +159,64 @@ export function Tracks() {
 
                 {/* Divider with gradient */}
                 <div
-                  className="mb-6 h-px w-full"
-                  style={{ background: `linear-gradient(90deg, ${track.borderColor}, transparent)` }}
+                  className="mb-8 h-[2px] w-full opacity-40 group-hover:opacity-100 transition-opacity duration-500 relative z-10"
+                  style={{ background: `linear-gradient(90deg, ${track.checkColor}, transparent)` }}
                 />
 
                 {/* Expectations */}
-                <ul className="flex-grow space-y-3 mb-8">
+                <ul className="flex-grow space-y-4 mb-10 relative z-10">
                   {track.expectations.map((item) => (
-                    <li key={item} className="flex items-start gap-2.5 text-sm text-text-muted leading-relaxed">
-                      <svg
-                        className="mt-0.5 h-4 w-4 flex-shrink-0"
-                        style={{ color: track.checkColor }}
-                        viewBox="0 0 16 16"
-                        fill="currentColor"
-                      >
-                        <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.78 5.28a.75.75 0 0 0-1.06-1.06L7 7.94 5.28 6.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.06 0l4.25-4.25z" />
-                      </svg>
-                      {item}
+                    <li key={item} className="flex items-center gap-3 text-sm text-text-muted leading-relaxed group/item transition-colors hover:text-white">
+                      <div className="relative flex items-center justify-center">
+                        <div className="absolute inset-0 blur-sm opacity-0 group-hover/item:opacity-100 transition-opacity" style={{ background: track.checkColor }} />
+                        <svg
+                          className="relative h-5 w-5 flex-shrink-0 transition-transform group-hover/item:scale-125"
+                          style={{ color: track.checkColor }}
+                          viewBox="0 0 16 16"
+                          fill="currentColor"
+                        >
+                          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.78 5.28a.75.75 0 0 0-1.06-1.06L7 7.94 5.28 6.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.06 0l4.25-4.25z" />
+                        </svg>
+                      </div>
+                      <span className="font-medium text-[15px]">{item}</span>
                     </li>
                   ))}
                 </ul>
 
-                {/* Note */}
-                <div className="mt-auto space-y-4">
-                  <p className="rounded-xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] px-4 py-3 text-xs text-text-muted/70 italic leading-relaxed">
-                    {track.note}
-                  </p>
+                {/* Note and Action */}
+                <div className="mt-auto space-y-5 relative z-10">
+                  <div className="relative overflow-hidden rounded-xl border border-[rgba(255,255,255,0.06)] bg-white/5 p-4 group-hover:bg-white/[0.08] transition-colors">
+                    <p className="text-[13px] text-text-muted font-medium italic leading-relaxed text-center">
+                      {track.note}
+                    </p>
+                  </div>
                   
                   <Link href={track.route} className="block w-full">
-                    <Button 
-                      variant="secondary" 
-                      className="w-full justify-center group/btn"
+                    <button 
+                      className="relative w-full overflow-hidden rounded-xl font-bold uppercase tracking-widest text-sm py-4 transition-all duration-300 group/btn"
                       style={{ 
-                        borderColor: track.borderColor, 
-                        color: track.checkColor 
+                        background: `linear-gradient(to right, ${track.checkColor}15, transparent)`,
+                        border: `1px solid ${track.checkColor}40`,
+                        color: 'white',
                       }}
                     >
-                      View Event Details
-                      <svg
-                        className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                      </svg>
-                    </Button>
+                      {/* Hover gradient fill */}
+                      <div 
+                        className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"
+                        style={{ background: `linear-gradient(to right, ${track.checkColor}40, ${track.checkColor}10)` }}
+                      />
+                      <span className="relative z-10 flex items-center justify-center gap-2 group-hover/btn:gap-4 transition-all duration-300 drop-shadow-md">
+                        View Event Details
+                        <svg
+                          className="h-5 w-5"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </span>
+                    </button>
                   </Link>
                 </div>
               </GlassCard>
