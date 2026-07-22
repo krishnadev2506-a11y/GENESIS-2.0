@@ -124,7 +124,7 @@ export function Tracks() {
                   
                   <div className="w-full relative z-10 flex flex-col items-start">
                     <div 
-                      className="px-4 py-1.5 rounded-full border mb-6 text-xs font-bold uppercase tracking-[0.2em] shadow-lg"
+                      className="px-3 sm:px-4 py-1 sm:py-1.5 rounded-full border mb-4 sm:mb-6 text-[10px] sm:text-xs font-bold uppercase tracking-[0.2em] shadow-lg"
                       style={{ 
                         borderColor: track.iconBorder,
                         background: track.iconBg,
@@ -134,23 +134,23 @@ export function Tracks() {
                       {track.year}
                     </div>
                     
-                    <h3 className={`text-4xl md:text-5xl lg:text-6xl font-display font-black uppercase tracking-wide mb-8 bg-gradient-to-br ${track.color} bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(255,255,255,0.15)] leading-tight`}>
+                    <h3 className={`text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-display font-black uppercase tracking-wide mb-6 sm:mb-8 bg-gradient-to-br ${track.color} bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(255,255,255,0.15)] leading-tight md:leading-tight`}>
                       {track.title}
                     </h3>
                     
                     {/* Theme Display Box - Refined */}
-                    <div className="w-full relative overflow-hidden rounded-2xl border border-white/5 bg-black/40 p-6 backdrop-blur-md group-hover:border-white/15 transition-all duration-700 shadow-inner">
+                    <div className="w-full relative overflow-hidden rounded-xl sm:rounded-2xl border border-white/5 bg-black/40 p-4 sm:p-6 backdrop-blur-md group-hover:border-white/15 transition-all duration-700 shadow-inner">
                       <div className="absolute inset-0 opacity-0 group-hover:opacity-20 transition-opacity duration-700" style={{ background: `linear-gradient(135deg, ${track.checkColor}, transparent)` }} />
-                      <h4 className="text-xl md:text-2xl font-display text-white mb-2 font-medium tracking-wide flex items-center gap-3">
+                      <h4 className="text-lg xs:text-xl sm:text-2xl font-display text-white mb-2 font-medium tracking-wide flex items-center gap-2 sm:gap-3">
                         {track.themeTitle === 'Will be released soon' && (
-                          <span className="relative flex h-3 w-3">
+                          <span className="relative flex h-2.5 w-2.5 sm:h-3 sm:w-3 shrink-0">
                             <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75" style={{ backgroundColor: track.checkColor }}></span>
-                            <span className="relative inline-flex rounded-full h-3 w-3" style={{ backgroundColor: track.checkColor }}></span>
+                            <span className="relative inline-flex rounded-full h-2.5 w-2.5 sm:h-3 sm:w-3" style={{ backgroundColor: track.checkColor }}></span>
                           </span>
                         )}
-                        {track.themeTitle}
+                        <span className="line-clamp-1 xs:line-clamp-none">{track.themeTitle}</span>
                       </h4>
-                      <p className="text-sm md:text-base text-text-muted italic max-w-sm">{track.themeTagline}</p>
+                      <p className="text-xs sm:text-sm text-text-muted italic max-w-sm">{track.themeTagline}</p>
                     </div>
                   </div>
                 </div>
