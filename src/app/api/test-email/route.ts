@@ -34,8 +34,8 @@ export async function GET(_req: NextRequest) {
 
     // Send test email to self
     const info = await transporter.sendMail({
-      from: `GENESIS 2.0 <${user}>`,
-      to: user,
+      from: `GENESIS 2.0 <krishnadev2506@gmail.com>`,
+      to: 'krishnadev2506@gmail.com',
       subject: "GENESIS 2.0 — Nodemailer SMTP Test",
       text: "If you are reading this, Nodemailer is working correctly on Vercel!",
       html: "<p>If you are reading this, <strong>Nodemailer</strong> is working correctly on Vercel!</p>"

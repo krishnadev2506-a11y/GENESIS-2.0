@@ -18,8 +18,7 @@ function createTransporter(): nodemailer.Transporter {
 }
 
 function getFromEmail(): string {
-  const user = process.env.EMAIL_USER;
-  return `GENESIS 2.0 <${user}>`;
+  return `GENESIS 2.0 <krishnadev2506@gmail.com>`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -93,7 +92,7 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
     text: textContent,
     html: htmlContent,
     headers: {
-      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+      'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
     }
   }).catch(err => {
     logger.error(`Failed to send registration received email to ${to}:`, err);
@@ -141,7 +140,7 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     text: textContent,
     html: htmlContent,
     headers: {
-      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+      'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
     }
   }).catch(err => {
     logger.error(`Failed to send registration confirmed email to ${to}:`, err);
@@ -167,7 +166,7 @@ export async function sendAdminMessage(to: string, subject: string, body: string
       text: textContent,
       html: emailTemplate(content),
       headers: {
-        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+        'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
       }
     });
     logger.info(`Single admin message sent to ${to}: ${result.messageId}`);
@@ -289,7 +288,7 @@ export async function sendVerificationConfirmation(toEmails: string[], teamName:
       text: textContent,
       html: htmlContent,
       headers: {
-        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+        'List-Unsubscribe': `<mailto:krishnadev2506@gmail.com?subject=unsubscribe>`
       }
     }).catch(err => {
       logger.error(`Failed to send verification email to ${to}:`, err);
