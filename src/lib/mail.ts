@@ -3,48 +3,23 @@ import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 import { logger } from '@/lib/logger';
 
-/**
- * Creates a fresh Nodemailer transporter using Resend's SMTP relay.
- *
- * WHY NOT CACHE: Vercel serverless functions are ephemeral. A cached transporter
- * from a previous warm invocation may hold a dead TCP connection. Creating fresh
- * per-call is negligible overhead with an API-based relay (no slow TLS handshake
- * to a personal Gmail server).
- *
- * SETUP:
- *  1. Create a free account at https://resend.com
- *  2. Add & verify your domain (follow their DNS instructions: SPF, DKIM, DMARC)
- *  3. Create an API key at https://resend.com/api-keys
- *  4. Add to Vercel env vars:
- *       RESEND_API_KEY = re_xxxxxxxxxxxxxxxx
- *       FROM_EMAIL     = noreply@yourdomain.com   (must be your verified domain)
- */
 function createTransporter(): nodemailer.Transporter {
-  const apiKey = process.env.RESEND_API_KEY;
-  if (!apiKey) {
-    throw new Error('RESEND_API_KEY environment variable is required');
+  const user = process.env.EMAIL_USER;
+  const pass = process.env.EMAIL_PASS;
+  if (!user || !pass) {
+    throw new Error('EMAIL_USER and EMAIL_PASS environment variables are required');
   }
   return nodemailer.createTransport({
-    host: 'smtp.resend.com',
+    host: 'smtp.gmail.com',
     port: 465,
     secure: true,
-    auth: {
-      user: 'resend',      // literal string — Resend's SMTP always uses "resend" as user
-      pass: apiKey,
-    },
+    auth: { user, pass },
   });
 }
 
 function getFromEmail(): string {
-  const from = process.env.FROM_EMAIL;
-  if (!from) {
-    throw new Error('FROM_EMAIL environment variable is required (e.g. noreply@yourdomain.com)');
-  }
-  return `GENESIS 2.0 <${from}>`;
-}
-
-function getFromAddress(): string {
-  return process.env.FROM_EMAIL || '';
+  const user = process.env.EMAIL_USER;
+  return `GENESIS 2.0 <${user}>`;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -57,7 +32,6 @@ function stripHtml(html: string): string {
     .trim();
 }
 
-// Email clients strip <style> blocks and external fonts. Everything must be inlined.
 const emailTemplate = (content: string) => `
 <!DOCTYPE html>
 <html>
@@ -110,7 +84,6 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
   const content = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
-  const fromAddress = getFromAddress();
   const transporter = createTransporter();
 
   const promises = toEmails.map(to => transporter.sendMail({
@@ -120,7 +93,7 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
     text: textContent,
     html: htmlContent,
     headers: {
-      'List-Unsubscribe': `<mailto:${fromAddress}?subject=unsubscribe>`
+      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
     }
   }).catch(err => {
     logger.error(`Failed to send registration received email to ${to}:`, err);
@@ -159,7 +132,6 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
   `;
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
-  const fromAddress = getFromAddress();
   const transporter = createTransporter();
 
   const promises = toEmails.map(to => transporter.sendMail({
@@ -169,7 +141,7 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     text: textContent,
     html: htmlContent,
     headers: {
-      'List-Unsubscribe': `<mailto:${fromAddress}?subject=unsubscribe>`
+      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
     }
   }).catch(err => {
     logger.error(`Failed to send registration confirmed email to ${to}:`, err);
@@ -184,21 +156,18 @@ export async function sendAdminMessage(to: string, subject: string, body: string
     <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">${subject}</h1>
     ${body.split('\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
   `;
-  
   const textContent = `${subject}\n\n${body}`;
-  const fromEmail = getFromEmail();
-  const fromAddress = getFromAddress();
   const transporter = createTransporter();
 
   try {
     const result = await transporter.sendMail({
-      from: fromEmail,
+      from: getFromEmail(),
       to,
       subject,
       text: textContent,
       html: emailTemplate(content),
       headers: {
-        'List-Unsubscribe': `<mailto:${fromAddress}?subject=unsubscribe>`
+        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
       }
     });
     logger.info(`Single admin message sent to ${to}: ${result.messageId}`);
@@ -224,23 +193,19 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
   const fromEmail = getFromEmail();
   const transporter = createTransporter();
 
-  // Send individually (not BCC) so Resend tracks each delivery separately
-  // Resend's free tier handles up to 3000/month; batch in chunks to avoid rate limits
-  const chunkSize = 50;
+  const chunkSize = 100;
   let succeeded = 0;
   let failed = 0;
 
   for (let i = 0; i < toEmails.length; i += chunkSize) {
     const chunk = toEmails.slice(i, i + chunkSize);
-    const chunkPromises = chunk.map(to =>
-      transporter.sendMail({ from: fromEmail, to, subject, text: textContent, html: htmlContent })
-        .then(() => { succeeded++; })
-        .catch(err => {
-          failed++;
-          logger.error(`Batch send failed for ${to}:`, err);
-        })
-    );
-    await Promise.allSettled(chunkPromises);
+    try {
+      await transporter.sendMail({ from: fromEmail, bcc: chunk, subject, text: textContent, html: htmlContent });
+      succeeded += chunk.length;
+    } catch (err) {
+      failed += chunk.length;
+      logger.error(`Failed to send batch email chunk:`, err);
+    }
   }
 
   logger.info(`Batch email task finished: ${succeeded}/${toEmails.length} succeeded, ${failed} failed - Subject: ${subject}`);
@@ -262,13 +227,11 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
   `;
   
   const textContent = `New Team Registered!\n\nA new team has just submitted their registration for GENESIS 2.0.\n\nTeam Name: ${teamName}\nCollege: ${college}\nMembers: ${memberCount}\n\nPlease log in to the admin panel to review and verify their payment.`;
-  const adminEmail = process.env.ADMIN_ALERT_EMAIL || process.env.FROM_EMAIL || 'krishnadev2506@gmail.com';
-  const transporter = createTransporter();
-
+  
   try {
-    await transporter.sendMail({
+    await createTransporter().sendMail({
       from: getFromEmail(),
-      to: adminEmail,
+      to: process.env.EMAIL_USER || 'krishnadev2506@gmail.com',
       subject: `New Registration Alert: ${teamName}`,
       text: textContent,
       html: emailTemplate(content),
@@ -278,9 +241,6 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
   }
 }
 
-/**
- * Send verification confirmation email to all team members after payment verification
- */
 export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
   const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/dashboard`;
   const content = `
@@ -305,6 +265,9 @@ export async function sendVerificationConfirmation(toEmails: string[], teamName:
       subject: `Your Team ${teamName} is Verified for GENESIS 2.0!`,
       text: textContent,
       html: htmlContent,
+      headers: {
+        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+      }
     }).catch(err => {
       logger.error(`Failed to send verification email to ${to}:`, err);
       return null;
@@ -312,7 +275,6 @@ export async function sendVerificationConfirmation(toEmails: string[], teamName:
   );
 
   const results = await Promise.allSettled(promises);
-  
   const failed = results.filter(r => r.status === 'rejected');
   if (failed.length > 0) {
     logger.warn(`${failed.length} verification emails failed to send`);

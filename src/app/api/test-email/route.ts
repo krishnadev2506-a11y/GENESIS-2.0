@@ -3,34 +3,24 @@ import nodemailer from 'nodemailer';
 
 export async function GET(_req: NextRequest) {
   try {
-    const apiKey = process.env.RESEND_API_KEY;
-    const fromEmail = process.env.FROM_EMAIL;
+    const user = process.env.EMAIL_USER;
+    const pass = process.env.EMAIL_PASS;
     
-    if (!apiKey) {
+    if (!user || !pass) {
       return NextResponse.json({ 
         success: false, 
-        error: "Missing RESEND_API_KEY. Add it to your Vercel environment variables." 
-      }, { status: 400 });
-    }
-
-    if (!fromEmail) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "Missing FROM_EMAIL. Add it to your Vercel environment variables (e.g. noreply@yourdomain.com)." 
+        error: "Missing EMAIL_USER or EMAIL_PASS environment variables." 
       }, { status: 400 });
     }
 
     const transporter = nodemailer.createTransport({
-      host: 'smtp.resend.com',
+      host: 'smtp.gmail.com',
       port: 465,
       secure: true,
-      auth: {
-        user: 'resend',
-        pass: apiKey,
-      },
+      auth: { user, pass },
     });
 
-    // Verify SMTP connection first
+    // Verify SMTP connection
     try {
       await transporter.verify();
     } catch (verifyError: any) {
@@ -42,25 +32,24 @@ export async function GET(_req: NextRequest) {
       }, { status: 500 });
     }
 
-    // Send a test email
+    // Send test email to self
     const info = await transporter.sendMail({
-      from: `GENESIS 2.0 <${fromEmail}>`,
-      to: fromEmail, // Send to self
-      subject: "GENESIS SMTP Test via Resend",
-      text: "If you are reading this, Nodemailer + Resend SMTP is working correctly!",
-      html: "<p>If you are reading this, <strong>Nodemailer + Resend SMTP</strong> is working correctly!</p>"
+      from: `GENESIS 2.0 <${user}>`,
+      to: user,
+      subject: "GENESIS 2.0 — Nodemailer SMTP Test",
+      text: "If you are reading this, Nodemailer is working correctly on Vercel!",
+      html: "<p>If you are reading this, <strong>Nodemailer</strong> is working correctly on Vercel!</p>"
     });
 
     return NextResponse.json({ 
       success: true, 
-      message: "Email sent successfully via Resend SMTP!",
-      info: info.messageId 
-    }, { status: 200 });
+      message: "Email sent successfully!",
+      messageId: info.messageId 
+    });
 
   } catch (error: any) {
     return NextResponse.json({ 
       success: false, 
-      stage: 'General Error',
       error: error.message 
     }, { status: 500 });
   }

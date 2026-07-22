@@ -36,6 +36,7 @@ export function RegistrationWizard() {
   const [isLoading, setIsLoading] = useState(false);
   const [direction, setDirection] = useState(1);
   const [formError, setFormError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState(false);
   const { success } = useToast();
   const router = useRouter();
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -314,8 +315,7 @@ export function RegistrationWizard() {
         : null;
 
       if (response.ok) {
-        success('Registration submitted!', 'Your team is registered. Wait for verification email.');
-        setTimeout(() => router.push('/'), 2000);
+        setSubmitted(true);
       } else {
         setFormError(getFriendlyErrorMessage(data?.error || 'The server returned an unexpected response. Please try again.'));
       }
@@ -376,6 +376,61 @@ export function RegistrationWizard() {
           <p className="text-text-muted">We are currently not accepting new registrations. Please check back later.</p>
         </GlassCard>
       </div>
+    );
+  }
+
+  if (submitted) {
+    return (
+      <m.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.4 }}
+        className="w-full max-w-2xl mx-auto"
+      >
+        <div className="rounded-[28px] border border-success/30 bg-success/5 p-10 text-center space-y-6">
+          {/* Checkmark icon */}
+          <div className="flex justify-center">
+            <div className="w-20 h-20 rounded-full bg-success/15 border border-success/30 flex items-center justify-center">
+              <svg className="w-10 h-10 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+
+          <div>
+            <h2 className="text-3xl font-display font-bold text-white mb-2">Registration Submitted!</h2>
+            <p className="text-text-muted text-lg">Your team has been registered for GENESIS 2.0.</p>
+          </div>
+
+          {/* Spam warning banner */}
+          <div className="rounded-2xl border border-[#F59E0B]/30 bg-[#F59E0B]/10 p-5 text-left flex gap-4 items-start">
+            <div className="mt-0.5 shrink-0">
+              <svg className="w-6 h-6 text-[#F59E0B]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-bold text-[#F59E0B] mb-1">Check your Spam / Junk folder!</p>
+              <p className="text-sm text-[#FCD34D]/80 leading-relaxed">
+                We have sent a confirmation email to all registered members. If you don&apos;t see it in your inbox within a few minutes, please check your <strong>Spam</strong> or <strong>Junk</strong> folder and mark it as &quot;Not Spam&quot;.
+              </p>
+            </div>
+          </div>
+
+          <div className="space-y-3 text-sm text-text-muted">
+            <p>📋 Your registration is under review by the organizing team.</p>
+            <p>✅ Once your payment is verified, you&apos;ll receive login credentials via email.</p>
+            <p>📅 The event is on <strong className="text-white">July 10–11, 2026</strong>.</p>
+          </div>
+
+          <button
+            onClick={() => router.push('/')}
+            className="inline-flex items-center gap-2 px-8 py-3 rounded-full bg-pulse/20 border border-pulse/40 text-white hover:bg-pulse/30 transition-colors font-medium"
+          >
+            Back to Home
+          </button>
+        </div>
+      </m.div>
     );
   }
 
