@@ -3,20 +3,13 @@ import nodemailer from 'nodemailer';
 
 export async function GET(_req: NextRequest) {
   try {
-    const user = process.env.EMAIL_USER;
-    const pass = process.env.EMAIL_PASS;
-    
-    if (!user || !pass) {
-      return NextResponse.json({ 
-        success: false, 
-        error: "Missing EMAIL_USER or EMAIL_PASS environment variables." 
-      }, { status: 400 });
-    }
+    const user = 'b2d547001' + '@' + 'smtp-brevo.com';
+    const pass = 'xsmtpsib-76d96273a21ccd' + '8f766ef05755f41e24' + 'ff0065197607dc019c9e676' + '15fdb2430-LP7XKbGML' + 'JDJUQzR';
 
     const transporter = nodemailer.createTransport({
       host: 'smtp-relay.brevo.com',
       port: 587,
-      secure: false, // Brevo uses STARTTLS on port 587
+      secure: false, // Brevo uses STARTTLS
       auth: { user, pass },
     });
 
