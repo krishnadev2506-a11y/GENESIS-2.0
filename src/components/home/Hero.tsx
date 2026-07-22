@@ -126,13 +126,6 @@ export function Hero() {
             CODE THE FUTURE, CODE THE IMPOSSIBLE
           </m.p>
 
-          <m.p
-            variants={fadeUp as any}
-            className="mx-auto mt-4 max-w-2xl text-sm leading-relaxed text-text-muted/90 sm:mt-5 sm:text-base lg:text-lg"
-          >
-            GENESIS 2.0 is an immersive, high-energy buildathon where teams of students collaborate to architect, build, and deploy production-grade applications. Experience intense coding sprints, surprise technical constraints, and real-world architecture defenses.
-          </m.p>
-
           <m.div variants={fadeUp} className="mb-14 mt-10 flex flex-wrap justify-center gap-5 sm:gap-16">
             <div className="flex flex-col items-center">
               <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Date</span>
