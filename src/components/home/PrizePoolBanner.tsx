@@ -89,9 +89,9 @@ export function PrizePoolBanner() {
               {/* 3D Coin/Money Icon */}
               <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-emerald-300 via-emerald-500 to-accent-primary shadow-[0_0_20px_rgba(52,211,153,0.4)] group-hover:shadow-[0_0_30px_rgba(52,211,153,0.6)] transition-shadow duration-500">
                 <div className="absolute inset-1 rounded-full border border-white/40" />
-                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-void font-black drop-shadow-md" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h2.25c.1 1.05.9 1.54 2.15 1.54 1.53 0 2.25-.8 2.25-1.7 0-2.31-4.72-1.34-4.72-4.66 0-1.7 1.25-2.78 2.74-3.1V5h2.67v1.92c1.38.3 2.61 1.13 2.87 2.85h-2.22c-.17-.83-.93-1.4-2.1-1.4-1.12 0-2.07.61-2.07 1.57 0 2.16 4.72 1.34 4.72 4.73 0 1.93-1.39 3.01-2.6 3.42z" />
-                </svg>
+                <div className="relative z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-void flex items-center justify-center drop-shadow-md">
+                  <span className="text-emerald-400 font-black text-sm sm:text-base mt-[1px] ml-[1px]">₹</span>
+                </div>
               </div>
 
               {/* Smaller, neatly aligned amount */}
