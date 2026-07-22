@@ -455,7 +455,7 @@ export function RegistrationWizard() {
         </div>
       </div>
 
-      <GlassCard hoverEffect={true} className="relative min-h-[400px] max-w-2xl mx-auto min-w-0 overflow-hidden">
+      <GlassCard hoverEffect={true} className="relative min-h-[auto] md:min-h-[400px] max-w-2xl mx-auto min-w-0 overflow-hidden">
         <AlertError error={formError} title="Registration Error" />
         
         <AnimatePresence mode="wait" custom={direction}>

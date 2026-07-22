@@ -90,7 +90,7 @@ export function Tracks() {
               <GlassCard
                 delay={index * 0.12}
                 hoverEffect
-                className="relative min-h-[620px] flex flex-col p-6 sm:p-8 md:p-10 hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
+                className="relative h-full min-h-[550px] md:min-h-[620px] flex flex-col p-6 sm:p-8 md:p-10 hover:-translate-y-2 transition-all duration-500 group overflow-hidden"
                 style={{
                   borderColor: track.borderColor,
                   boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 24px 80px rgba(0,0,0,0.4), 0 0 40px ${track.glowColor}`,

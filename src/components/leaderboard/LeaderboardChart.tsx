@@ -34,7 +34,7 @@ export function LeaderboardChart({ data }: LeaderboardChartProps) {
       variants={fadeUp}
       initial="hidden"
       animate="visible"
-      className="w-full h-[350px] mb-12 sm:mb-16"
+      className="w-full h-[250px] sm:h-[300px] md:h-[350px] mb-12 sm:mb-16"
     >
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
