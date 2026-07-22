@@ -42,7 +42,12 @@ export function SettingsClient() {
       tagline: '',
       description: '',
       releaseDate: '',
+      releaseDate: '',
       published: false
+    },
+    prizePool: {
+      foundation: 'Will be released soon..',
+      professional: 'Will be released soon..'
     }
   });
 
@@ -103,7 +108,12 @@ export function SettingsClient() {
           tagline: settings.themeProfessional?.tagline ?? '',
           description: settings.themeProfessional?.description ?? '',
           releaseDate: formatLocalDate(settings.themeProfessional?.releaseDate),
+          releaseDate: formatLocalDate(settings.themeProfessional?.releaseDate),
           published: settings.themeProfessional?.published ?? false,
+        },
+        prizePool: {
+          foundation: settings.prizePool?.foundation ?? 'Will be released soon..',
+          professional: settings.prizePool?.professional ?? 'Will be released soon..'
         }
       });
     }
@@ -451,6 +461,30 @@ export function SettingsClient() {
         {/* Theme Releases */}
         {renderThemeSection('themeFoundation', 'Foundation Track')}
         {renderThemeSection('themeProfessional', 'Professional Track')}
+
+        {/* Prize Pool */}
+        <GlassCard className="p-8">
+          <h2 className="text-2xl font-display font-bold text-white mb-6 uppercase">Prize Pool</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Foundation Track Prize Pool</label>
+              <input 
+                type="text" name="prizePool.foundation" required
+                className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
+                value={formData.prizePool.foundation} onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Professional Track Prize Pool</label>
+              <input 
+                type="text" name="prizePool.professional" required
+                className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
+                value={formData.prizePool.professional} onChange={handleChange}
+              />
+            </div>
+          </div>
+        </GlassCard>
 
         {/* Email Templates Section */}
         <GlassCard className="p-8">

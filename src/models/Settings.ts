@@ -21,6 +21,11 @@ export interface IThemeRelease {
   published: boolean;
 }
 
+export interface IPrizePool {
+  foundation: string;
+  professional: string;
+}
+
 // ----- Main Settings interface -----
 
 export interface ISettings extends Document {
@@ -45,6 +50,9 @@ export interface ISettings extends Document {
   // Theme Release (one per route)
   themeFoundation: IThemeRelease;
   themeProfessional: IThemeRelease;
+
+  // Prize Pool
+  prizePool: IPrizePool;
 }
 
 interface ISettingsModel extends Model<ISettings> {
@@ -68,6 +76,14 @@ const ThemeReleaseSchema = new Schema<IThemeRelease>(
     description: { type: String, default: '' },
     releaseDate: { type: Date, default: null },
     published: { type: Boolean, default: false },
+  },
+  { _id: false }
+);
+
+const PrizePoolSchema = new Schema<IPrizePool>(
+  {
+    foundation: { type: String, default: 'Will be released soon..' },
+    professional: { type: String, default: 'Will be released soon..' },
   },
   { _id: false }
 );
@@ -130,6 +146,13 @@ const SettingsSchema = new Schema<ISettings>(
         description: '',
         releaseDate: null,
         published: false,
+      }),
+    },
+    prizePool: {
+      type: PrizePoolSchema,
+      default: () => ({
+        foundation: 'Will be released soon..',
+        professional: 'Will be released soon..',
       }),
     },
   },

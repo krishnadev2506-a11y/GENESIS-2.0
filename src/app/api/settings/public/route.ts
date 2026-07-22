@@ -28,6 +28,7 @@ export async function GET() {
       qrCodeImageUrl: settings.qrCodeImageUrl,
       themeFoundation: settings.themeFoundation,
       themeProfessional: settings.themeProfessional,
+      prizePool: settings.prizePool,
     };
 
     return NextResponse.json(publicSettings, {
