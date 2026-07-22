@@ -8,8 +8,8 @@ import Settings from '@/models/Settings';
  * and event pages: pricing, early bird, food toggle, themes, registration status.
  */
 
-// Add static generation with revalidation!
-export const revalidate = 3600; // Revalidate once an hour!
+// Use ISR with shorter revalidation for settings changes to reflect quickly
+export const revalidate = 60; // Revalidate every minute
 export const dynamic = 'force-static';
 
 export async function GET() {
@@ -32,7 +32,7 @@ export async function GET() {
 
     return NextResponse.json(publicSettings, {
       headers: {
-        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=7200',
+        'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
       },
     });
   } catch (error) {
