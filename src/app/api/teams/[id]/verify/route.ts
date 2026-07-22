@@ -5,6 +5,7 @@ import AuditLog from '@/models/AuditLog';
 import { requireAuth, generateCredentials, hashPassword } from '@/lib/auth';
 import { sendRegistrationConfirmed, sendVerificationConfirmation } from '@/lib/mail';
 import mongoose from 'mongoose';
+import { logger } from '@/lib/logger';
 
 export async function PATCH(
   req: NextRequest,

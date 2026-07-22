@@ -16,10 +16,12 @@ export async function GET(req: NextRequest) {
     
     // If user, only show messages targeted to them or broadcast
     if (payload.role === 'user') {
+      const team = await Team.findById(payload.teamId).select('members.email').lean();
+      const memberEmails = team?.members?.map((m: any) => m.email) || [];
       query.$or = [
         { scope: 'broadcast' },
         { scope: 'team', targetTeamId: new mongoose.Types.ObjectId(payload.teamId) },
-        { scope: 'participant', targetParticipantEmail: payload.email }
+        { scope: 'participant', targetParticipantEmail: { $in: memberEmails } }
       ];
     }
     
