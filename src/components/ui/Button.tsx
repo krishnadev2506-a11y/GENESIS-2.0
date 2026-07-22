@@ -73,7 +73,7 @@ export function Button({
           <span>Wait...</span>
         </div>
       ) : (
-        <span className="relative z-10 whitespace-nowrap">{children}</span>
+        <span className="relative z-10 whitespace-nowrap flex items-center justify-center gap-2">{children}</span>
       )}
     </m.button>
   );
