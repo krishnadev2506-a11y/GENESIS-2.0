@@ -3,7 +3,8 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 // ----- Sub-document interfaces -----
 
 export interface ITeamSizePricing {
-  standardPrice: number;
+  withFoodPrice: number;
+  withoutFoodPrice: number;
   earlyBirdDiscountPercent: number;
 }
 
@@ -35,6 +36,10 @@ export interface ISettings extends Document {
   registrationReceivedEmailTemplate: string;
   registrationConfirmedEmailTemplate: string;
 
+  // Registration Contact details
+  upiId: string;
+  adminContactNumber: string;
+
   // Pricing (replaces old entryFee / extraMemberFee / baseTeamSize / maxTeamSize)
   earlyBirdEnabled: boolean;
   pricing: IPricing;
@@ -58,7 +63,8 @@ interface ISettingsModel extends Model<ISettings> {
 
 const TeamSizePricingSchema = new Schema<ITeamSizePricing>(
   {
-    standardPrice: { type: Number, required: true },
+    withFoodPrice: { type: Number, required: true },
+    withoutFoodPrice: { type: Number, required: true },
     earlyBirdDiscountPercent: { type: Number, required: true, min: 0, max: 100 },
   },
   { _id: false }
@@ -96,18 +102,22 @@ const SettingsSchema = new Schema<ISettings>(
       default: 'Dear {{teamName}},\n\nYour payment has been successfully verified! You are officially registered for GENESIS.\n\nYou can now log in to the dashboard to manage your team.\n\nUsername: {{username}}\nPassword: {{password}}\n\nPlease keep these credentials safe.\n\nSee you at the event!\nGENESIS Team' 
     },
 
+    // Registration Contact Details
+    upiId: { type: String, default: '' },
+    adminContactNumber: { type: String, default: '' },
+
     // Pricing
     earlyBirdEnabled: { type: Boolean, default: false },
     pricing: {
       type: {
-        team4: { type: TeamSizePricingSchema, default: () => ({ standardPrice: 600, earlyBirdDiscountPercent: 20 }) },
-        team5: { type: TeamSizePricingSchema, default: () => ({ standardPrice: 725, earlyBirdDiscountPercent: 20 }) },
-        team6: { type: TeamSizePricingSchema, default: () => ({ standardPrice: 850, earlyBirdDiscountPercent: 20 }) },
+        team4: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 600, withoutFoodPrice: 400, earlyBirdDiscountPercent: 20 }) },
+        team5: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 725, withoutFoodPrice: 500, earlyBirdDiscountPercent: 20 }) },
+        team6: { type: TeamSizePricingSchema, default: () => ({ withFoodPrice: 850, withoutFoodPrice: 600, earlyBirdDiscountPercent: 20 }) },
       },
       default: () => ({
-        team4: { standardPrice: 600, earlyBirdDiscountPercent: 20 },
-        team5: { standardPrice: 725, earlyBirdDiscountPercent: 20 },
-        team6: { standardPrice: 850, earlyBirdDiscountPercent: 20 },
+        team4: { withFoodPrice: 600, withoutFoodPrice: 400, earlyBirdDiscountPercent: 20 },
+        team5: { withFoodPrice: 725, withoutFoodPrice: 500, earlyBirdDiscountPercent: 20 },
+        team6: { withFoodPrice: 850, withoutFoodPrice: 600, earlyBirdDiscountPercent: 20 },
       }),
     },
 

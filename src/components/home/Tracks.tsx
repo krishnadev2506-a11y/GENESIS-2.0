@@ -157,7 +157,7 @@ export function Tracks() {
                   
                   <Link href={track.route} className="block w-full">
                     <button 
-                      className="relative w-full overflow-hidden rounded-xl font-bold uppercase tracking-widest text-sm py-4 transition-all duration-300 group/btn"
+                      className="relative w-full overflow-hidden rounded-xl font-bold uppercase tracking-widest text-[11px] xs:text-xs sm:text-sm py-3.5 sm:py-4 transition-all duration-300 group/btn"
                       style={{ 
                         background: `linear-gradient(to right, ${track.checkColor}15, transparent)`,
                         border: `1px solid ${track.checkColor}40`,
@@ -169,10 +169,10 @@ export function Tracks() {
                         className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"
                         style={{ background: `linear-gradient(to right, ${track.checkColor}40, ${track.checkColor}10)` }}
                       />
-                      <span className="relative z-10 flex items-center justify-center gap-2 group-hover/btn:gap-4 transition-all duration-300 drop-shadow-md">
+                      <span className="relative z-10 flex flex-wrap sm:flex-nowrap items-center justify-center gap-1.5 sm:gap-2 group-hover/btn:gap-2.5 sm:group-hover/btn:gap-4 transition-all duration-300 drop-shadow-md px-2 text-center">
                         View Event Details
                         <svg
-                          className="h-5 w-5"
+                          className="h-4 w-4 sm:h-5 sm:w-5 shrink-0"
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"

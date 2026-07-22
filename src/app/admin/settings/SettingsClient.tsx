@@ -23,10 +23,12 @@ export function SettingsClient() {
     
     earlyBirdEnabled: false,
     pricing: {
-      team4: { standardPrice: 0, earlyBirdDiscountPercent: 0 },
-      team5: { standardPrice: 0, earlyBirdDiscountPercent: 0 },
-      team6: { standardPrice: 0, earlyBirdDiscountPercent: 0 },
+      team4: { withFoodPrice: 0, withoutFoodPrice: 0, earlyBirdDiscountPercent: 0 },
+      team5: { withFoodPrice: 0, withoutFoodPrice: 0, earlyBirdDiscountPercent: 0 },
+      team6: { withFoodPrice: 0, withoutFoodPrice: 0, earlyBirdDiscountPercent: 0 },
     },
+    upiId: '',
+    adminContactNumber: '',
     
     foodEnabled: true,
     
@@ -77,18 +79,23 @@ export function SettingsClient() {
         earlyBirdEnabled: settings.earlyBirdEnabled ?? false,
         pricing: {
           team4: {
-            standardPrice: settings.pricing?.team4?.standardPrice ?? 600,
+            withFoodPrice: settings.pricing?.team4?.withFoodPrice ?? 600,
+            withoutFoodPrice: settings.pricing?.team4?.withoutFoodPrice ?? 400,
             earlyBirdDiscountPercent: settings.pricing?.team4?.earlyBirdDiscountPercent ?? 20,
           },
           team5: {
-            standardPrice: settings.pricing?.team5?.standardPrice ?? 725,
+            withFoodPrice: settings.pricing?.team5?.withFoodPrice ?? 725,
+            withoutFoodPrice: settings.pricing?.team5?.withoutFoodPrice ?? 500,
             earlyBirdDiscountPercent: settings.pricing?.team5?.earlyBirdDiscountPercent ?? 20,
           },
           team6: {
-            standardPrice: settings.pricing?.team6?.standardPrice ?? 850,
+            withFoodPrice: settings.pricing?.team6?.withFoodPrice ?? 850,
+            withoutFoodPrice: settings.pricing?.team6?.withoutFoodPrice ?? 600,
             earlyBirdDiscountPercent: settings.pricing?.team6?.earlyBirdDiscountPercent ?? 20,
           },
         },
+        upiId: settings.upiId ?? '',
+        adminContactNumber: settings.adminContactNumber ?? '',
         
         foodEnabled: settings.foodEnabled ?? true,
         
@@ -228,28 +235,38 @@ export function SettingsClient() {
 
   const renderPricingRow = (teamSize: 'team4' | 'team5' | 'team6', label: string) => {
     const p = formData.pricing[teamSize];
-    const ebPrice = p.standardPrice - (p.standardPrice * (p.earlyBirdDiscountPercent / 100));
+    const ebWithFood = p.withFoodPrice - (p.withFoodPrice * (p.earlyBirdDiscountPercent / 100));
+    const ebWithoutFood = p.withoutFoodPrice - (p.withoutFoodPrice * (p.earlyBirdDiscountPercent / 100));
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-end bg-void/30 p-4 border border-glass-border rounded-[14px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end bg-void/30 p-4 border border-glass-border rounded-[14px]">
         <div>
-          <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Standard Price (₹)</label>
+          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - With Food (₹)</label>
           <input 
-            type="number" name={`pricing.${teamSize}.standardPrice`} required min="0"
+            type="number" name={`pricing.${teamSize}.withFoodPrice`} required min="0"
             className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
-            value={p.standardPrice} onChange={handleChange}
+            value={p.withFoodPrice} onChange={handleChange}
           />
         </div>
         <div>
-          <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Early Bird Discount (%)</label>
+          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Without Food (₹)</label>
+          <input 
+            type="number" name={`pricing.${teamSize}.withoutFoodPrice`} required min="0"
+            className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
+            value={p.withoutFoodPrice} onChange={handleChange}
+          />
+        </div>
+        <div>
+          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">Early Bird (%)</label>
           <input 
             type="number" name={`pricing.${teamSize}.earlyBirdDiscountPercent`} required min="0" max="100" step="any"
             className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
             value={p.earlyBirdDiscountPercent} onChange={handleChange}
           />
         </div>
-        <div className="pb-3 text-pulse font-bold text-lg h-full flex items-center">
-          Early Bird Price: ₹{Math.round(ebPrice)}
+        <div className="pb-3 text-pulse font-medium text-sm flex flex-col justify-center h-full">
+          <span>EB With Food: ₹{Math.round(ebWithFood)}</span>
+          <span>EB Without: ₹{Math.round(ebWithoutFood)}</span>
         </div>
       </div>
     );
@@ -431,6 +448,31 @@ export function SettingsClient() {
             {renderPricingRow('team4', 'Team of 4')}
             {renderPricingRow('team5', 'Team of 5')}
             {renderPricingRow('team6', 'Team of 6')}
+          </div>
+        </GlassCard>
+
+        {/* Contact & Payment Details */}
+        <GlassCard className="p-8">
+          <h2 className="text-2xl font-display font-bold text-white mb-6 uppercase">Payment Contact Details</h2>
+          <p className="text-text-muted text-sm mb-6">These details will be displayed to participants during the payment step of registration.</p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Payment UPI ID</label>
+              <input 
+                type="text" name="upiId" placeholder="example@upi"
+                className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
+                value={formData.upiId} onChange={handleChange}
+              />
+            </div>
+            <div>
+              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Admin Contact Number</label>
+              <input 
+                type="text" name="adminContactNumber" placeholder="+91 9876543210"
+                className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
+                value={formData.adminContactNumber} onChange={handleChange}
+              />
+            </div>
           </div>
         </GlassCard>
 

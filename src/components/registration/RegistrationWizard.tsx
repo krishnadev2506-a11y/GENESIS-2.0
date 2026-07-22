@@ -333,15 +333,19 @@ export function RegistrationWizard() {
     const pricing = settings.pricing[teamKey];
     if (!pricing) return { originalPrice: 0, finalPrice: 0, discount: 0 };
     
-    let finalPrice = pricing.standardPrice;
+    // Choose base price depending on whether food is required and enabled
+    const isFoodSelected = formData.foodRequired && settings?.foodEnabled;
+    const basePrice = isFoodSelected ? pricing.withFoodPrice : pricing.withoutFoodPrice;
+
+    let finalPrice = basePrice;
     if (settings.earlyBirdEnabled) {
-      finalPrice = Math.round(pricing.standardPrice * (1 - pricing.earlyBirdDiscountPercent / 100));
+      finalPrice = Math.round(basePrice * (1 - pricing.earlyBirdDiscountPercent / 100));
     }
     
     return {
-      originalPrice: pricing.standardPrice,
+      originalPrice: basePrice,
       finalPrice,
-      discount: pricing.standardPrice - finalPrice
+      discount: basePrice - finalPrice
     };
   };
 
@@ -674,7 +678,16 @@ export function RegistrationWizard() {
                       <span className="text-text-muted">No QR Code configured</span>
                     )}
                   </div>
-                  <p className="text-xs text-text-muted">Or pay via UPI ID: example@upi</p>
+                  {settings?.upiId && (
+                    <p className="text-sm font-mono text-center text-accent-secondary mb-2 bg-void/50 py-2 rounded-lg border border-glass-border">
+                      UPI ID: <span className="font-bold text-white">{settings.upiId}</span>
+                    </p>
+                  )}
+                  {settings?.adminContactNumber && (
+                    <p className="text-xs text-text-muted text-center">
+                      Facing issues? Contact Admin: {settings.adminContactNumber}
+                    </p>
+                  )}
                 </div>
                 
                 <div className="space-y-6">

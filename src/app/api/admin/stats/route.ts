@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
       Team.countDocuments({ paymentStatus: 'verified' }),
       Team.countDocuments({ paymentStatus: 'rejected' }),
       Team.countDocuments({ checkedIn: true }),
-      Team.find({}, { members: 1, paymentStatus: 1 })
+      Team.find({}, { members: 1, paymentStatus: 1, foodRequired: 1 })
     ]);
 
     let totalParticipants = 0;
@@ -42,10 +42,13 @@ export async function GET(req: NextRequest) {
         else if (numMembers >= 6) pricingObj = p?.team6;
         
         if (pricingObj) {
+          const isFoodSelected = team.foodRequired !== false && settings?.foodEnabled;
+          const basePrice = isFoodSelected ? pricingObj.withFoodPrice : pricingObj.withoutFoodPrice;
+
           if (settings.earlyBirdEnabled) {
-            totalRevenue += Math.round(pricingObj.standardPrice * (1 - pricingObj.earlyBirdDiscountPercent / 100));
+            totalRevenue += Math.round(basePrice * (1 - pricingObj.earlyBirdDiscountPercent / 100));
           } else {
-            totalRevenue += pricingObj.standardPrice;
+            totalRevenue += basePrice;
           }
         }
       }
