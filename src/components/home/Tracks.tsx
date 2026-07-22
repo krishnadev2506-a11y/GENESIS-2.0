@@ -45,14 +45,6 @@ export function Tracks() {
       iconBorder: 'rgba(74,222,128,0.3)',
       checkColor: '#4ade80',
       badgeText: 'text-[#4ade80]',
-      expectations: [
-        'MVC Architecture',
-        'Database Integration',
-        'Basic Authentication',
-        'Input Validation',
-        'Clean Structure',
-        'Basic Deployment',
-      ],
       note: 'Cloud infra not expected.',
     },
     {
@@ -70,14 +62,6 @@ export function Tracks() {
       iconBorder: 'rgba(167,139,250,0.3)',
       checkColor: '#c4b5fd',
       badgeText: 'text-[#c4b5fd]',
-      expectations: [
-        'System Design',
-        'Cloud Deployment',
-        'Docker & CI/CD',
-        'AI Integration',
-        'Scalable Architecture',
-        'Monitoring & Logs',
-      ],
       note: 'Must justify technical choices.',
     },
   ];
@@ -159,29 +143,9 @@ export function Tracks() {
 
                 {/* Divider with gradient */}
                 <div
-                  className="mb-8 h-[2px] w-full opacity-40 group-hover:opacity-100 transition-opacity duration-500 relative z-10"
+                  className="mb-8 h-[2px] w-full opacity-40 group-hover:opacity-100 transition-opacity duration-500 relative z-10 flex-grow"
                   style={{ background: `linear-gradient(90deg, ${track.checkColor}, transparent)` }}
                 />
-
-                {/* Expectations */}
-                <ul className="flex-grow space-y-4 mb-10 relative z-10">
-                  {track.expectations.map((item) => (
-                    <li key={item} className="flex items-center gap-3 text-sm text-text-muted leading-relaxed group/item transition-colors hover:text-white">
-                      <div className="relative flex items-center justify-center">
-                        <div className="absolute inset-0 blur-sm opacity-0 group-hover/item:opacity-100 transition-opacity" style={{ background: track.checkColor }} />
-                        <svg
-                          className="relative h-5 w-5 flex-shrink-0 transition-transform group-hover/item:scale-125"
-                          style={{ color: track.checkColor }}
-                          viewBox="0 0 16 16"
-                          fill="currentColor"
-                        >
-                          <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zm3.78 5.28a.75.75 0 0 0-1.06-1.06L7 7.94 5.28 6.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.06 0l4.25-4.25z" />
-                        </svg>
-                      </div>
-                      <span className="font-medium text-[15px]">{item}</span>
-                    </li>
-                  ))}
-                </ul>
 
                 {/* Note and Action */}
                 <div className="mt-auto space-y-5 relative z-10">
