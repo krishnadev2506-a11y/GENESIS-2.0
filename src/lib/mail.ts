@@ -1,13 +1,19 @@
-import { connectDB } from '@/lib/db';
-import Settings from '@/models/Settings';
+import nodemailer from 'nodemailer';
 import { logger } from '@/lib/logger';
 
-// Bypassing Vercel Env variables with a split string to prevent GitHub Secret Scanning blocks
-const API_KEY = 'xkeysib-' + '76d96273a21ccd8f766ef05755f41e24ff0065197607dc019c9e67615fdb2430-' + 'CD374osjNCkJOYxc';
-const FROM_EMAIL = 'krishnadev2506@gmail.com';
-const FROM_NAME = 'GENESIS 2.0';
+// Use Gmail SMTP
+const transporter = nodemailer.createTransport({
+  service: 'gmail',
+  auth: {
+    user: process.env.EMAIL_USER || 'krishnadev2506@gmail.com',
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
-interface BrevoEmailParams {
+const FROM_EMAIL = process.env.EMAIL_USER || 'krishnadev2506@gmail.com';
+const FROM_NAME = process.env.SENDER_NAME || 'GENESIS 2.0';
+
+interface EmailParams {
   toEmails?: string[];
   bccEmails?: string[];
   subject: string;
@@ -15,132 +21,116 @@ interface BrevoEmailParams {
   htmlContent: string;
 }
 
-async function sendBrevoEmail({ toEmails = [], bccEmails = [], subject, textContent, htmlContent }: BrevoEmailParams) {
-  const payload: any = {
-    sender: { name: FROM_NAME, email: FROM_EMAIL },
+async function sendEmail({ toEmails = [], bccEmails = [], subject, textContent, htmlContent }: EmailParams) {
+  if (!process.env.EMAIL_PASS) {
+    logger.warn('EMAIL_PASS is not set! Emails will fail.');
+  }
+
+  const mailOptions: any = {
+    from: `"${FROM_NAME}" <${FROM_EMAIL}>`,
     subject,
-    htmlContent,
-    textContent,
+    text: textContent,
+    html: htmlContent,
   };
 
   if (toEmails.length > 0) {
-    payload.to = toEmails.map(email => ({ email }));
-  } else if (bccEmails.length > 0) {
-    // If only BCC is provided, Brevo requires at least one TO address.
-    payload.to = [{ email: FROM_EMAIL }];
+    mailOptions.to = toEmails.join(', ');
   }
-
   if (bccEmails.length > 0) {
-    payload.bcc = bccEmails.map(email => ({ email }));
-  }
-
-  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-    method: 'POST',
-    headers: {
-      'accept': 'application/json',
-      'api-key': API_KEY,
-      'content-type': 'application/json'
-    },
-    body: JSON.stringify(payload)
-  });
-
-  if (!response.ok) {
-    const errorData = await response.text();
-    logger.error('Brevo API Error:', errorData);
-    throw new Error(`Failed to send email: ${errorData}`);
+    mailOptions.bcc = bccEmails.join(', ');
   }
   
-  return response.json();
-}
+  if (toEmails.length === 0 && bccEmails.length > 0) {
+    mailOptions.to = FROM_EMAIL; // To prevent empty 'to' issues
+  }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function stripHtml(html: string): string {
-  return html
-    .replace(/<br\s*\/?>/gi, '\n')
-    .replace(/<\/p>/gi, '\n\n')
-    .replace(/<[^>]+>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .trim();
-}
-
-const emailTemplate = (content: string) => `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-<body style="background-color: #0A0118; color: #F5F3FF; font-family: Arial, Helvetica, sans-serif; margin: 0; padding: 40px 20px;">
-  <div style="max-width: 600px; margin: 0 auto; background-color: #110B1F; border: 1px solid #2D2342; border-radius: 16px; padding: 40px;">
-    
-    <div style="text-align: center; margin-bottom: 32px;">
-      <div style="font-size: 32px; font-weight: bold; letter-spacing: 2px; color: #F5F3FF; text-transform: uppercase;">
-        Genesis <span style="color: #A78BFA;">2.0</span>
-      </div>
-      <div style="font-size: 14px; margin-top: 8px; color: #B3A8CC;">July 10-11, 2026</div>
-    </div>
-    
-    <div style="font-size: 16px; line-height: 1.6; color: #E5E7EB;">
-      ${content}
-    </div>
-    
-    <div style="margin-top: 40px; text-align: center; font-size: 14px; color: #B3A8CC;">
-      Code The Future. Create the Impossible.<br>
-      &copy; 2026 GENESIS Buildathon
-    </div>
-  </div>
-</body>
-</html>
-`;
-
-export async function sendRegistrationReceived(toEmails: string[], teamName: string, memberNames: string[] = []): Promise<void> {
-  await connectDB();
-  let contentStr = '';
   try {
-    // @ts-ignore
-    const settings = await Settings.getSettings();
-    contentStr = settings.registrationReceivedEmailTemplate || 'Registration received for {{teamName}}';
-  } catch (err) {
-    logger.error('Error fetching settings for email template', err);
-    contentStr = 'Registration received for {{teamName}}';
+    const info = await transporter.sendMail(mailOptions);
+    logger.info(`Email sent successfully: ${info.messageId}`);
+    return info;
+  } catch (error) {
+    logger.error('Failed to send email via Gmail:', error);
+    throw error;
   }
+}
 
-  contentStr = contentStr.replace(/{{teamName}}/g, teamName);
+function emailTemplate(content: string) {
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; background-color: #0A0A0A; border: 1px solid #1F2937; border-radius: 16px; overflow: hidden; color: #E5E7EB;">
+      <div style="background: linear-gradient(135deg, #4338CA 0%, #312E81 100%); padding: 32px 24px; text-align: center; border-bottom: 1px solid #4F46E5;">
+        <h1 style="margin: 0; color: #FFFFFF; font-size: 28px; font-weight: 800; letter-spacing: 2px;">GENESIS 2.0</h1>
+        <p style="margin: 8px 0 0 0; color: #C7D2FE; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">The Ultimate Tech Symposium</p>
+      </div>
+      <div style="padding: 32px 24px; background-color: #0A0A0A;">
+        ${content}
+      </div>
+      <div style="background-color: #050505; padding: 24px; text-align: center; border-top: 1px solid #1F2937;">
+        <p style="margin: 0 0 8px 0; color: #6B7280; font-size: 14px;">This is an automated message from the GENESIS 2.0 system.</p>
+        <p style="margin: 0; color: #4B5563; font-size: 12px;">© 2026 GENESIS FISAT. All rights reserved.</p>
+      </div>
+    </div>
+  `;
+}
+
+export async function sendRegistrationReceived(toEmails: string[], teamName: string, participantNames: string[] = []): Promise<void> {
+  const content = `
+    <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Registration Received!</h2>
+    <p style="margin: 0 0 16px 0; line-height: 1.6;">Hello ${participantNames.length > 0 ? participantNames.join(', ') : 'there'},</p>
+    <p style="margin: 0 0 16px 0; line-height: 1.6;">We have successfully received the registration for your team <strong>${teamName}</strong>.</p>
+    <p style="margin: 0 0 24px 0; line-height: 1.6;">Please note that your registration is currently <strong>Pending Verification</strong>. Our team will review your payment and details shortly. You will receive another email once your registration is confirmed.</p>
+    <p style="margin: 0; line-height: 1.6; color: #9CA3AF;">If you have any questions, please contact the event organizers.</p>
+  `;
   
-  if (memberNames.length > 0) {
-    contentStr += '\n\nRegistered Participants:\n' + memberNames.map(name => `- ${name}`).join('\n');
-  }
-  
-  const textContent = contentStr;
-  const content = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
-  const htmlContent = emailTemplate(content);
+  const textContent = `Registration Received!\n\nHello ${participantNames.length > 0 ? participantNames.join(', ') : 'there'},\n\nWe have successfully received the registration for your team ${teamName}.\n\nYour registration is currently Pending Verification. You will receive another email once your registration is confirmed.`;
 
   const promises = toEmails.map(to => 
-    sendBrevoEmail({
+    sendEmail({
       toEmails: [to],
       subject: "We have received your GENESIS 2.0 registration",
       textContent,
-      htmlContent
+      htmlContent: emailTemplate(content)
     }).catch(err => logger.error(`Failed to send registration received email to ${to}:`, err))
   );
 
   await Promise.allSettled(promises);
-  logger.info(`Sent registration received emails to ${toEmails.length} recipients for team ${teamName}`);
 }
 
-export async function sendRegistrationConfirmed(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
-  await connectDB();
-  let contentStr = '';
-  try {
-    // @ts-ignore
-    const settings = await Settings.getSettings();
-    contentStr = settings.registrationConfirmedEmailTemplate || 'Confirmed! User: {{username}}, Pass: {{password}}';
-  } catch (err) {
-    logger.error('Error fetching settings for email template', err);
-    contentStr = 'Confirmed! User: {{username}}, Pass: {{password}}';
-  }
+export async function sendAdminRegistrationAlert(teamName: string, college: string, memberCount: number): Promise<void> {
+  const content = `
+    <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">New Registration</h2>
+    <div style="background-color: #111827; border: 1px solid #374151; border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+      <p style="margin: 0 0 8px 0; color: #9CA3AF;"><strong>Team:</strong> <span style="color: #E5E7EB;">${teamName}</span></p>
+      <p style="margin: 0 0 8px 0; color: #9CA3AF;"><strong>College:</strong> <span style="color: #E5E7EB;">${college}</span></p>
+      <p style="margin: 0; color: #9CA3AF;"><strong>Members:</strong> <span style="color: #E5E7EB;">${memberCount}</span></p>
+    </div>
+    <p style="margin: 0; line-height: 1.6; color: #9CA3AF;">Please check the admin dashboard to verify the payment.</p>
+  `;
+  
+  const textContent = `New Registration\n\nTeam: ${teamName}\nCollege: ${college}\nMembers: ${memberCount}\n\nPlease check the admin dashboard to verify the payment.`;
 
-  contentStr = contentStr
+  await sendEmail({
+    toEmails: ['krishnadev2506@gmail.com'],
+    subject: `[Admin Alert] New Team Registered: ${teamName}`,
+    textContent,
+    htmlContent: emailTemplate(content)
+  });
+}
+
+export async function sendTeamCredentials(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
+  const contentStr = process.env.EMAIL_TEMPLATE_CREDENTIALS || `
+    <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Welcome to GENESIS 2.0!</h2>
+    <p style="margin: 0 0 16px 0; line-height: 1.6;">Hello Team <strong>{{teamName}}</strong>,</p>
+    <p style="margin: 0 0 16px 0; line-height: 1.6;">Your registration has been verified. Here are your login credentials for the dashboard:</p>
+    <div style="background-color: #111827; border: 1px solid #374151; border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
+      <p style="margin: 0 0 12px 0; color: #9CA3AF; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Username</p>
+      <p style="margin: 0 0 20px 0; color: #FFFFFF; font-size: 20px; font-weight: bold; font-family: monospace;">{{username}}</p>
+      <p style="margin: 0 0 12px 0; color: #9CA3AF; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Password</p>
+      <p style="margin: 0; color: #FFFFFF; font-size: 20px; font-weight: bold; font-family: monospace;">{{password}}</p>
+    </div>
+    <p style="margin: 0 0 16px 0; line-height: 1.6; color: #F87171;">⚠️ <strong>IMPORTANT:</strong> Keep these credentials safe. Anyone with this password can access your team's dashboard.</p>
+  `;
+  
+  const content = contentStr
     .replace(/{{teamName}}/g, teamName)
     .replace(/{{username}}/g, username)
     .replace(/{{password}}/g, password);
@@ -149,25 +139,23 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
   const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
   const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   
-  const content = `
-    ${formattedContent}
+  const fullHtml = emailTemplate(`
+    ${content}
     <div style="text-align: center; margin-top: 32px;">
-      <a href="${loginUrl}" style="display: inline-block; background-color: #8B5CF6; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
+      <a href="${loginUrl}" style="display: inline-block; background-color: #4F46E5; color: #FFFFFF; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; transition: background-color 0.2s;">Access Dashboard</a>
     </div>
-  `;
-  const htmlContent = emailTemplate(content);
+  `);
 
   const promises = toEmails.map(to => 
-    sendBrevoEmail({
+    sendEmail({
       toEmails: [to],
-      subject: "You are confirmed for GENESIS 2.0 - Welcome!",
+      subject: `Your GENESIS 2.0 Login Credentials`,
       textContent,
-      htmlContent
-    }).catch(err => logger.error(`Failed to send registration confirmed email to ${to}:`, err))
+      htmlContent: fullHtml
+    }).catch(err => logger.error(`Failed to send credentials to ${to}:`, err))
   );
 
   await Promise.allSettled(promises);
-  logger.info(`Sent registration confirmed emails to ${toEmails.length} recipients for team ${teamName}`);
 }
 
 export async function sendAdminMessage(to: string, subject: string, body: string): Promise<void> {
@@ -178,7 +166,7 @@ export async function sendAdminMessage(to: string, subject: string, body: string
   const textContent = `${subject}\n\n${body}`;
 
   try {
-    await sendBrevoEmail({
+    await sendEmail({
       toEmails: [to],
       subject,
       textContent,
@@ -201,18 +189,17 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
     <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">${subject}</h1>
     ${body.split('\n').map(p => `<p style="margin: 0 0 16px 0;">${p}</p>`).join('')}
   `;
-
   const textContent = `${subject}\n\n${body}`;
   const htmlContent = emailTemplate(content);
 
-  const chunkSize = 100;
+  // Gmail SMTP limit is ~500 per day. Chunking in batches of 90 to be safe with BCC limits.
+  const chunkSize = 90;
   let succeeded = 0;
-  let failed = 0;
 
   for (let i = 0; i < toEmails.length; i += chunkSize) {
     const chunk = toEmails.slice(i, i + chunkSize);
     try {
-      await sendBrevoEmail({
+      await sendEmail({
         bccEmails: chunk,
         subject,
         textContent,
@@ -220,63 +207,11 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
       });
       succeeded += chunk.length;
     } catch (err) {
-      failed += chunk.length;
-      logger.error(`Failed to send batch email chunk:`, err);
+      logger.error(`Failed to send batch message chunk (${i} to ${i+chunkSize}):`, err);
     }
   }
-
-  logger.info(`Batch email task finished: ${succeeded}/${toEmails.length} succeeded, ${failed} failed - Subject: ${subject}`);
-  if (failed > 0) {
-    throw new Error(`${failed} emails failed to send in batch.`);
-  }
-}
-
-export async function sendAdminRegistrationAlert(teamName: string, college: string, memberCount: number): Promise<void> {
-  const content = `
-    <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">New Team Registered!</h1>
-    <p style="margin: 0 0 16px 0;">A new team has just submitted their registration for GENESIS 2.0.</p>
-    <ul style="padding-left: 20px; margin-bottom: 24px; color: #E5E7EB;">
-      <li style="margin-bottom: 8px;"><strong>Team Name:</strong> ${teamName}</li>
-      <li style="margin-bottom: 8px;"><strong>College:</strong> ${college}</li>
-      <li style="margin-bottom: 8px;"><strong>Members:</strong> ${memberCount}</li>
-    </ul>
-    <p style="margin: 0 0 16px 0;">Please log in to the admin panel to review and verify their payment.</p>
-  `;
   
-  const textContent = `New Team Registered!\n\nA new team has just submitted their registration for GENESIS 2.0.\n\nTeam Name: ${teamName}\nCollege: ${college}\nMembers: ${memberCount}\n\nPlease log in to the admin panel to review and verify their payment.`;
-  
-  try {
-    await sendBrevoEmail({
-      toEmails: ['krishnadev2506@gmail.com'],
-      subject: `New Registration Alert: ${teamName}`,
-      textContent,
-      htmlContent: emailTemplate(content)
-    });
-  } catch (err) {
-    logger.error('Failed to send admin alert email', err);
-  }
-}
-
-export async function sendAdminVerificationAlert(teamName: string, verifiedBy: string = 'Admin'): Promise<void> {
-  const content = `
-    <h1 style="color: #F5F3FF; font-size: 20px; margin-top: 0; margin-bottom: 24px;">Team Verified!</h1>
-    <p style="margin: 0 0 16px 0;">The team <strong>${teamName}</strong> has been successfully verified.</p>
-    <p style="margin: 0 0 16px 0;">Verification handled by: ${verifiedBy}</p>
-    <p style="margin: 0 0 16px 0;">A confirmation email along with their dashboard login credentials has been automatically sent to all members of the team.</p>
-  `;
-  
-  const textContent = `Team Verified!\n\nThe team ${teamName} has been successfully verified.\nVerification handled by: ${verifiedBy}\n\nA confirmation email along with their dashboard login credentials has been automatically sent to all members of the team.`;
-  
-  try {
-    await sendBrevoEmail({
-      toEmails: ['krishnadev2506@gmail.com'],
-      subject: `Team Verified: ${teamName}`,
-      textContent,
-      htmlContent: emailTemplate(content)
-    });
-  } catch (err) {
-    logger.error('Failed to send admin verification alert email', err);
-  }
+  logger.info(`Admin message batch complete. Sent to ${succeeded}/${toEmails.length} participants.`);
 }
 
 export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
@@ -284,31 +219,23 @@ export async function sendVerificationConfirmation(toEmails: string[], teamName:
   const content = `
     <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Verification Confirmed! 🎉</h2>
     <p style="margin: 0 0 16px 0;">Great news! Your team <strong>${teamName}</strong> has been verified for GENESIS 2.0.</p>
-    <p style="margin: 0 0 16px 0;">Your team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.</p>
+    <p style="margin: 0 0 24px 0;">You can now log in to the dashboard to view your status, complete any pending tasks, and get ready for the event.</p>
+    
     <div style="text-align: center; margin-top: 32px;">
-      <a href="${dashboardUrl}" style="display: inline-block; background-color: #8B5CF6; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
+      <a href="${dashboardUrl}" style="display: inline-block; background-color: #4F46E5; color: #FFFFFF; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; transition: background-color 0.2s;">Go to Dashboard</a>
     </div>
-    <p style="margin: 24px 0 0 0; color: #B3A8CC; font-size: 14px;">If you have any questions, reach out to the organizing team.</p>
   `;
   
-  const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\n\nYour team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.\n\nAccess Dashboard: ${dashboardUrl}`;
-  const htmlContent = emailTemplate(content);
+  const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\nYou can now log in to the dashboard to view your status and get ready for the event.\n\nDashboard URL: ${dashboardUrl}`;
 
   const promises = toEmails.map(to => 
-    sendBrevoEmail({
+    sendEmail({
       toEmails: [to],
-      subject: `Your Team ${teamName} is Verified for GENESIS 2.0!`,
+      subject: `Your Team ${teamName} is Verified!`,
       textContent,
-      htmlContent
-    }).catch(err => {
-      logger.error(`Failed to send verification email to ${to}:`, err);
-      return null;
-    })
+      htmlContent: emailTemplate(content)
+    }).catch(err => logger.error(`Failed to send verification confirmation to ${to}:`, err))
   );
 
-  const results = await Promise.allSettled(promises);
-  const failed = results.filter(r => r.status === 'rejected');
-  if (failed.length > 0) {
-    logger.warn(`${failed.length} verification emails failed to send`);
-  }
+  await Promise.allSettled(promises);
 }

@@ -1,42 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
+import nodemailer from 'nodemailer';
 
 export async function GET(_req: NextRequest) {
   try {
-    const API_KEY = 'xkeysib-' + '76d96273a21ccd8f766ef05755f41e24ff0065197607dc019c9e67615fdb2430-' + 'CD374osjNCkJOYxc';
-
-    const payload = {
-      sender: { name: "GENESIS 2.0", email: "krishnadev2506@gmail.com" },
-      to: [{ email: "krishnadev2506@gmail.com" }],
-      subject: "Genesis 2.0 - Vercel API Test",
-      htmlContent: "<html><body><p>If you are reading this, the Brevo REST API is working perfectly!</p></body></html>",
-      textContent: "If you are reading this, the Brevo REST API is working perfectly!"
-    };
-
-    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
-      headers: {
-        'accept': 'application/json',
-        'api-key': API_KEY,
-        'content-type': 'application/json'
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER || 'krishnadev2506@gmail.com',
+        pass: process.env.EMAIL_PASS,
       },
-      body: JSON.stringify(payload)
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      return NextResponse.json({ 
-        success: false, 
-        stage: "API Send Failed",
-        error: errorText 
-      }, { status: 500 });
-    }
+    const mailOptions = {
+      from: `"GENESIS 2.0" <${process.env.EMAIL_USER || 'krishnadev2506@gmail.com'}>`,
+      to: 'krishnadev2506@gmail.com',
+      subject: 'Genesis 2.0 - Gmail SMTP Test',
+      text: 'If you are reading this, the Gmail SMTP integration is working perfectly!',
+      html: '<html><body><p>If you are reading this, the Gmail SMTP integration is working perfectly!</p></body></html>'
+    };
 
-    const data = await response.json();
+    const info = await transporter.sendMail(mailOptions);
 
     return NextResponse.json({ 
       success: true, 
-      message: "Email sent successfully via REST API!",
-      messageId: data.messageId
+      message: "Email sent successfully via Gmail SMTP!",
+      messageId: info.messageId
     });
 
   } catch (error) {
