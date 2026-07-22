@@ -14,9 +14,9 @@ export async function GET(_req: NextRequest) {
     }
 
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
+      host: 'smtp-relay.brevo.com',
+      port: 587,
+      secure: false, // Brevo uses STARTTLS on port 587
       auth: { user, pass },
     });
 

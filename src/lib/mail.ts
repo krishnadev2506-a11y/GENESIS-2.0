@@ -10,9 +10,9 @@ function createTransporter(): nodemailer.Transporter {
     throw new Error('EMAIL_USER and EMAIL_PASS environment variables are required');
   }
   return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 465,
-    secure: true,
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false, // Brevo uses STARTTLS on port 587
     auth: { user, pass },
   });
 }
