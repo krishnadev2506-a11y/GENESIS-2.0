@@ -15,11 +15,19 @@ export async function PATCH(
     const payload = await requireAuth(req, 'admin');
     
     const { id } = await params;
-    const body = await req.json();
-    const { reason } = body;
     
-    if (!reason) {
-      return NextResponse.json({ error: 'Rejection reason is required' }, { status: 400 });
+    let reason = "The payment screenshot uploaded was invalid or unreadable. Please check your transaction details and try again.";
+    
+    try {
+      const body = await req.text();
+      if (body) {
+        const parsed = JSON.parse(body);
+        if (parsed.reason) {
+          reason = parsed.reason;
+        }
+      }
+    } catch (e) {
+      // Ignore JSON parse errors, just use the default reason
     }
     
     const team = await Team.findById(id);
