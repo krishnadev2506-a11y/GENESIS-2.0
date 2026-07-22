@@ -3,31 +3,48 @@ import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 import { logger } from '@/lib/logger';
 
-let transporter: nodemailer.Transporter | null = null;
-
-function getTransporter(): nodemailer.Transporter {
-  if (!transporter) {
-    const user = process.env.EMAIL_USER;
-    const pass = process.env.EMAIL_PASS;
-    if (!user || !pass) {
-      throw new Error('EMAIL_USER and EMAIL_PASS environment variables are required');
-    }
-    transporter = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user,
-        pass,
-      },
-    });
+/**
+ * Creates a fresh Nodemailer transporter using Resend's SMTP relay.
+ *
+ * WHY NOT CACHE: Vercel serverless functions are ephemeral. A cached transporter
+ * from a previous warm invocation may hold a dead TCP connection. Creating fresh
+ * per-call is negligible overhead with an API-based relay (no slow TLS handshake
+ * to a personal Gmail server).
+ *
+ * SETUP:
+ *  1. Create a free account at https://resend.com
+ *  2. Add & verify your domain (follow their DNS instructions: SPF, DKIM, DMARC)
+ *  3. Create an API key at https://resend.com/api-keys
+ *  4. Add to Vercel env vars:
+ *       RESEND_API_KEY = re_xxxxxxxxxxxxxxxx
+ *       FROM_EMAIL     = noreply@yourdomain.com   (must be your verified domain)
+ */
+function createTransporter(): nodemailer.Transporter {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    throw new Error('RESEND_API_KEY environment variable is required');
   }
-  return transporter;
+  return nodemailer.createTransport({
+    host: 'smtp.resend.com',
+    port: 465,
+    secure: true,
+    auth: {
+      user: 'resend',      // literal string — Resend's SMTP always uses "resend" as user
+      pass: apiKey,
+    },
+  });
 }
 
 function getFromEmail(): string {
-  const user = process.env.EMAIL_USER;
-  return `GENESIS 2.0 <${user}>`;
+  const from = process.env.FROM_EMAIL;
+  if (!from) {
+    throw new Error('FROM_EMAIL environment variable is required (e.g. noreply@yourdomain.com)');
+  }
+  return `GENESIS 2.0 <${from}>`;
+}
+
+function getFromAddress(): string {
+  return process.env.FROM_EMAIL || '';
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -89,23 +106,21 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
     contentStr += '\n\nRegistered Participants:\n' + memberNames.map(name => `- ${name}`).join('\n');
   }
   
-  // Create plain text fallback first
   const textContent = contentStr;
-  
-  // Create HTML version
   const content = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   const htmlContent = emailTemplate(content);
-  
   const fromEmail = getFromEmail();
+  const fromAddress = getFromAddress();
+  const transporter = createTransporter();
 
-  const promises = toEmails.map(to => getTransporter().sendMail({
+  const promises = toEmails.map(to => transporter.sendMail({
     from: fromEmail,
     to,
     subject: "We have received your GENESIS 2.0 registration",
     text: textContent,
     html: htmlContent,
     headers: {
-      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+      'List-Unsubscribe': `<mailto:${fromAddress}?subject=unsubscribe>`
     }
   }).catch(err => {
     logger.error(`Failed to send registration received email to ${to}:`, err);
@@ -133,11 +148,7 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     .replace(/{{password}}/g, password);
 
   const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/login`;
-  
-  // Create plain text fallback
   const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
-
-  // Create HTML version
   const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   
   const content = `
@@ -147,17 +158,18 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     </div>
   `;
   const htmlContent = emailTemplate(content);
-  
   const fromEmail = getFromEmail();
+  const fromAddress = getFromAddress();
+  const transporter = createTransporter();
 
-  const promises = toEmails.map(to => getTransporter().sendMail({
+  const promises = toEmails.map(to => transporter.sendMail({
     from: fromEmail,
     to,
     subject: "You are confirmed for GENESIS 2.0 - Welcome!",
     text: textContent,
     html: htmlContent,
     headers: {
-      'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+      'List-Unsubscribe': `<mailto:${fromAddress}?subject=unsubscribe>`
     }
   }).catch(err => {
     logger.error(`Failed to send registration confirmed email to ${to}:`, err);
@@ -174,16 +186,19 @@ export async function sendAdminMessage(to: string, subject: string, body: string
   `;
   
   const textContent = `${subject}\n\n${body}`;
+  const fromEmail = getFromEmail();
+  const fromAddress = getFromAddress();
+  const transporter = createTransporter();
 
   try {
-    const result = await getTransporter().sendMail({
-      from: getFromEmail(),
+    const result = await transporter.sendMail({
+      from: fromEmail,
       to,
       subject,
       text: textContent,
       html: emailTemplate(content),
       headers: {
-        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
+        'List-Unsubscribe': `<mailto:${fromAddress}?subject=unsubscribe>`
       }
     });
     logger.info(`Single admin message sent to ${to}: ${result.messageId}`);
@@ -207,22 +222,25 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
   const textContent = `${subject}\n\n${body}`;
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
-  const transporter = getTransporter();
+  const transporter = createTransporter();
 
-  // Use BCC for batch sending to protect recipient privacy and improve efficiency
-  const chunkSize = 100; // Gmail BCC limit is around 100
+  // Send individually (not BCC) so Resend tracks each delivery separately
+  // Resend's free tier handles up to 3000/month; batch in chunks to avoid rate limits
+  const chunkSize = 50;
   let succeeded = 0;
   let failed = 0;
 
   for (let i = 0; i < toEmails.length; i += chunkSize) {
     const chunk = toEmails.slice(i, i + chunkSize);
-    try {
-      await transporter.sendMail({ from: fromEmail, bcc: chunk, subject, text: textContent, html: htmlContent });
-      succeeded += chunk.length;
-    } catch (err) {
-      failed += chunk.length;
-      logger.error(`Failed to send batch email chunk:`, err);
-    }
+    const chunkPromises = chunk.map(to =>
+      transporter.sendMail({ from: fromEmail, to, subject, text: textContent, html: htmlContent })
+        .then(() => { succeeded++; })
+        .catch(err => {
+          failed++;
+          logger.error(`Batch send failed for ${to}:`, err);
+        })
+    );
+    await Promise.allSettled(chunkPromises);
   }
 
   logger.info(`Batch email task finished: ${succeeded}/${toEmails.length} succeeded, ${failed} failed - Subject: ${subject}`);
@@ -244,11 +262,13 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
   `;
   
   const textContent = `New Team Registered!\n\nA new team has just submitted their registration for GENESIS 2.0.\n\nTeam Name: ${teamName}\nCollege: ${college}\nMembers: ${memberCount}\n\nPlease log in to the admin panel to review and verify their payment.`;
-  
+  const adminEmail = process.env.ADMIN_ALERT_EMAIL || process.env.FROM_EMAIL || 'krishnadev2506@gmail.com';
+  const transporter = createTransporter();
+
   try {
-    await getTransporter().sendMail({
+    await transporter.sendMail({
       from: getFromEmail(),
-      to: process.env.EMAIL_USER || 'krishnadev2506@gmail.com',
+      to: adminEmail,
       subject: `New Registration Alert: ${teamName}`,
       text: textContent,
       html: emailTemplate(content),
@@ -262,30 +282,29 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
  * Send verification confirmation email to all team members after payment verification
  */
 export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
+  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/dashboard`;
   const content = `
     <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Verification Confirmed! 🎉</h2>
     <p style="margin: 0 0 16px 0;">Great news! Your team <strong>${teamName}</strong> has been verified for GENESIS 2.0.</p>
     <p style="margin: 0 0 16px 0;">Your team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.</p>
     <div style="text-align: center; margin-top: 32px;">
-      <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/dashboard" style="display: inline-block; background-color: #8B5CF6; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
+      <a href="${dashboardUrl}" style="display: inline-block; background-color: #8B5CF6; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
     </div>
     <p style="margin: 24px 0 0 0; color: #B3A8CC; font-size: 14px;">If you have any questions, reach out to the organizing team.</p>
   `;
   
-  const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\n\nYour team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.\n\nAccess Dashboard: ${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/dashboard`;
+  const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\n\nYour team leader will have received separate login credentials. You can now access the dashboard and prepare for the event.\n\nAccess Dashboard: ${dashboardUrl}`;
   const htmlContent = emailTemplate(content);
   const fromEmail = getFromEmail();
+  const transporter = createTransporter();
 
   const promises = toEmails.map(to => 
-    getTransporter().sendMail({
+    transporter.sendMail({
       from: fromEmail,
       to,
       subject: `Your Team ${teamName} is Verified for GENESIS 2.0!`,
       text: textContent,
       html: htmlContent,
-      headers: {
-        'List-Unsubscribe': `<mailto:${process.env.EMAIL_USER}?subject=unsubscribe>`
-      }
     }).catch(err => {
       logger.error(`Failed to send verification email to ${to}:`, err);
       return null;
