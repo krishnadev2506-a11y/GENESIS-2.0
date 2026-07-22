@@ -99,8 +99,8 @@ const Icons = {
     <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8 md:w-10 md:h-10 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]">
       <defs>
         <linearGradient id="bubble1" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#34d399" />
-          <stop offset="100%" stopColor="#047857" />
+          <stop offset="0%" stopColor="#60a5fa" />
+          <stop offset="100%" stopColor="#1d4ed8" />
         </linearGradient>
         <linearGradient id="bubble2" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0%" stopColor="#a78bfa" />
@@ -180,14 +180,14 @@ export function EventJourney({ route, theme }: EventJourneyProps) {
         { name: 'Best UI/UX', icon: <Icons.ui /> },
       ];
 
-  const colorPrimary = isProfessional ? 'text-purple-400' : 'text-emerald-400';
-  const colorGlow = isProfessional ? 'rgba(168,85,247,0.15)' : 'rgba(52,211,153,0.15)';
-  const colorBorder = isProfessional ? 'rgba(168,85,247,0.3)' : 'rgba(52,211,153,0.3)';
+  const colorPrimary = isProfessional ? 'text-purple-400' : 'text-blue-400';
+  const colorGlow = isProfessional ? 'rgba(168,85,247,0.15)' : 'rgba(96,165,250,0.15)';
+  const colorBorder = isProfessional ? 'rgba(168,85,247,0.3)' : 'rgba(96,165,250,0.3)';
   const bgGradient = isProfessional 
     ? 'from-[#1a0b2e] to-[#0c0814]' 
-    : 'from-[#0b2923] to-[#0c0814]';
-  const blobColor1 = isProfessional ? 'bg-purple-600/20' : 'bg-emerald-600/20';
-  const blobColor2 = isProfessional ? 'bg-indigo-600/20' : 'bg-teal-600/20';
+    : 'from-[#0f172a] to-[#0c0814]';
+  const blobColor1 = isProfessional ? 'bg-purple-600/20' : 'bg-blue-600/20';
+  const blobColor2 = isProfessional ? 'bg-indigo-600/20' : 'bg-cyan-600/20';
 
   return (
     <div className={`relative min-h-screen pt-24 pb-32 overflow-hidden bg-gradient-to-b ${bgGradient}`}>
@@ -250,7 +250,7 @@ export function EventJourney({ route, theme }: EventJourneyProps) {
         <div className="relative">
           <FadeUp className="text-center mb-16">
             <h2 className="text-2xl font-display font-bold text-white uppercase tracking-[0.2em] opacity-90">Execution Timeline</h2>
-            <div className={`h-1 w-24 mx-auto mt-6 rounded-full bg-gradient-to-r ${isProfessional ? 'from-purple-500/0 via-purple-500 to-purple-500/0' : 'from-emerald-500/0 via-emerald-500 to-emerald-500/0'}`} />
+            <div className={`h-1 w-24 mx-auto mt-6 rounded-full bg-gradient-to-r ${isProfessional ? 'from-purple-500/0 via-purple-500 to-purple-500/0' : 'from-blue-500/0 via-blue-500 to-blue-500/0'}`} />
           </FadeUp>
 
           <div className="space-y-8 relative">

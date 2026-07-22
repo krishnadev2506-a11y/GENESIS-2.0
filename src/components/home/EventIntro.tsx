@@ -57,7 +57,7 @@ export function EventIntro() {
           <div className="absolute top-0 left-1/4 right-1/4 h-[1px] bg-gradient-to-r from-transparent via-accent-primary/50 to-transparent opacity-50 group-hover:opacity-100 transition-opacity duration-700" />
           
           <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 bg-accent-primary/10 blur-[100px] rounded-full pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
-          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-emerald-500/10 blur-[100px] rounded-full pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
+          <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-blue-500/10 blur-[100px] rounded-full pointer-events-none transition-transform duration-1000 group-hover:scale-110" />
           
           <div className="relative z-10 flex flex-col md:flex-row items-center gap-10 md:gap-16">
             
@@ -75,7 +75,7 @@ export function EventIntro() {
                     transformStyle: 'preserve-3d'
                  }}
                >
-                 <div className="absolute inset-2 border border-emerald-400/30 rounded-xl" style={{ transform: "translateZ(20px)" }} />
+                 <div className="absolute inset-2 border border-blue-400/30 rounded-xl" style={{ transform: "translateZ(20px)" }} />
                  <div className="absolute inset-4 border border-accent-primary/40 rounded-lg" style={{ transform: "translateZ(40px)" }} />
                  <div className="absolute w-2 h-2 rounded-full bg-white shadow-[0_0_10px_white]" style={{ transform: "translateZ(60px)" }} />
                </m.div>
@@ -88,12 +88,12 @@ export function EventIntro() {
             >
               <h2 className="mb-4 text-3xl font-display font-black uppercase tracking-[0.1em] sm:text-4xl lg:text-5xl drop-shadow-md">
                 Welcome to <br className="md:hidden" />
-                <span className="bg-gradient-to-r from-accent-primary via-purple-300 to-emerald-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(168,85,247,0.3)]">
+                <span className="bg-gradient-to-r from-accent-primary via-purple-300 to-blue-400 bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(168,85,247,0.3)]">
                   GENESIS 2.0
                 </span>
               </h2>
               
-              <div className="mx-auto md:mx-0 h-1 w-24 bg-gradient-to-r from-accent-primary to-emerald-400 mb-6 rounded-full shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
+              <div className="mx-auto md:mx-0 h-1 w-24 bg-gradient-to-r from-accent-primary to-blue-400 mb-6 rounded-full shadow-[0_0_10px_rgba(96,165,250,0.5)]" />
 
               <p className="text-sm leading-relaxed text-text-muted sm:text-base md:text-lg sm:leading-loose">
                 An immersive, high-energy buildathon where teams of students collaborate to architect, build, and deploy production-grade applications. Experience intense coding sprints, surprise technical constraints, and real-world architecture defenses.

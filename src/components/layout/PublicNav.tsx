@@ -86,7 +86,7 @@ export function PublicNav() {
               transition={{ duration: 2, repeat: Infinity }}
             >
               <m.span 
-                className="mr-2 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.85)]"
+                className="mr-2 h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.85)]"
                 animate={{ 
                   scale: [1, 1.4, 1],
                   opacity: [1, 0.6, 1]
@@ -149,7 +149,7 @@ export function PublicNav() {
               })}
               <div className="mt-6 glass-surface rounded-[22px] p-4 text-xs uppercase tracking-[0.18em] text-text-muted sm:text-sm sm:tracking-[0.22em]">
                 <div className="mb-2 flex items-center gap-2 text-white">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.85)]"></span>
+                  <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.85)]"></span>
                   Live registrations open
                 </div>
                 Team buildathon experience with workshops and challenges.
