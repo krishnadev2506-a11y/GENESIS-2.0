@@ -145,7 +145,7 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     .replace(/{{username}}/g, username)
     .replace(/{{password}}/g, password);
 
-  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/login`;
+  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/login`;
   const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
   const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   
@@ -280,7 +280,7 @@ export async function sendAdminVerificationAlert(teamName: string, verifiedBy: s
 }
 
 export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
-  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesis2026.dev'}/dashboard`;
+  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/dashboard`;
   const content = `
     <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Verification Confirmed! 🎉</h2>
     <p style="margin: 0 0 16px 0;">Great news! Your team <strong>${teamName}</strong> has been verified for GENESIS 2.0.</p>

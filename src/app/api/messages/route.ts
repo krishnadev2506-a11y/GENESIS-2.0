@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
       logger.info(`Sending ${scope} message emails...`);
       try {
         if (scope === 'broadcast') {
-            const teams = await Team.find({ registrationStatus: 'confirmed' }).select('members.email').lean();
+            const teams = await Team.find({}).select('members.email').lean();
             // Collect all member emails from all confirmed teams, deduplicate
             const emails = Array.from(new Set(teams.flatMap(t => t.members?.map((m: any) => m.email) || []).filter(Boolean)));
             
