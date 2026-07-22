@@ -29,6 +29,8 @@ export async function GET() {
       themeFoundation: settings.themeFoundation,
       themeProfessional: settings.themeProfessional,
       prizePool: settings.prizePool,
+      upiId: settings.upiId,
+      adminContactNumber: settings.adminContactNumber,
     };
 
     return NextResponse.json(publicSettings, {
