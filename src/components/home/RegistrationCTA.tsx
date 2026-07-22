@@ -16,6 +16,7 @@ export function RegistrationCTA() {
   const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-5deg", "5deg"]);
 
   const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    if (typeof window !== 'undefined' && window.innerWidth < 768) return;
     const rect = e.currentTarget.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;

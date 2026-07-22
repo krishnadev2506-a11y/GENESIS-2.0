@@ -227,17 +227,24 @@ h1, h2, h3, h4, h5, h6, .font-display {
 }
 
 @media (max-width: 640px) {
+  body {
+    background:
+      radial-gradient(circle at 15% 50%, rgba(139, 92, 246, 0.03), transparent 30%),
+      radial-gradient(circle at 85% 30%, rgba(109, 40, 217, 0.03), transparent 30%),
+      linear-gradient(180deg, #020202 0%, #05020a 50%, #020202 100%);
+  }
+
   body::before {
-    opacity: 0.05;
+    opacity: 0.02;
   }
 
   body::after {
-    opacity: 0.02;
+    display: none;
   }
 
   .section-glow {
     filter: blur(72px);
-    opacity: 0.55;
+    opacity: 0.35;
   }
 
   .animate-slow-spin {
