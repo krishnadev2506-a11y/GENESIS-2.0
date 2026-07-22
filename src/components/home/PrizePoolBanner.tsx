@@ -73,12 +73,9 @@ export function PrizePoolBanner() {
             className="relative z-10 flex-1 text-center md:text-left pointer-events-none"
             style={{ transform: "translateZ(30px)" }}
           >
-            <h3 className="text-xs sm:text-sm font-bold uppercase tracking-[0.3em] text-accent-secondary mb-2 drop-shadow-[0_0_8px_rgba(52,211,153,0.3)]">
+            <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black uppercase tracking-[0.2em] bg-clip-text text-transparent bg-gradient-to-r from-accent-secondary via-emerald-300 to-emerald-500 drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]">
               Combined Prize Pool
             </h3>
-            <p className="text-text-muted text-xs sm:text-sm leading-relaxed max-w-[280px] sm:max-w-sm mx-auto md:mx-0">
-              Compete across both Foundation and Professional tracks for epic rewards and glory.
-            </p>
           </div>
 
           {/* The Money Element */}

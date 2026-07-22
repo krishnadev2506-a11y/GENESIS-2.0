@@ -101,23 +101,23 @@ export function Tracks() {
               >
                 {/* Hairline glowing top border */}
                 <div 
-                  className="absolute top-0 left-0 right-0 h-[1px] opacity-50 group-hover:opacity-100 transition-opacity duration-700" 
+                  className="absolute top-0 left-0 right-0 h-[1px] opacity-30 group-hover:opacity-80 transition-opacity duration-700" 
                   style={{ background: `linear-gradient(90deg, transparent, ${track.checkColor}, transparent)` }} 
                 />
 
                 {/* Subtle Grid Background */}
-                <div className="absolute inset-0 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity duration-700 pointer-events-none" 
+                <div className="absolute inset-0 opacity-[0.02] group-hover:opacity-[0.05] transition-opacity duration-700 pointer-events-none" 
                      style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)', backgroundSize: '30px 30px' }} 
                 />
 
                 {/* Large Background Glow that follows hover */}
                 <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-30 transition-opacity duration-700 pointer-events-none mix-blend-screen"
+                  className="absolute inset-0 opacity-0 group-hover:opacity-15 transition-opacity duration-700 pointer-events-none mix-blend-screen"
                   style={{ background: `radial-gradient(circle at 80% 20%, ${track.checkColor}40, transparent 60%)` }}
                 />
 
-                {/* Light sweep animation */}
-                <div className="absolute inset-0 opacity-0 group-hover:opacity-20 group-hover:animate-[sweep_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] -translate-x-full pointer-events-none" />
+                {/* Light sweep animation - made darker */}
+                <div className="absolute inset-0 opacity-0 group-hover:opacity-10 group-hover:animate-[sweep_3s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white to-transparent skew-x-[-25deg] -translate-x-full pointer-events-none" />
 
                 {/* Header Section */}
                 <div className="mb-auto flex flex-col items-start gap-4 relative z-10 w-full">
@@ -134,7 +134,7 @@ export function Tracks() {
                       {track.year}
                     </div>
                     
-                    <h3 className={`text-3xl xs:text-4xl sm:text-5xl lg:text-6xl font-display font-black uppercase tracking-wide mb-6 sm:mb-8 bg-gradient-to-br ${track.color} bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(255,255,255,0.15)] leading-tight md:leading-tight`}>
+                    <h3 className={`text-[1.75rem] leading-[1.1] xs:text-3xl sm:text-4xl md:text-5xl lg:text-5xl font-display font-black uppercase tracking-wide mb-6 sm:mb-8 bg-gradient-to-br ${track.color} bg-clip-text text-transparent drop-shadow-[0_2px_15px_rgba(255,255,255,0.15)] break-words hyphens-auto w-full`}>
                       {track.title}
                     </h3>
                     
