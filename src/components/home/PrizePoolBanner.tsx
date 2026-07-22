@@ -45,63 +45,64 @@ export function PrizePoolBanner() {
   };
 
   return (
-    <div className="relative w-full z-20 mt-8 mb-12 flex justify-center perspective-[1200px]">
+    <div className="relative w-full z-20 mt-12 mb-20 flex justify-center">
       <m.div
-        initial={{ opacity: 0, y: 30 }}
+        initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-50px" }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
         className="w-full max-w-4xl px-4 sm:px-6 relative"
       >
-        <m.div
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          className="relative flex flex-col md:flex-row items-center justify-between p-6 sm:p-8 md:p-10 gap-6 sm:gap-8 w-full rounded-2xl sm:rounded-[2rem] border border-white/5 bg-gradient-to-br from-[rgba(30,15,50,0.6)] to-[rgba(15,10,25,0.8)] shadow-2xl backdrop-blur-xl group"
-          style={{
-            rotateX,
-            rotateY,
-            transformStyle: "preserve-3d",
-          }}
-        >
-          {/* Glass Glare Effects */}
-          <div className="absolute inset-0 rounded-2xl sm:rounded-[2rem] overflow-hidden pointer-events-none">
-             <div className="absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-emerald-400/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-             <div className="absolute -inset-20 bg-[radial-gradient(circle_at_center,rgba(52,211,153,0.08)_0%,transparent_60%)] opacity-0 group-hover:opacity-100 transition-opacity duration-700 mix-blend-screen pointer-events-none" />
-          </div>
+        <div className="relative flex flex-col md:flex-row items-center justify-between p-6 sm:p-8 md:p-10 gap-6 sm:gap-8 w-full rounded-[1.5rem] sm:rounded-3xl border border-white/[0.08] bg-[#0c0814] shadow-[0_10px_40px_rgba(0,0,0,0.3)] overflow-hidden group">
+          
+          {/* Subtle purple-to-teal backdrop glow inside the card */}
+          <div className="absolute inset-0 pointer-events-none opacity-30" style={{ background: 'radial-gradient(100% 100% at 0% 0%, rgba(168, 85, 247, 0.1) 0%, transparent 50%), radial-gradient(100% 100% at 100% 100%, rgba(45, 212, 191, 0.1) 0%, transparent 50%)' }} />
+          
+          {/* Top rim light */}
+          <div className="absolute top-0 left-[10%] right-[10%] h-[1px] bg-gradient-to-r from-transparent via-purple-400/20 to-transparent" />
 
           {/* Text Content */}
-          <div 
-            className="relative z-10 flex-1 text-center md:text-left pointer-events-none"
-            style={{ transform: "translateZ(30px)" }}
-          >
-            <h3 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-display font-black uppercase tracking-[0.2em] bg-clip-text text-transparent bg-gradient-to-r from-accent-secondary via-emerald-300 to-emerald-500 drop-shadow-[0_0_15px_rgba(52,211,153,0.4)]">
-              Combined Prize Pool
+          <div className="relative z-10 flex-1 text-center md:text-left">
+            <h3 className="text-xs sm:text-sm font-display font-bold uppercase tracking-[0.25em] text-text-muted mb-2">
+              Prize Pool
             </h3>
+            <p className="text-sm sm:text-base text-text-muted/70 max-w-sm mx-auto md:mx-0">
+              Reward for exceptional execution and innovation.
+            </p>
           </div>
 
           {/* The Money Element */}
-          <div 
-            className="relative z-20 flex justify-center items-center pointer-events-none"
-            style={{ transform: "translateZ(50px)" }}
-          >
-            <div className="flex items-center gap-3 sm:gap-4 bg-white/[0.03] border border-white/10 px-5 sm:px-6 py-3 sm:py-4 rounded-xl sm:rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.3)] backdrop-blur-md group-hover:border-emerald-500/20 group-hover:bg-white/[0.05] transition-all duration-500">
+          <div className="relative z-20 flex justify-center items-center">
+            <div className="flex items-center gap-4 sm:gap-5 bg-white/[0.02] border border-white/5 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl shadow-inner">
               
-              {/* 3D Coin/Money Icon */}
-              <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-emerald-300 via-emerald-500 to-accent-primary shadow-[0_0_20px_rgba(52,211,153,0.4)] group-hover:shadow-[0_0_30px_rgba(52,211,153,0.6)] transition-shadow duration-500">
-                <div className="absolute inset-1 rounded-full border border-white/40" />
-                <div className="relative z-10 w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-void flex items-center justify-center drop-shadow-md">
-                  <span className="text-emerald-400 font-black text-sm sm:text-base mt-[1px] ml-[1px]">₹</span>
+              {/* 3D Coin/Medallion */}
+              <m.div 
+                animate={{ y: [0, -3, 0] }}
+                transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
+                className="relative flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 rounded-full shadow-[0_8px_16px_rgba(0,0,0,0.5),0_0_20px_rgba(168,85,247,0.15)]"
+              >
+                {/* Outer rim (purple to teal) */}
+                <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500 to-teal-400 opacity-90 shadow-[inset_0_2px_4px_rgba(255,255,255,0.4),inset_0_-2px_4px_rgba(0,0,0,0.4)]" />
+                
+                {/* Inner embossed face */}
+                <div className="relative w-[82%] h-[82%] rounded-full bg-gradient-to-br from-[#1f1635] to-[#0f1f22] flex items-center justify-center shadow-[inset_0_-2px_3px_rgba(255,255,255,0.15),inset_0_2px_5px_rgba(0,0,0,0.6),0_2px_4px_rgba(0,0,0,0.5)] overflow-hidden">
+                  {/* Directional light glare */}
+                  <div className="absolute -top-1 -left-1 w-full h-full bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.15)_0%,transparent_50%)]" />
+                  
+                  <span className="text-transparent bg-clip-text bg-gradient-to-b from-white to-gray-400 font-black text-xl sm:text-2xl relative z-10 drop-shadow-[0_2px_2px_rgba(0,0,0,0.8)]">
+                    ₹
+                  </span>
                 </div>
-              </div>
+              </m.div>
 
-              {/* Smaller, neatly aligned amount */}
-              <span className="text-3xl sm:text-4xl md:text-5xl font-display font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-emerald-100 to-emerald-400 drop-shadow-sm">
+              {/* Amount */}
+              <span className="text-4xl md:text-5xl font-display font-black text-white drop-shadow-md tracking-tight">
                 {prizePool}
               </span>
               
             </div>
           </div>
-        </m.div>
+        </div>
       </m.div>
     </div>
   );
