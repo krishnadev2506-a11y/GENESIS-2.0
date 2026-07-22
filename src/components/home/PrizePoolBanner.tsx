@@ -5,37 +5,6 @@ import { m, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { MouseEvent } from 'react';
 
 export function PrizePoolBanner() {
-  const { data: settings } = useQuery({
-    queryKey: ['publicSettings'],
-    queryFn: async () => {
-      const res = await fetch('/api/settings/public');
-      if (!res.ok) throw new Error('Failed to fetch settings');
-      return res.json();
-    }
-  });
-
-  const prizePool = typeof settings?.prizePool === 'string' ? settings.prizePool : 'Will be released soon..';
-
-  // 3D Interactive Cursor Hover Effect setup
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const mouseXSpring = useSpring(x, { stiffness: 300, damping: 20 });
-  const mouseYSpring = useSpring(y, { stiffness: 300, damping: 20 });
-
-  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ["10deg", "-10deg"]);
-  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ["-10deg", "10deg"]);
-
-  const handleMouseMove = (e: MouseEvent<HTMLDivElement>) => {
-    if (typeof window !== 'undefined' && window.innerWidth < 768) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = e.clientX - rect.left;
-    const mouseY = e.clientY - rect.top;
-    const xPct = mouseX / width - 0.5;
-    const yPct = mouseY / height - 0.5;
-    x.set(xPct);
   return (
     <div className="relative w-full z-20 mt-12 mb-20 flex justify-center">
       <m.div
