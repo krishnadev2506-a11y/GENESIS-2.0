@@ -1,6 +1,7 @@
 import { Hero } from '@/components/home/Hero';
 import { EventIntro } from '@/components/home/EventIntro';
 import { SpaceDust } from '@/components/home/SpaceDust';
+import { PrizePoolBanner } from '@/components/home/PrizePoolBanner';
 import dynamic from 'next/dynamic';
 import { LazyLoadSection } from '@/components/ui/LazyLoadSection';
 
@@ -13,6 +14,7 @@ export default function Home() {
     <main className="cosmic-page flex-grow flex flex-col pb-16 overflow-x-hidden relative">
       <SpaceDust />
       <Hero />
+      <PrizePoolBanner />
       <EventIntro />
       <LazyLoadSection minHeight="600px">
         <Tracks />
