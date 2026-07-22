@@ -31,7 +31,7 @@ export function PrizePool() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
-        <FadeUp delay={0.1}>
+        <FadeUp>
           <GlassCard 
             hoverEffect 
             className="p-8 sm:p-12 text-center h-full border-t-4 border-t-accent-primary group relative overflow-hidden"
@@ -50,7 +50,7 @@ export function PrizePool() {
           </GlassCard>
         </FadeUp>
 
-        <FadeUp delay={0.2}>
+        <FadeUp>
           <GlassCard 
             hoverEffect 
             className="p-8 sm:p-12 text-center h-full border-t-4 border-t-emerald-400 group relative overflow-hidden"

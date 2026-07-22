@@ -42,7 +42,6 @@ export function SettingsClient() {
       tagline: '',
       description: '',
       releaseDate: '',
-      releaseDate: '',
       published: false
     },
     prizePool: {
@@ -107,7 +106,6 @@ export function SettingsClient() {
           title: settings.themeProfessional?.title ?? '',
           tagline: settings.themeProfessional?.tagline ?? '',
           description: settings.themeProfessional?.description ?? '',
-          releaseDate: formatLocalDate(settings.themeProfessional?.releaseDate),
           releaseDate: formatLocalDate(settings.themeProfessional?.releaseDate),
           published: settings.themeProfessional?.published ?? false,
         },
