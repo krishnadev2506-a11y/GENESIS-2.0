@@ -115,31 +115,31 @@ export function Hero() {
           initial="hidden"
           animate="visible"
         >
-          <m.h1 variants={fadeUp} className="mb-6">
-            <BrandWordmark className="text-[2.5rem] sm:text-7xl lg:text-[6rem] tracking-[0.15em] sm:tracking-[0.2em] lg:tracking-[0.22em] leading-none text-transparent bg-clip-text bg-gradient-to-br from-[#c4b5fd] via-white to-[#a855f7]" />
+          <m.h1 variants={fadeUp} className="mb-4 sm:mb-6">
+            <BrandWordmark className="text-[2rem] xs:text-[2.25rem] sm:text-7xl lg:text-[6rem] tracking-[0.15em] sm:tracking-[0.2em] lg:tracking-[0.22em] leading-none text-transparent bg-clip-text bg-gradient-to-br from-[#c4b5fd] via-white to-[#a855f7] whitespace-nowrap" />
           </m.h1>
 
           <m.p
             variants={fadeUp as any}
-            className="mx-auto mt-5 max-w-3xl text-base leading-7 text-text-muted sm:mt-6 sm:text-xl sm:leading-8 lg:text-2xl uppercase tracking-wider"
+            className="mx-auto mt-4 max-w-3xl text-[11px] xs:text-xs leading-6 text-text-muted sm:mt-6 sm:text-xl sm:leading-8 lg:text-2xl uppercase tracking-wider whitespace-nowrap"
           >
             CODE THE FUTURE, CODE THE IMPOSSIBLE
           </m.p>
 
-          <m.div variants={fadeUp} className="mb-14 mt-10 flex flex-wrap justify-center gap-5 sm:gap-16">
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Date</span>
-              <span className="mt-1 text-base font-semibold text-white">August 7 & 8</span>
+          <m.div variants={fadeUp} className="mb-14 mt-10 flex flex-nowrap items-center justify-center gap-3 xs:gap-5 sm:gap-16 w-full overflow-hidden">
+            <div className="flex flex-col items-center shrink-0">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-text-muted/60">Date</span>
+              <span className="mt-1 text-xs xs:text-sm sm:text-base font-semibold text-white whitespace-nowrap">Aug 7 & 8</span>
             </div>
-            <div className="w-px bg-white/10" />
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Venue</span>
-              <span className="mt-1 text-base font-semibold text-white">FISAT Campus</span>
+            <div className="w-px h-8 bg-white/10 shrink-0" />
+            <div className="flex flex-col items-center shrink-0">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-text-muted/60">Venue</span>
+              <span className="mt-1 text-xs xs:text-sm sm:text-base font-semibold text-white whitespace-nowrap">FISAT</span>
             </div>
-            <div className="w-px bg-white/10" />
-            <div className="flex flex-col items-center">
-              <span className="text-[10px] uppercase tracking-[0.28em] text-text-muted/60">Deadline</span>
-              <span className="mt-1 text-base font-semibold text-white">Aug 5</span>
+            <div className="w-px h-8 bg-white/10 shrink-0" />
+            <div className="flex flex-col items-center shrink-0">
+              <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-text-muted/60">Deadline</span>
+              <span className="mt-1 text-xs xs:text-sm sm:text-base font-semibold text-white whitespace-nowrap">Aug 5</span>
             </div>
           </m.div>
 
