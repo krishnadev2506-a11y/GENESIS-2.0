@@ -49,8 +49,8 @@ export async function PATCH(
     // Send email with credentials
     const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
     
-    // Send emails concurrently and log errors without stopping the response
-    Promise.allSettled([
+    // Send emails concurrently (we must await to prevent serverless termination)
+    await Promise.allSettled([
       sendRegistrationConfirmed(allMemberEmails, team.teamName, username, password),
       sendVerificationConfirmation(allMemberEmails, team.teamName)
     ]).then(results => {

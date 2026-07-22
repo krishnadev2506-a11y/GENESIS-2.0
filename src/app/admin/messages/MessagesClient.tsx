@@ -36,8 +36,13 @@ export function MessagesClient() {
       if (!res.ok) throw new Error('Failed to send message');
       return res.json();
     },
-    onSuccess: () => {
-      success('Success', sendEmail ? 'Message sent and email delivered!' : 'Message sent successfully!');
+    onSuccess: (data) => {
+      if (data.success === false) {
+        // This handles the 207 partial success case where email failed
+        error('Warning', data.error || 'Message saved, but failed to send emails.');
+      } else {
+        success('Success', sendEmail ? 'Message sent and email delivered!' : 'Message sent successfully!');
+      }
       setSubject(''); setBody(''); setTargetParticipantEmail(''); setTargetTeamId('');
       setSendEmail(false);
     },
