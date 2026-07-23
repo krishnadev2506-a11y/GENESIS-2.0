@@ -27,8 +27,6 @@ export interface ISettings extends Document {
   // Existing fields
   qrCodeImageUrl: string;
   qrCodeImagePublicId: string;
-  rulebookUrl: string;
-  rulebookPublicId: string;
   eventDate: Date;
   eventEndDate: Date;
   registrationOpen: boolean;
@@ -83,8 +81,6 @@ const SettingsSchema = new Schema<ISettings>(
     // Existing
     qrCodeImageUrl: { type: String, default: '' },
     qrCodeImagePublicId: { type: String, default: '' },
-    rulebookUrl: { type: String, default: '' },
-    rulebookPublicId: { type: String, default: '' },
     eventDate: { type: Date, default: new Date('2026-07-10T00:00:00Z') },
     eventEndDate: { type: Date, default: new Date('2026-07-11T23:59:59Z') },
     registrationOpen: { type: Boolean, default: true },

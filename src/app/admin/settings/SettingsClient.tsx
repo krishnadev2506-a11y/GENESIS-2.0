@@ -16,8 +16,6 @@ export function SettingsClient() {
   const [formData, setFormData] = useState({
     registrationOpen: true,
     qrCodeImageUrl: '',
-    rulebookUrl: '',
-    rulebookPublicId: '',
     registrationReceivedEmailTemplate: '',
     registrationConfirmedEmailTemplate: '',
     
@@ -69,8 +67,6 @@ export function SettingsClient() {
       setFormData({
         registrationOpen: settings.registrationOpen ?? true,
         qrCodeImageUrl: settings.qrCodeImageUrl ?? '',
-        rulebookUrl: settings.rulebookUrl ?? '',
-        rulebookPublicId: settings.rulebookPublicId ?? '',
         registrationReceivedEmailTemplate: settings.registrationReceivedEmailTemplate ?? '',
         registrationConfirmedEmailTemplate: settings.registrationConfirmedEmailTemplate ?? '',
         
@@ -129,61 +125,6 @@ export function SettingsClient() {
   });
 
   const [isUploading, setIsUploading] = useState(false);
-
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    if (file.type !== 'application/pdf') {
-      error('Invalid File', 'Only PDF files are allowed for the rulebook.');
-      e.target.value = '';
-      return;
-    }
-
-    if (file.size > 10 * 1024 * 1024) {
-      error('File Too Large', 'Maximum file size is 10MB.');
-      e.target.value = '';
-      return;
-    }
-
-    setIsUploading(true);
-    try {
-      const sigRes = await fetch('/api/cloudinary/sign', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ folder: 'genesis2.0/misc' })
-      });
-      
-      if (!sigRes.ok) throw new Error('Failed to get upload signature');
-      const { timestamp, signature, api_key, cloud_name, folder } = await sigRes.json();
-
-      const uploadData = new FormData();
-      uploadData.append('file', file);
-      uploadData.append('api_key', api_key);
-      uploadData.append('timestamp', timestamp.toString());
-      uploadData.append('signature', signature);
-      uploadData.append('folder', folder);
-
-      const uploadRes = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/image/upload`, {
-        method: 'POST',
-        body: uploadData,
-      });
-
-      if (!uploadRes.ok) throw new Error('Failed to upload PDF');
-      const result = await uploadRes.json();
-
-      setFormData(prev => ({
-        ...prev,
-        rulebookUrl: result.secure_url,
-        rulebookPublicId: result.public_id
-      }));
-      success('Uploaded', 'Rulebook PDF uploaded successfully. Remember to Save Configuration!');
-    } catch (err: any) {
-      error('Upload Failed', err?.message || 'Something went wrong');
-    } finally {
-      setIsUploading(false);
-    }
-  };
 
   const handleDeepChange = (path: string, value: any) => {
     setFormData(prev => {
@@ -368,44 +309,7 @@ export function SettingsClient() {
               )}
             </div>
 
-            <div>
-              <label className="block text-sm text-text-muted mb-2 uppercase font-mono tracking-wider">Event Rulebook (PDF)</label>
-              <div className="bg-void/50 border border-glass-border rounded-[14px] p-4 flex flex-col gap-4">
-                {formData.rulebookUrl ? (
-                  <div className="flex items-center justify-between bg-white/5 p-3 rounded-xl border border-white/10">
-                    <span className="text-sm text-white truncate mr-4">
-                      Current Rulebook: <a href={formData.rulebookUrl} target="_blank" rel="noreferrer" className="text-pulse hover:underline">View PDF</a>
-                    </span>
-                    <button 
-                      type="button" 
-                      className="text-red-400 text-sm hover:underline"
-                      onClick={() => setFormData(prev => ({ ...prev, rulebookUrl: '', rulebookPublicId: '' }))}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                ) : (
-                  <span className="text-sm text-text-muted">No rulebook uploaded yet.</span>
-                )}
-                
-                <div className="flex items-center gap-4">
-                  <input 
-                    type="file" 
-                    accept="application/pdf"
-                    onChange={handleFileUpload}
-                    disabled={isUploading}
-                    className="block w-full text-sm text-text-muted
-                      file:mr-4 file:py-2 file:px-4
-                      file:rounded-full file:border-0
-                      file:text-sm file:font-semibold
-                      file:bg-pulse/20 file:text-pulse
-                      hover:file:bg-pulse/30 disabled:opacity-50"
-                  />
-                  {isUploading && <LoadingSpinner size="sm" />}
-                </div>
-              </div>
             </div>
-          </div>
         </GlassCard>
 
         {/* Pricing */}
