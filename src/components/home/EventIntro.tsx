@@ -145,15 +145,7 @@ export function EventIntro() {
                 </p>
               </div>
 
-              {/* Prize Pool Teaser */}
-              <div className="mt-8 rounded-2xl border border-purple-500/30 bg-gradient-to-br from-purple-500/5 to-transparent p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <span className="text-2xl">🏆</span>
-                  <p className="uppercase tracking-[2px] text-sm font-semibold text-purple-400">Grand Prize Pool</p>
-                </div>
-                <p className="text-white font-medium text-lg">Massive rewards await the top teams</p>
-                <p className="text-purple-300 text-sm mt-1">Prize pool to be revealed soon</p>
-              </div>
+              
 
               {/* Philosophy */}
               <div className="mt-8 rounded-2xl border border-accent-primary/20 bg-accent-primary/5 backdrop-blur-sm px-6 py-5">
