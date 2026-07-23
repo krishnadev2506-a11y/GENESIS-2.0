@@ -14,7 +14,7 @@ export default function Home() {
     <main className="cosmic-page flex-grow flex flex-col pb-16 overflow-x-hidden relative">
       <SpaceDust />
       <Hero />
-      <PrizePoolBanner />
+      {/**<PrizePoolBanner />*/} 
       <EventIntro />
       <LazyLoadSection minHeight="600px">
         <Tracks />

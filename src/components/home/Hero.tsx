@@ -1,5 +1,4 @@
 'use client';
-
 import { m, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { fadeUp, staggerContainer } from '@/lib/motion-variants';
 import Link from 'next/link';
@@ -19,14 +18,12 @@ export function Hero() {
       mouseY.set(0);
       return;
     }
-
     const handleMouseMove = (event: MouseEvent) => {
       const x = (event.clientX / window.innerWidth) * 2 - 1;
       const y = (event.clientY / window.innerHeight) * 2 - 1;
       mouseX.set(x);
       mouseY.set(y);
     };
-
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [mouseX, mouseY]);
@@ -62,9 +59,9 @@ export function Hero() {
   return (
     <section className="relative isolate min-h-screen overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_24%,rgba(167,139,250,0.14)_0%,transparent_28%),linear-gradient(180deg,rgba(10,10,15,0.72)_0%,rgba(10,10,15,0.2)_35%,rgba(10,10,15,0)_100%)]" />
-
+      
       <m.div className="absolute inset-x-[10%] top-[15%] h-[25%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(196,181,253,0.15)_0%,rgba(139,92,246,0.1)_25%,transparent_60%)] blur-[40px] sm:inset-x-[15%] sm:h-[30%] sm:blur-[50px]" style={{ x: farX, y: farY }} />
-
+      
       {stars.map((star) => (
         <span
           key={`${star.top}-${star.left}`}
@@ -72,7 +69,7 @@ export function Hero() {
           style={{ top: star.top, left: star.left, animationDelay: star.delay }}
         />
       ))}
-
+      
       {asteroids.map((asteroid, index) => (
         <m.div
           key={asteroid.className}
@@ -87,12 +84,11 @@ export function Hero() {
           </svg>
         </m.div>
       ))}
-
+      
       <m.div className="absolute right-[-10%] top-[55%] z-[1] h-[24rem] w-[24rem] lg:right-[5%] lg:top-[50%] lg:h-[40rem] lg:w-[40rem] rounded-full shadow-[0_0_150px_rgba(168,85,247,0.5)] blur-[1px]" style={{ x: farX, y: farY }}>
         <div className="absolute inset-[-5%] rounded-full bg-[conic-gradient(from_210deg,rgba(168,85,247,0.8)_0deg,rgba(255,255,255,0.9)_72deg,rgba(109,40,217,0.9)_118deg,rgba(0,0,0,0)_360deg)] blur-[20px]" />
-        
         <div className="absolute inset-[2%] overflow-hidden rounded-full bg-[#1a103c] shadow-[inset_-30px_-30px_80px_rgba(168,85,247,0.8),inset_30px_30px_80px_rgba(0,0,0,0.8)] border border-[rgba(168,85,247,0.3)]">
-          <m.div 
+          <m.div
             className="absolute inset-[-50%] bg-[radial-gradient(circle_at_30%_36%,rgba(196,181,253,0.3)_0%,transparent_70%),linear-gradient(140deg,#2d1b4e_10%,#140d21_50%,#0a0a10_100%)] opacity-100"
             animate={{ rotate: 360 }}
             transition={{ duration: 180, repeat: Infinity, ease: 'linear' }}
@@ -118,7 +114,7 @@ export function Hero() {
           <m.h1 variants={fadeUp} className="mb-4 sm:mb-6">
             <BrandWordmark className="text-[2rem] xs:text-[2.25rem] sm:text-7xl lg:text-[6rem] tracking-[0.15em] sm:tracking-[0.2em] lg:tracking-[0.22em] leading-none text-transparent bg-clip-text bg-gradient-to-br from-[#c4b5fd] via-white to-[#a855f7] whitespace-nowrap" />
           </m.h1>
-
+          
           <m.p
             variants={fadeUp as any}
             className="mx-auto mt-4 max-w-3xl text-[11px] xs:text-xs leading-6 text-text-muted sm:mt-6 sm:text-xl sm:leading-8 lg:text-2xl uppercase tracking-wider whitespace-nowrap"
@@ -126,7 +122,152 @@ export function Hero() {
             CODE THE FUTURE, CODE THE IMPOSSIBLE
           </m.p>
 
-          <m.div variants={fadeUp} className="mb-14 mt-10 flex flex-nowrap items-center justify-center gap-3 xs:gap-5 sm:gap-16 w-full overflow-hidden">
+          {/* Prize Pool with Loading Circle */}
+          <m.div 
+            variants={fadeUp} 
+            className="mt-8 sm:mt-10 w-full max-w-md mx-auto"
+          >
+            <div className="relative group">
+              {/* Background glow */}
+              <div className="absolute -inset-2 bg-gradient-to-r from-[#a855f7]/20 via-[#ec4899]/10 to-[#a855f7]/20 rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+              
+              <div className="relative bg-[#0a0a10]/80 backdrop-blur-xl border border-white/5 hover:border-[#a855f7]/30 rounded-2xl p-6 transition-all duration-500">
+                <div className="flex items-center gap-6">
+                  {/* Loading Circle */}
+                  <div className="relative flex-shrink-0">
+                    {/* Outer rotating ring */}
+                    <m.div
+                      className="absolute inset-0 rounded-full"
+                      style={{
+                        background: 'conic-gradient(from 0deg, transparent, #a855f7, #ec4899, #a855f7, transparent)',
+                        padding: '2px',
+                        mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px))',
+                        WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px))',
+                      }}
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+                    />
+                    
+                    {/* Inner rotating ring - opposite direction */}
+                    <m.div
+                      className="absolute inset-[3px] rounded-full"
+                      style={{
+                        background: 'conic-gradient(from 0deg, transparent, #8b5cf6, #a855f7, #8b5cf6, transparent)',
+                        padding: '2px',
+                        mask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px))',
+                        WebkitMask: 'radial-gradient(farthest-side, transparent calc(100% - 2px), #fff calc(100% - 2px))',
+                      }}
+                      animate={{ rotate: -360 }}
+                      transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
+                    />
+
+                    {/* Center content */}
+                    <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#0a0a10] border border-[#a855f7]/20 flex items-center justify-center">
+                      {/* Pulsing dot */}
+                      <m.div
+                        className="absolute inset-0 rounded-full bg-[#a855f7]/10"
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{ duration: 1.5, repeat: Infinity }}
+                      />
+                      
+                      <div className="relative flex flex-col items-center">
+                        <span className="text-xl sm:text-2xl font-black text-white">₹</span>
+                        <m.div
+                          className="flex gap-0.5 mt-0.5"
+                          animate={{ opacity: [0.5, 1, 0.5] }}
+                          transition={{ duration: 1.5, repeat: Infinity }}
+                        >
+                          <span className="text-[10px] sm:text-xs font-bold text-[#c4b5fd]">??</span>
+                          <m.span
+                            className="text-[10px] sm:text-xs font-bold text-[#c4b5fd]"
+                            animate={{ opacity: [0.3, 1, 0.3] }}
+                            transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}
+                          >
+                            ?
+                          </m.span>
+                        </m.div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Info Section */}
+                  <div className="flex-1 text-left">
+                    <h3 className="text-sm font-semibold text-white tracking-wide">
+                      Prize Pool
+                    </h3>
+                    <p className="text-xs text-white/40 mt-0.5 tracking-wider">
+                      Loading...
+                    </p>
+                    
+                    {/* Status indicators */}
+                    <div className="flex items-center gap-3 mt-2">
+                      <div className="flex items-center gap-1.5">
+                        <m.div 
+                          className="w-1.5 h-1.5 rounded-full bg-[#a855f7]"
+                          animate={{ 
+                            scale: [1, 1.5, 1],
+                            opacity: [1, 0.5, 1]
+                          }}
+                          transition={{ duration: 1, repeat: Infinity }}
+                        />
+                        <span className="text-[9px] uppercase tracking-[0.1em] text-white/30">
+                          TBA
+                        </span>
+                      </div>
+                      
+                      <div className="w-px h-3 bg-white/10" />
+                      
+                      <div className="flex items-center gap-1.5">
+                        <svg className="w-3 h-3 text-[#a855f7]/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-[9px] uppercase tracking-[0.1em] text-white/30">
+                          Coming Soon
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress dots */}
+                    <div className="flex gap-1 mt-2.5">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <m.div
+                          key={i}
+                          className="h-0.5 rounded-full bg-[#a855f7]/20"
+                          style={{ width: `${100/5}%` }}
+                          animate={{
+                            backgroundColor: i <= 2 ? ['#a855f7/20', '#a855f7', '#a855f7/20'] : '#a855f7/20'
+                          }}
+                          transition={{
+                            duration: 1.5,
+                            delay: i * 0.15,
+                            repeat: Infinity,
+                            ease: "easeInOut"
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Decorative sparkle */}
+                <div className="absolute -top-1 -right-1">
+                  <m.div
+                    animate={{ 
+                      scale: [1, 1.2, 1],
+                      opacity: [0.5, 1, 0.5]
+                    }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  >
+                    <svg className="w-4 h-4 text-[#a855f7]/30" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M10 0L12.5 7.5L20 10L12.5 12.5L10 20L7.5 12.5L0 10L7.5 7.5L10 0Z" />
+                    </svg>
+                  </m.div>
+                </div>
+              </div>
+            </div>
+          </m.div>
+
+          <m.div variants={fadeUp} className="mb-14 mt-6 sm:mt-8 flex flex-nowrap items-center justify-center gap-3 xs:gap-5 sm:gap-16 w-full overflow-hidden">
             <div className="flex flex-col items-center shrink-0">
               <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-text-muted/60">Date</span>
               <span className="mt-1 text-xs xs:text-sm sm:text-base font-semibold text-white whitespace-nowrap">Aug 7 & 8</span>
