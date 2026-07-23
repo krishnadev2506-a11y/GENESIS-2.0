@@ -261,7 +261,7 @@ export function Hero() {
             <div className="flex flex-col items-center shrink-0">
               <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-text-muted/60">Date</span>
               <span className="mt-1 text-xs xs:text-sm sm:text-base font-semibold text-white whitespace-nowrap">Aug 7 & 8</span>
-              <span className="mt-1 text-[8px] sm:text-[9px] uppercase tracking-[0.1em] text-white/40">(No overnight stay)</span>
+              <span className="mt-1 text-[8px] sm:text-[9px] uppercase tracking-[0.1em] text-white/40">(No Overnighters)</span>
             </div>
             <div className="w-px h-8 bg-white/10 shrink-0" />
             <div className="flex flex-col items-center shrink-0">
