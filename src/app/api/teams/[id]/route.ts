@@ -51,7 +51,7 @@ export async function PATCH(
     const beforeData = team.toObject();
     
     // Allowed fields to update directly
-    const allowedUpdates = ['teamName', 'college', 'semester', 'contactNumber', 'email', 'foodPreference', 'members', 'scoreboardPoints', 'checkedIn', 'route', 'paymentStatus', 'paymentScreenshotUrl', 'transactionId'];
+    const allowedUpdates = ['teamName', 'college', 'semester', 'contactNumber', 'email', 'members', 'scoreboardPoints', 'checkedIn', 'route', 'paymentStatus', 'paymentScreenshotUrl', 'transactionId'];
     
     allowedUpdates.forEach(field => {
       if (body[field] !== undefined) {

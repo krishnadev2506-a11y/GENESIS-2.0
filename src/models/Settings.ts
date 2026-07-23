@@ -4,8 +4,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface ITeamSizePricing {
   earlyBirdPrice: number;
-  withFoodPrice: number;
-  withoutFoodPrice: number;
+  normalPrice: number;
 }
 
 export interface IPricing {
@@ -44,9 +43,6 @@ export interface ISettings extends Document {
   earlyBirdEnabled: boolean;
   pricing: IPricing;
 
-  // Food
-  foodEnabled: boolean;
-
   // Theme Release (one per route)
   themeFoundation: IThemeRelease;
   themeProfessional: IThemeRelease;
@@ -64,8 +60,7 @@ interface ISettingsModel extends Model<ISettings> {
 const TeamSizePricingSchema = new Schema<ITeamSizePricing>(
   {
     earlyBirdPrice: { type: Number, required: true },
-    withFoodPrice: { type: Number, required: true },
-    withoutFoodPrice: { type: Number, required: true },
+    normalPrice: { type: Number, required: true },
   },
   { _id: false }
 );
@@ -110,19 +105,16 @@ const SettingsSchema = new Schema<ISettings>(
     earlyBirdEnabled: { type: Boolean, default: false },
     pricing: {
       type: {
-        team4: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 500, withFoodPrice: 600, withoutFoodPrice: 400 }) },
-        team5: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 600, withFoodPrice: 725, withoutFoodPrice: 500 }) },
-        team6: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 700, withFoodPrice: 850, withoutFoodPrice: 600 }) },
+        team4: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 500, normalPrice: 600 }) },
+        team5: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 600, normalPrice: 725 }) },
+        team6: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 700, normalPrice: 850 }) },
       },
       default: () => ({
-        team4: { earlyBirdPrice: 500, withFoodPrice: 600, withoutFoodPrice: 400 },
-        team5: { earlyBirdPrice: 600, withFoodPrice: 725, withoutFoodPrice: 500 },
-        team6: { earlyBirdPrice: 700, withFoodPrice: 850, withoutFoodPrice: 600 },
+        team4: { earlyBirdPrice: 500, normalPrice: 600 },
+        team5: { earlyBirdPrice: 600, normalPrice: 725 },
+        team6: { earlyBirdPrice: 700, normalPrice: 850 },
       }),
     },
-
-    // Food
-    foodEnabled: { type: Boolean, default: true },
 
     // Theme Release
     themeFoundation: {

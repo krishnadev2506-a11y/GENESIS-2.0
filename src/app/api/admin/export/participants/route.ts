@@ -13,7 +13,6 @@ type ExportMember = {
   phone: string;
   college: string;
   semester: string;
-  foodPreference: 'veg' | 'non-veg';
   isLeader: boolean;
 };
 
@@ -24,7 +23,6 @@ type ExportTeam = {
   semester: string;
   contactNumber: string;
   email: string;
-  foodRequired: boolean;
   members: ExportMember[];
   memberCount: number;
   paymentScreenshotUrl: string;
@@ -51,7 +49,6 @@ const csvColumns: Array<keyof ExportTeam> = [
   'semester',
   'contactNumber',
   'email',
-  'foodRequired',
   'memberCount',
   'members',
   'paymentScreenshotUrl',
@@ -75,7 +72,6 @@ const teamSheetColumns = [
   { key: 'semester', header: 'Semester' },
   { key: 'contactNumber', header: 'Contact Number' },
   { key: 'email', header: 'Team Email' },
-  { key: 'foodRequired', header: 'Food Required' },
   { key: 'memberCount', header: 'Member Count' },
   { key: 'membersJson', header: 'Members JSON' },
   { key: 'paymentScreenshotUrl', header: 'Payment Screenshot URL' },
@@ -106,7 +102,6 @@ const memberSheetColumns = [
   { key: 'phone', header: 'Phone' },
   { key: 'memberCollege', header: 'Member College' },
   { key: 'memberSemester', header: 'Member Semester' },
-  { key: 'foodPreference', header: 'Food Preference' },
   { key: 'isLeader', header: 'Is Leader' },
 ] as const;
 
@@ -289,7 +284,6 @@ function buildXlsx(rows: ExportTeam[]) {
     semester: row.semester,
     contactNumber: row.contactNumber,
     email: row.email,
-    foodRequired: row.foodRequired,
     memberCount: row.memberCount,
     membersJson: JSON.stringify(row.members),
     paymentScreenshotUrl: row.paymentScreenshotUrl,
@@ -321,7 +315,6 @@ function buildXlsx(rows: ExportTeam[]) {
       phone: member.phone,
       memberCollege: member.college,
       memberSemester: member.semester,
-      foodPreference: member.foodPreference,
       isLeader: member.isLeader,
     }))
   );
@@ -389,7 +382,6 @@ export async function GET(req: NextRequest) {
       const college: string = team.college ?? '';
       const semester: string = team.semester ?? '';
       const contactNumber: string = team.contactNumber ?? '';
-      const foodRequired: boolean = team.foodRequired ?? false;
 
       return {
         id: team._id.toString(),
@@ -398,12 +390,10 @@ export async function GET(req: NextRequest) {
         semester,
         contactNumber,
         email: team.email,
-        foodRequired,
         members: (team.members || []).map((member) => {
           const memberCollege: string = member.college ?? '';
           const memberSemester: string = member.semester ?? '';
           const memberPhone: string = member.phone ?? '';
-          const memberFood: 'veg' | 'non-veg' = member.foodPreference ?? 'veg';
 
           return {
             name: member.name,
@@ -412,7 +402,6 @@ export async function GET(req: NextRequest) {
             phone: memberPhone,
             college: memberCollege,
             semester: memberSemester,
-            foodPreference: memberFood,
             isLeader: member.isLeader,
           };
         }),

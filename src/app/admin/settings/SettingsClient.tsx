@@ -23,14 +23,12 @@ export function SettingsClient() {
     
     earlyBirdEnabled: false,
     pricing: {
-      team4: { earlyBirdPrice: 0, withFoodPrice: 0, withoutFoodPrice: 0 },
-      team5: { earlyBirdPrice: 0, withFoodPrice: 0, withoutFoodPrice: 0 },
-      team6: { earlyBirdPrice: 0, withFoodPrice: 0, withoutFoodPrice: 0 },
+      team4: { earlyBirdPrice: 0, normalPrice: 0 },
+      team5: { earlyBirdPrice: 0, normalPrice: 0 },
+      team6: { earlyBirdPrice: 0, normalPrice: 0 },
     },
     upiId: '',
     adminContactNumber: '',
-    
-    foodEnabled: true,
     
     themeFoundation: {
       title: '',
@@ -80,24 +78,19 @@ export function SettingsClient() {
         pricing: {
           team4: {
             earlyBirdPrice: settings.pricing?.team4?.earlyBirdPrice ?? 500,
-            withFoodPrice: settings.pricing?.team4?.withFoodPrice ?? 600,
-            withoutFoodPrice: settings.pricing?.team4?.withoutFoodPrice ?? 400,
+            normalPrice: settings.pricing?.team4?.normalPrice ?? 600,
           },
           team5: {
             earlyBirdPrice: settings.pricing?.team5?.earlyBirdPrice ?? 600,
-            withFoodPrice: settings.pricing?.team5?.withFoodPrice ?? 725,
-            withoutFoodPrice: settings.pricing?.team5?.withoutFoodPrice ?? 500,
+            normalPrice: settings.pricing?.team5?.normalPrice ?? 725,
           },
           team6: {
             earlyBirdPrice: settings.pricing?.team6?.earlyBirdPrice ?? 700,
-            withFoodPrice: settings.pricing?.team6?.withFoodPrice ?? 850,
-            withoutFoodPrice: settings.pricing?.team6?.withoutFoodPrice ?? 600,
+            normalPrice: settings.pricing?.team6?.normalPrice ?? 850,
           },
         },
         upiId: settings.upiId ?? '',
         adminContactNumber: settings.adminContactNumber ?? '',
-        
-        foodEnabled: settings.foodEnabled ?? true,
         
         themeFoundation: {
           title: settings.themeFoundation?.title ?? '',
@@ -237,9 +230,9 @@ export function SettingsClient() {
     const p = formData.pricing[teamSize];
     
     return (
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-end bg-void/30 p-4 border border-glass-border rounded-[14px]">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end bg-void/30 p-4 border border-glass-border rounded-[14px]">
         <div>
-          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Early Bird (Inc. Food) (₹)</label>
+          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Early Bird (₹)</label>
           <input 
             type="number" name={`pricing.${teamSize}.earlyBirdPrice`} required min="0"
             className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
@@ -247,19 +240,11 @@ export function SettingsClient() {
           />
         </div>
         <div>
-          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - With Food (₹)</label>
+          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Normal Price (₹)</label>
           <input 
-            type="number" name={`pricing.${teamSize}.withFoodPrice`} required min="0"
+            type="number" name={`pricing.${teamSize}.normalPrice`} required min="0"
             className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
-            value={p.withFoodPrice} onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Without Food (₹)</label>
-          <input 
-            type="number" name={`pricing.${teamSize}.withoutFoodPrice`} required min="0"
-            className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
-            value={p.withoutFoodPrice} onChange={handleChange}
+            value={p.normalPrice} onChange={handleChange}
           />
         </div>
       </div>
@@ -472,21 +457,7 @@ export function SettingsClient() {
           </div>
         </GlassCard>
 
-        {/* Food Settings */}
-        <GlassCard className="p-8">
-          <h2 className="text-2xl font-display font-bold text-white mb-6 uppercase">Food Settings</h2>
-          
-          <div className="flex items-center justify-between p-4 bg-void/50 border border-glass-border rounded-[14px]">
-            <div>
-              <h3 className="font-bold text-white text-lg">Food Available for Event</h3>
-              <p className="text-text-muted text-sm">Toggle whether food passes can be purchased by participants.</p>
-            </div>
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input type="checkbox" name="foodEnabled" className="sr-only peer" checked={formData.foodEnabled} onChange={handleChange} />
-              <div className="w-14 h-7 bg-void border border-glass-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-text-muted peer-checked:after:bg-pulse after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:border-pulse"></div>
-            </label>
-          </div>
-        </GlassCard>
+
 
         {/* Theme Releases */}
         {renderThemeSection('themeFoundation', 'Foundation Track')}

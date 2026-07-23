@@ -51,7 +51,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Team name already taken. Please choose a different name.' }, { status: 400 });
     }
 
-    let finalFoodRequired = validatedData.foodRequired;
     let amountPaid = 0;
     let isEarlyBird = false;
     const settings = await Settings.findOne({});
@@ -65,28 +64,15 @@ export async function POST(req: NextRequest) {
         if (settings.earlyBirdEnabled) {
           amountPaid = pricingObj.earlyBirdPrice;
           isEarlyBird = true;
-          // If early bird is active, food is implicitly included
-          finalFoodRequired = true;
         } else {
-          amountPaid = (finalFoodRequired && settings.foodEnabled) ? pricingObj.withFoodPrice : pricingObj.withoutFoodPrice;
+          amountPaid = pricingObj.normalPrice;
         }
       }
     }
-
-    // Strip foodPreference from members if food is not required
-    const processedMembers = validatedData.members.map(member => {
-      if (!finalFoodRequired) {
-        const { foodPreference: _foodPreference, ...rest } = member;
-        return rest;
-      }
-      return member;
-    });
     
     // Create team
     const newTeam = await Team.create({
       ...validatedData,
-      foodRequired: finalFoodRequired,
-      members: processedMembers,
       paymentStatus: 'pending_verification',
       registrationStatus: 'submitted',
       amountPaid,

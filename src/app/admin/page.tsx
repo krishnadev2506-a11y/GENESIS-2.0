@@ -3,7 +3,6 @@ import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ExportParticipantsButtons } from '@/components/admin/ExportParticipantsButtons';
 import { AnalyticsChart } from '@/components/admin/AnalyticsChart';
-import { FoodAnalyticsChart } from '@/components/admin/FoodAnalyticsChart';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 
@@ -23,8 +22,7 @@ export default async function AdminDashboardPage() {
     verified,
     checkedIn,
     recentTeams,
-    registrationData,
-    foodDataRaw
+    registrationData
   ] = await Promise.all([
     Team.countDocuments(),
     Team.countDocuments({ paymentStatus: 'pending_verification' }),
@@ -39,31 +37,6 @@ export default async function AdminDashboardPage() {
         }
       },
       { $sort: { _id: 1 } }
-    ]),
-    Team.aggregate([
-      {
-        $facet: {
-          foodRequired: [
-            { $match: { foodRequired: true } },
-            { $unwind: "$members" },
-            {
-              $group: {
-                _id: "$members.foodPreference",
-                count: { $sum: 1 }
-              }
-            }
-          ],
-          foodOptOut: [
-            { $match: { foodRequired: false } },
-            {
-              $group: {
-                _id: null,
-                count: { $sum: { $size: "$members" } }
-              }
-            }
-          ]
-        }
-      }
     ])
   ]);
 
@@ -76,24 +49,6 @@ export default async function AdminDashboardPage() {
       fullDate: item._id // keep for sorting just in case
     };
   });
-
-  const foodStats = foodDataRaw?.[0] || { foodRequired: [], foodOptOut: [] };
-  
-  let vegCount = 0;
-  let nonVegCount = 0;
-  let optOutCount = 0;
-
-  if (foodStats.foodRequired) {
-    foodStats.foodRequired.forEach((item: any) => {
-      if (item._id === 'veg') vegCount = item.count;
-      if (item._id === 'non-veg') nonVegCount = item.count;
-    });
-  }
-  if (foodStats.foodOptOut && foodStats.foodOptOut.length > 0) {
-    optOutCount = foodStats.foodOptOut[0].count;
-  }
-  
-  const parsedFoodData = { veg: vegCount, nonVeg: nonVegCount, optOut: optOutCount };
 
   return (
     <div className="space-y-8 relative z-10">
@@ -140,14 +95,9 @@ export default async function AdminDashboardPage() {
           </GlassCard>
         </div>
 
-        {/* Analytics Chart (Span 8) */}
-        <div className="md:col-span-8 mt-4 min-h-[400px]">
+        {/* Analytics Chart (Span 12) */}
+        <div className="md:col-span-12 mt-4 min-h-[400px]">
           <AnalyticsChart data={chartData} />
-        </div>
-
-        {/* Food Analytics (Span 4) */}
-        <div className="md:col-span-4 mt-4 min-h-[400px]">
-          <FoodAnalyticsChart data={parsedFoodData} />
         </div>
 
         {/* Data Table Area (Span 12) */}

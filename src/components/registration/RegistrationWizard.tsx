@@ -22,10 +22,9 @@ const step1Schema = z.object({
 const memberSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^[0-9]{10}$/, 'Invalid phone number (10 digits)').optional().or(z.literal('')),
+  phone: z.string().regex(/^[0-9]{10}$/, 'Please enter exactly 10 digits for the phone number.').optional().or(z.literal('')),
   college: z.string().optional().or(z.literal('')),
   semester: z.string().optional().or(z.literal('')),
-  foodPreference: z.enum(['veg', 'non-veg']).optional(),
 });
 
 
@@ -80,7 +79,6 @@ export function RegistrationWizard() {
     teamName: '',
     route: 'foundation',
     participantCount: 4,
-    foodRequired: true,
     members: Array.from({ length: 4 }).map((_, i) => ({ 
       name: '', 
       role: i === 0 ? 'Leader' : 'Member', 
@@ -88,7 +86,6 @@ export function RegistrationWizard() {
       phone: '',
       college: '',
       semester: '',
-      foodPreference: 'veg',
       isLeader: i === 0
     })),
     paymentScreenshotUrl: '',
@@ -115,7 +112,7 @@ export function RegistrationWizard() {
           for (let i = 0; i < toAdd; i++) {
             newMembers.push({
               name: '', role: 'Member', email: '', phone: '',
-              college: '', semester: '', foodPreference: 'veg', isLeader: false
+              college: '', semester: '', isLeader: false
             });
           }
         } else if (newMembers.length > prev.participantCount) {
@@ -141,7 +138,7 @@ export function RegistrationWizard() {
         try {
           const member = formData.members[i];
           if (member.isLeader) {
-            if (!member.phone || !member.phone.match(/^[0-9]{10}$/)) throw new Error("Leader must provide a valid 10-digit phone number");
+            if (!member.phone || !member.phone.match(/^[0-9]{10}$/)) throw new Error("Please enter exactly 10 digits for the phone number.");
             if (!member.college) throw new Error("Leader must provide a college name");
           }
           memberSchema.parse(formData.members[i]);
@@ -285,17 +282,11 @@ export function RegistrationWizard() {
     const submissionPayload = {
       teamName: formData.teamName,
       route: formData.route,
-      foodRequired: formData.foodRequired,
       college: leader.college,
       semester: leader.semester,
       contactNumber: leader.phone,
       email: leader.email,
-      members: formData.members.map(m => {
-        const { foodPreference, ...rest } = m;
-        return (formData.foodRequired && settings?.foodEnabled) 
-          ? { ...rest, foodPreference } 
-          : rest;
-      }),
+      members: formData.members,
       paymentScreenshotUrl: formData.paymentScreenshotUrl,
       paymentScreenshotPublicId: formData.paymentScreenshotPublicId,
       transactionId: formData.transactionId,
@@ -342,9 +333,8 @@ export function RegistrationWizard() {
       };
     }
 
-    // Otherwise, choose base price depending on whether food is required and enabled
-    const isFoodSelected = formData.foodRequired && settings?.foodEnabled;
-    const basePrice = isFoodSelected ? pricing.withFoodPrice : pricing.withoutFoodPrice;
+    // Otherwise, choose base price
+    const basePrice = pricing.normalPrice;
 
     return {
       originalPrice: basePrice,
@@ -511,21 +501,6 @@ export function RegistrationWizard() {
                     <option value={6}>6 Members</option>
                   </select>
                 </div>
-
-                {/* Food Requirement (Hidden if Early Bird is active, as it includes food by default) */}
-                {!settings?.earlyBirdEnabled && settings?.foodEnabled && (
-                  <div className="space-y-4 pt-4 border-t border-white/10">
-                    <label className="text-sm font-medium text-text-primary block">Food required for your team?</label>
-                    <SegmentedToggle
-                      options={[
-                        { label: 'Yes', value: 'yes' },
-                        { label: 'No', value: 'no' }
-                      ]}
-                      value={formData.foodRequired ? 'yes' : 'no'}
-                      onChange={(val) => setFormData({ ...formData, foodRequired: val === 'yes' })}
-                    />
-                  </div>
-                )}
               </div>
             </m.div>
           )}
@@ -599,20 +574,6 @@ export function RegistrationWizard() {
                         </>
                       )}
                     </div>
-                    
-                    {formData.foodRequired && settings?.foodEnabled && (
-                      <div className="mt-4 max-w-[200px]">
-                        <label className="text-sm font-medium text-text-primary block mb-2">Food Preference</label>
-                        <SegmentedToggle
-                          options={[
-                            { label: 'Veg', value: 'veg' },
-                            { label: 'Non-Veg', value: 'non-veg' }
-                          ]}
-                          value={member.foodPreference || 'veg'}
-                          onChange={(val) => updateMember(index, 'foodPreference', val)}
-                        />
-                      </div>
-                    )}
                   </div>
                 ))}
               </div>
@@ -644,13 +605,6 @@ export function RegistrationWizard() {
                     ₹{pricingInfo.finalPrice}
                   </span>
                 </div>
-                
-                {settings?.earlyBirdEnabled && (
-                  <div className="flex justify-between py-2 border-b border-white/10 text-sm">
-                    <span className="text-text-muted">Food Included</span>
-                    <span className="text-emerald-400 font-medium">Yes</span>
-                  </div>
-                )}
 
                 <div className="flex justify-between py-3 font-bold text-lg">
                   <span className="text-pulse">Total Amount</span>
@@ -694,8 +648,8 @@ export function RegistrationWizard() {
                     </p>
                   )}
                   {settings?.adminContactNumber && (
-                    <p className="text-xs text-text-muted text-center">
-                      Facing issues? Contact Admin: {settings.adminContactNumber}
+                    <p className="text-sm font-mono text-center text-accent-secondary mb-2 bg-void/50 py-2 rounded-lg border border-glass-border">
+                      GPay / PhonePe: <span className="font-bold text-white">{settings.adminContactNumber}</span>
                     </p>
                   )}
                 </div>

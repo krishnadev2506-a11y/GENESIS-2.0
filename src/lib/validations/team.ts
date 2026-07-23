@@ -4,10 +4,9 @@ export const teamMemberSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(50, "Name is too long"),
   role: z.string().min(2, "Role must be at least 2 characters").max(30, "Role is too long"),
   email: z.string().email("Invalid email address"),
-  phone: z.string().regex(/^[0-9]{10}$/, "Invalid phone number, must be 10 digits").optional().or(z.literal('')),
+  phone: z.string().regex(/^[0-9]{10}$/, "Please enter exactly 10 digits for the phone number.").optional().or(z.literal('')),
   college: z.string().max(60, "College name is too long").optional().or(z.literal('')),
   semester: z.string().optional().or(z.literal('')),
-  foodPreference: z.enum(['veg', 'non-veg']).optional(),
   isLeader: z.boolean(),
 });
 
@@ -16,23 +15,14 @@ export const teamRegistrationSchema = z.object({
   route: z.enum(['foundation', 'professional']),
   college: z.string().max(60, "College name is too long").optional().or(z.literal('')),
   semester: z.string().optional().or(z.literal('')),
-  contactNumber: z.string().regex(/^[0-9]{10}$/, "Invalid contact number, must be 10 digits").optional().or(z.literal('')),
+  contactNumber: z.string().regex(/^[0-9]{10}$/, "Please enter exactly 10 digits for the phone number.").optional().or(z.literal('')),
   email: z.string().email("Invalid primary email address"),
-  foodRequired: z.boolean().default(true),
   members: z.array(teamMemberSchema)
     .min(1, "At least one member is required")
     .max(6, "A team can have a maximum of 6 members"),
   paymentScreenshotUrl: z.string().url("Valid URL required for payment screenshot"),
   paymentScreenshotPublicId: z.string().min(1, "Screenshot ID is required"),
   transactionId: z.string().min(4, "Transaction ID must be at least 4 characters").max(50, "Transaction ID is too long"),
-}).refine(
-  (data) => {
-    // If food is not required, foodPreference on members is optional
-    // If food is required, every member must have a foodPreference
-    if (!data.foodRequired) return true;
-    return data.members.every(m => m.foodPreference === 'veg' || m.foodPreference === 'non-veg');
-  },
-  { message: "All team members must select Veg or Non-Veg when food is required for the team", path: ['members'] }
-);
+});
 
 export type TeamRegistrationInput = z.infer<typeof teamRegistrationSchema>;

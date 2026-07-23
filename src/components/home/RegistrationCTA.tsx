@@ -65,7 +65,7 @@ export function RegistrationCTA() {
           <div className="absolute bottom-0 left-0 h-80 w-80 -translate-x-1/3 translate-y-1/3 rounded-full bg-[rgba(196,181,253,0.15)] blur-[100px] pointer-events-none transition-transform duration-1000 group-hover:scale-125" />
 
           {/* Foreground Content container */}
-          <div className="relative z-10 pointer-events-none" style={{ transform: "translateZ(40px)" }}>
+          <div className="relative z-10" style={{ transform: "translateZ(40px)" }}>
             
             <p className="mb-4 text-xs sm:text-sm uppercase tracking-[0.3em] font-bold text-accent-secondary drop-shadow-[0_0_8px_rgba(168,85,247,0.4)]">
               Ready to Build?
@@ -93,7 +93,7 @@ export function RegistrationCTA() {
               </div>
             </div>
 
-            <div className="flex flex-col items-center justify-center gap-6 sm:flex-row pointer-events-auto" style={{ transform: "translateZ(30px)" }}>
+            <div className="flex flex-col items-center justify-center gap-6 sm:flex-row" style={{ transform: "translateZ(30px)" }}>
               <Link href="/register" id="cta-register-btn">
                 <Button size="lg" variant="primary" className="px-14 py-4 text-sm font-bold uppercase tracking-widest shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_50px_rgba(168,85,247,0.6)] hover:-translate-y-1 transition-all">
                   Register Now

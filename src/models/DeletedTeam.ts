@@ -8,7 +8,6 @@ export interface IDeletedTeam extends Document {
   semester?: string;
   contactNumber?: string;
   email: string;
-  foodRequired: boolean;
   members: ITeamMember[];
   paymentScreenshotUrl: string;
   paymentScreenshotPublicId: string;
@@ -33,7 +32,6 @@ const TeamMemberSchema = new Schema<ITeamMember>({
   phone: { type: String },
   college: { type: String },
   semester: { type: String },
-  foodPreference: { type: String, enum: ['veg', 'non-veg'] },
   isLeader: { type: Boolean, default: false },
 });
 
@@ -45,7 +43,6 @@ const DeletedTeamSchema = new Schema<IDeletedTeam>(
     semester: { type: String },
     contactNumber: { type: String },
     email: { type: String, required: true },
-    foodRequired: { type: Boolean, default: true },
     members: [TeamMemberSchema],
     paymentScreenshotUrl: { type: String, required: true },
     paymentScreenshotPublicId: { type: String, required: true },

@@ -20,7 +20,6 @@ export interface ITeamMember {
   phone?: string;
   college?: string;
   semester?: string;
-  foodPreference?: 'veg' | 'non-veg';
   isLeader: boolean;
 }
 
@@ -33,7 +32,6 @@ export interface ITeam extends Document {
   semester?: string;
   contactNumber?: string;
   email: string;
-  foodRequired: boolean;
   members: ITeamMember[];
   paymentScreenshotUrl: string;
   paymentScreenshotPublicId: string;
@@ -73,7 +71,6 @@ const TeamMemberSchema = new Schema<ITeamMember>({
   phone: { type: String },
   college: { type: String },
   semester: { type: String },
-  foodPreference: { type: String, enum: ['veg', 'non-veg'] },
   isLeader: { type: Boolean, default: false },
 });
 
@@ -87,7 +84,6 @@ const TeamSchema = new Schema<ITeam>(
     semester: { type: String },
     contactNumber: { type: String },
     email: { type: String, required: true },
-    foodRequired: { type: Boolean, default: true },
     members: [TeamMemberSchema],
     paymentScreenshotUrl: { type: String, required: true },
     paymentScreenshotPublicId: { type: String, required: true },

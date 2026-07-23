@@ -22,7 +22,6 @@ export async function GET() {
       registrationOpen: settings.registrationOpen,
       earlyBirdEnabled: settings.earlyBirdEnabled,
       pricing: settings.pricing,
-      foodEnabled: settings.foodEnabled,
       eventDate: settings.eventDate,
       eventEndDate: settings.eventEndDate,
       qrCodeImageUrl: settings.qrCodeImageUrl,

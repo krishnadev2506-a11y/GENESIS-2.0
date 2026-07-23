@@ -78,7 +78,7 @@ export function TeamsClient() {
   };
 
   const handleAddMember = () => {
-    const newMember = { name: '', role: '', email: '', phone: '', college: '', semester: '', foodPreference: 'veg', isLeader: false };
+    const newMember = { name: '', role: '', email: '', phone: '', college: '', semester: '', isLeader: false };
     setEditedTeam({ ...editedTeam, members: [...editedTeam.members, newMember] });
   };
 
@@ -342,7 +342,6 @@ export function TeamsClient() {
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Email</span> <span className="text-white font-medium">{selectedTeam.email}</span></p>
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Contact</span> <span className="text-white font-medium">{selectedTeam.contactNumber}</span></p>
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Semester</span> <span className="text-white font-medium">{selectedTeam.semester}</span></p>
-                        <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Food Pref</span> <span className="text-white capitalize font-medium">{selectedTeam.foodPreference}</span></p>
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Points</span> <span className="text-white font-medium">{selectedTeam.scoreboardPoints}</span></p>
                         
                         {/* Credentials Section */}
@@ -485,13 +484,6 @@ export function TeamsClient() {
                             </div>
                           </div>
                           <div className="grid grid-cols-2 gap-2 mt-2">
-                            <div className="flex flex-col gap-1">
-                              <label className="text-text-muted text-[10px] uppercase tracking-wider">Food Pref</label>
-                              <select className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white text-sm" value={member.foodPreference || 'veg'} onChange={e => handleMemberChange(idx, 'foodPreference', e.target.value)}>
-                                <option value="veg">Veg</option>
-                                <option value="non-veg">Non-Veg</option>
-                              </select>
-                            </div>
                             <div className="flex flex-col justify-end pb-1">
                               <label className="flex items-center gap-2 text-white cursor-pointer text-sm">
                                 <input 
@@ -522,10 +514,6 @@ export function TeamsClient() {
                               <div>
                                 <p className="text-text-muted text-[10px] uppercase tracking-wider mb-0.5">College</p>
                                 <p className="text-text-primary truncate" title={member.college}>{member.college} (S{member.semester})</p>
-                              </div>
-                              <div>
-                                <p className="text-text-muted text-[10px] uppercase tracking-wider mb-0.5">Food</p>
-                                <p className="text-text-primary capitalize">{member.foodPreference}</p>
                               </div>
                             </div>
                           </div>
