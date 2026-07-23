@@ -119,7 +119,7 @@ export function Hero() {
             variants={fadeUp as any}
             className="mx-auto mt-4 max-w-3xl text-[11px] xs:text-xs leading-6 text-text-muted sm:mt-6 sm:text-xl sm:leading-8 lg:text-2xl uppercase tracking-wider whitespace-nowrap"
           >
-            CODE THE FUTURE, CODE THE IMPOSSIBLE
+            CODE THE FUTURE, CREATE  THE IMPOSSIBLE
           </m.p>
 
           {/* Prize Pool with Loading Circle */}
