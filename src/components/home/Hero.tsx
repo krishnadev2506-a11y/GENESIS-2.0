@@ -57,7 +57,7 @@ export function Hero() {
   ];
 
   return (
-    <section className="relative isolate min-h-screen overflow-hidden px-4 pb-16 pt-28 sm:px-6 sm:pb-20 sm:pt-32 lg:px-8">
+    <section className="relative isolate min-h-screen overflow-hidden px-4 pb-12 pt-20 sm:pb-20 sm:pt-28 lg:px-8">
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_24%,rgba(167,139,250,0.14)_0%,transparent_28%),linear-gradient(180deg,rgba(10,10,15,0.72)_0%,rgba(10,10,15,0.2)_35%,rgba(10,10,15,0)_100%)]" />
       
       <m.div className="absolute inset-x-[10%] top-[15%] h-[25%] rounded-full bg-[radial-gradient(ellipse_at_center,rgba(196,181,253,0.15)_0%,rgba(139,92,246,0.1)_25%,transparent_60%)] blur-[40px] sm:inset-x-[15%] sm:h-[30%] sm:blur-[50px]" style={{ x: farX, y: farY }} />
@@ -104,9 +104,9 @@ export function Hero() {
         </div>
       </m.div>
 
-      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center justify-center px-6 sm:px-12 lg:px-24">
+      <div className="relative z-10 mx-auto flex min-h-screen max-w-7xl items-center justify-center px-4 sm:px-6 lg:px-24">
         <m.div
-          className="flex flex-col items-center text-center pt-20 lg:pt-0 w-full"
+          className="flex flex-col items-center text-center pt-8 sm:pt-16 lg:pt-0 w-full"
           variants={staggerContainer}
           initial="hidden"
           animate="visible"
@@ -119,7 +119,7 @@ export function Hero() {
             variants={fadeUp as any}
             className="mx-auto mt-4 max-w-3xl text-[11px] xs:text-xs leading-6 text-text-muted sm:mt-6 sm:text-xl sm:leading-8 lg:text-2xl uppercase tracking-wider whitespace-nowrap"
           >
-            CODE THE FUTURE, CREATE  THE IMPOSSIBLE
+            CODE THE FUTURE, CREATE THE IMPOSSIBLE
           </m.p>
 
           {/* Prize Pool with Loading Circle */}
@@ -128,14 +128,11 @@ export function Hero() {
             className="mt-8 sm:mt-10 w-full max-w-md mx-auto"
           >
             <div className="relative group">
-              {/* Background glow */}
               <div className="absolute -inset-2 bg-gradient-to-r from-[#a855f7]/20 via-[#ec4899]/10 to-[#a855f7]/20 rounded-2xl blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
               
               <div className="relative bg-[#0a0a10]/80 backdrop-blur-xl border border-white/5 hover:border-[#a855f7]/30 rounded-2xl p-6 transition-all duration-500">
                 <div className="flex items-center gap-6">
-                  {/* Loading Circle */}
                   <div className="relative flex-shrink-0">
-                    {/* Outer rotating ring */}
                     <m.div
                       className="absolute inset-0 rounded-full"
                       style={{
@@ -148,7 +145,6 @@ export function Hero() {
                       transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
                     />
                     
-                    {/* Inner rotating ring - opposite direction */}
                     <m.div
                       className="absolute inset-[3px] rounded-full"
                       style={{
@@ -161,9 +157,7 @@ export function Hero() {
                       transition={{ duration: 3, repeat: Infinity, ease: 'linear' }}
                     />
 
-                    {/* Center content */}
                     <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-[#0a0a10] border border-[#a855f7]/20 flex items-center justify-center">
-                      {/* Pulsing dot */}
                       <m.div
                         className="absolute inset-0 rounded-full bg-[#a855f7]/10"
                         animate={{ scale: [1, 1.2, 1] }}
@@ -190,7 +184,6 @@ export function Hero() {
                     </div>
                   </div>
 
-                  {/* Info Section */}
                   <div className="flex-1 text-left">
                     <h3 className="text-sm font-semibold text-white tracking-wide">
                       Prize Pool
@@ -199,7 +192,6 @@ export function Hero() {
                       Loading...
                     </p>
                     
-                    {/* Status indicators */}
                     <div className="flex items-center gap-3 mt-2">
                       <div className="flex items-center gap-1.5">
                         <m.div 
@@ -227,7 +219,6 @@ export function Hero() {
                       </div>
                     </div>
 
-                    {/* Progress dots */}
                     <div className="flex gap-1 mt-2.5">
                       {[0, 1, 2, 3, 4].map((i) => (
                         <m.div
@@ -249,7 +240,6 @@ export function Hero() {
                   </div>
                 </div>
 
-                {/* Decorative sparkle */}
                 <div className="absolute -top-1 -right-1">
                   <m.div
                     animate={{ 
@@ -267,7 +257,7 @@ export function Hero() {
             </div>
           </m.div>
 
-          <m.div variants={fadeUp} className="mb-14 mt-6 sm:mt-8 flex flex-nowrap items-center justify-center gap-3 xs:gap-5 sm:gap-16 w-full overflow-hidden">
+          <m.div variants={fadeUp} className="mb-10 sm:mb-14 mt-8 sm:mt-10 flex flex-nowrap items-center justify-center gap-3 xs:gap-5 sm:gap-16 w-full overflow-hidden">
             <div className="flex flex-col items-center shrink-0">
               <span className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.28em] text-text-muted/60">Date</span>
               <span className="mt-1 text-xs xs:text-sm sm:text-base font-semibold text-white whitespace-nowrap">Aug 7 & 8</span>
@@ -284,7 +274,7 @@ export function Hero() {
             </div>
           </m.div>
 
-          <m.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto justify-center">
+          <m.div variants={fadeUp} className="flex flex-col sm:flex-row gap-4 sm:gap-6 w-full sm:w-auto justify-center pb-8 sm:pb-0">
             <Link href="/register" className="w-full sm:w-auto shadow-[0_0_40px_rgba(168,85,247,0.2)] rounded-full" id="hero-register-btn">
               <Button size="lg" variant="primary" className="w-full sm:w-auto min-w-[160px] h-14 flex items-center justify-center">Register Now</Button>
             </Link>
