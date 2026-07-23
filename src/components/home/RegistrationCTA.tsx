@@ -83,6 +83,7 @@ export function RegistrationCTA() {
               <div className="flex flex-col items-center p-5 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm shadow-inner group-hover:bg-white/10 transition-colors duration-500 min-w-[200px]">
                 <span className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-accent-secondary/80">Event Date</span>
                 <span className="text-lg sm:text-xl font-display font-bold text-white tracking-widest">7th & 8th August</span>
+                <span className="mt-2 text-[9px] sm:text-[10px] uppercase tracking-[0.1em] text-white/50">(No overnight stay)</span>
               </div>
               
               <div className="hidden h-16 w-[1px] bg-gradient-to-b from-transparent via-white/20 to-transparent md:block"></div>

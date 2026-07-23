@@ -259,18 +259,18 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
 }
 
 export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
-  const dashboardUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/dashboard`;
+  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/login`;
   const content = `
     <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Verification Confirmed! 🎉</h2>
     <p style="margin: 0 0 16px 0;">Great news! Your team <strong>${teamName}</strong> has been verified for GENESIS 2.0.</p>
     <p style="margin: 0 0 24px 0;">You can now log in to the dashboard to view your status, complete any pending tasks, and get ready for the event.</p>
     
     <div style="text-align: center; margin-top: 32px;">
-      <a href="${dashboardUrl}" style="display: inline-block; background-color: #4F46E5; color: #FFFFFF; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; transition: background-color 0.2s;">Go to Dashboard</a>
+      <a href="${loginUrl}" style="display: inline-block; background-color: #4F46E5; color: #FFFFFF; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; transition: background-color 0.2s;">Go to Login</a>
     </div>
   `;
   
-  const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\nYou can now log in to the dashboard to view your status and get ready for the event.\n\nDashboard URL: ${dashboardUrl}`;
+  const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\nYou can now log in to the dashboard to view your status and get ready for the event.\n\nLogin URL: ${loginUrl}`;
 
   const promises = toEmails.map(to => 
     sendEmail({
