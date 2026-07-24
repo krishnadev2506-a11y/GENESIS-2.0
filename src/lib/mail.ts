@@ -15,6 +15,13 @@ const transporter = nodemailer.createTransport({
 const FROM_EMAIL = process.env.EMAIL_USER || 'krishnadev2506@gmail.com';
 const FROM_NAME = process.env.SENDER_NAME || 'GENESIS 2.0';
 
+const getBaseUrl = () => {
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  if (process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_APP_URL.includes('localhost')) return process.env.NEXT_PUBLIC_APP_URL;
+  if (process.env.NODE_ENV === 'production') return 'https://genesisfisat.vercel.app';
+  return process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+};
+
 interface EmailParams {
   toEmails?: string[];
   bccEmails?: string[];
@@ -80,10 +87,11 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
     <p style="margin: 0 0 16px 0; line-height: 1.6;">Hello ${participantNames.length > 0 ? participantNames.join(', ') : 'there'},</p>
     <p style="margin: 0 0 16px 0; line-height: 1.6;">We have successfully received the registration for your team <strong>${teamName}</strong>.</p>
     <p style="margin: 0 0 24px 0; line-height: 1.6;">Please note that your registration is currently <strong>Pending Verification</strong>. Our team will review your payment and details shortly. You will receive another email once your registration is confirmed.</p>
+    <p style="margin: 0 0 24px 0; line-height: 1.6; color: #EF4444;"><strong>STRICTLY NO REFUNDS: Registration fees are non-refundable under any circumstances.</strong></p>
     <p style="margin: 0; line-height: 1.6; color: #9CA3AF;">If you have any questions, please contact the event organizers.</p>
   `;
   
-  const textContent = `Registration Received!\n\nHello ${participantNames.length > 0 ? participantNames.join(', ') : 'there'},\n\nWe have successfully received the registration for your team ${teamName}.\n\nYour registration is currently Pending Verification. You will receive another email once your registration is confirmed.`;
+  const textContent = `Registration Received!\n\nHello ${participantNames.length > 0 ? participantNames.join(', ') : 'there'},\n\nWe have successfully received the registration for your team ${teamName}.\n\nYour registration is currently Pending Verification. You will receive another email once your registration is confirmed.\n\nSTRICTLY NO REFUNDS: Registration fees are non-refundable under any circumstances.`;
 
   const promises = toEmails.map(to => 
     sendEmail({
@@ -137,7 +145,7 @@ export async function sendTeamCredentials(toEmails: string[], teamName: string, 
     .replace(/{{username}}/g, username)
     .replace(/{{password}}/g, password);
 
-  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/login`;
+  const loginUrl = `${getBaseUrl()}/login`;
   const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
   const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   
@@ -177,7 +185,7 @@ export async function sendRegistrationConfirmed(toEmails: string[], teamName: st
     .replace(/{{username}}/g, username)
     .replace(/{{password}}/g, password);
 
-  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/login`;
+  const loginUrl = `${getBaseUrl()}/login`;
   const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
   const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
   
@@ -259,7 +267,7 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
 }
 
 export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
-  const loginUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'https://genesisfisat.vercel.app'}/login`;
+  const loginUrl = `${getBaseUrl()}/login`;
   const content = `
     <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Verification Confirmed! 🎉</h2>
     <p style="margin: 0 0 16px 0;">Great news! Your team <strong>${teamName}</strong> has been verified for GENESIS 2.0.</p>

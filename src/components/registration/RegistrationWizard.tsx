@@ -419,6 +419,7 @@ export function RegistrationWizard() {
             <p>📋 Your registration is under review by the organizing team.</p>
             <p>✅ Once your payment is verified, you&apos;ll receive login credentials via email.</p>
             <p>📅 The event is on <strong className="text-white">7,8 AUGUST</strong>.</p>
+            <p>🚫 <strong className="text-white uppercase">Strictly No Refunds: Registration fees are non-refundable under any circumstances.</strong></p>
           </div>
 
           <button
