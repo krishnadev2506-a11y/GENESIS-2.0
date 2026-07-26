@@ -22,7 +22,8 @@ export default async function AdminDashboardPage() {
     verified,
     checkedIn,
     recentTeams,
-    registrationData
+    registrationData,
+    participantData
   ] = await Promise.all([
     Team.countDocuments(),
     Team.countDocuments({ paymentStatus: 'pending_verification' }),
@@ -37,8 +38,13 @@ export default async function AdminDashboardPage() {
         }
       },
       { $sort: { _id: 1 } }
+    ]),
+    Team.aggregate([
+      { $group: { _id: null, totalParticipants: { $sum: { $size: { $ifNull: ["$members", []] } } } } }
     ])
   ]);
+
+  const totalParticipants = participantData[0]?.totalParticipants || 0;
 
   // Format aggregated data for the chart
   const chartData = registrationData.map((item: any) => {
@@ -61,47 +67,55 @@ export default async function AdminDashboardPage() {
       </div>
       
       {/* Bento Grid Layout */}
-      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 relative">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6 relative">
         
-        {/* Total Teams (Span 3) */}
-        <div className="md:col-span-3">
+        {/* Total Teams */}
+        <div>
           <GlassCard className="h-full flex flex-col justify-between" hoverEffect={true}>
             <div className="text-[12px] font-mono text-text-muted mb-4 uppercase tracking-[0.12em]">Total Teams</div>
             <div className="text-4xl font-display font-bold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]">{totalTeams}</div>
           </GlassCard>
         </div>
+
+        {/* Total Participants */}
+        <div>
+          <GlassCard className="h-full flex flex-col justify-between" hoverEffect={true}>
+            <div className="text-[12px] font-mono text-text-muted mb-4 uppercase tracking-[0.12em]">Total Pct.</div>
+            <div className="text-4xl font-display font-bold text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.2)]">{totalParticipants}</div>
+          </GlassCard>
+        </div>
         
-        {/* Pending Verification (Span 3) */}
-        <div className="md:col-span-3">
+        {/* Pending Verification */}
+        <div>
           <GlassCard className="h-full flex flex-col justify-between bg-pending/5 border-pending/20" hoverEffect={true}>
             <div className="text-[12px] font-mono text-pending mb-4 uppercase tracking-[0.12em]">Pending</div>
             <div className="text-4xl font-display font-bold text-pending drop-shadow-[0_0_12px_rgba(251,191,36,0.3)]">{pendingVerification}</div>
           </GlassCard>
         </div>
         
-        {/* Verified Teams (Span 3) */}
-        <div className="md:col-span-3">
+        {/* Verified Teams */}
+        <div>
           <GlassCard className="h-full flex flex-col justify-between bg-success/5 border-success/20" hoverEffect={true}>
             <div className="text-[12px] font-mono text-success mb-4 uppercase tracking-[0.12em]">Verified</div>
             <div className="text-4xl font-display font-bold text-success drop-shadow-[0_0_12px_rgba(52,211,153,0.3)]">{verified}</div>
           </GlassCard>
         </div>
 
-        {/* Checked In (Span 3) */}
-        <div className="md:col-span-3">
+        {/* Checked In */}
+        <div>
           <GlassCard className="h-full flex flex-col justify-between bg-starlight/5 border-starlight/20" hoverEffect={true}>
             <div className="text-[12px] font-mono text-starlight mb-4 uppercase tracking-[0.12em]">Checked In</div>
             <div className="text-4xl font-display font-bold text-starlight drop-shadow-[0_0_12px_rgba(196,181,253,0.3)]">{checkedIn}</div>
           </GlassCard>
         </div>
 
-        {/* Analytics Chart (Span 12) */}
-        <div className="md:col-span-12 mt-4 min-h-[400px]">
+        {/* Analytics Chart */}
+        <div className="md:col-span-5 mt-4 min-h-[400px]">
           <AnalyticsChart data={chartData} />
         </div>
 
-        {/* Data Table Area (Span 12) */}
-        <div className="md:col-span-12 mt-4">
+        {/* Data Table Area */}
+        <div className="md:col-span-5 mt-4">
           <GlassCard className="p-0 overflow-hidden" hoverEffect={false}>
             <div className="p-6 border-b border-glass-border flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between bg-glass/30">
               <h2 className="text-xl font-display font-bold text-white uppercase">Recent Registrations</h2>

@@ -3,7 +3,6 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 // ----- Sub-document interfaces -----
 
 export interface ITeamSizePricing {
-  earlyBirdPrice: number;
   normalPrice: number;
 }
 
@@ -38,7 +37,6 @@ export interface ISettings extends Document {
   adminContactNumber: string;
 
   // Pricing
-  earlyBirdEnabled: boolean;
   pricing: IPricing;
 
   // Theme Release (one per route)
@@ -57,7 +55,6 @@ interface ISettingsModel extends Model<ISettings> {
 
 const TeamSizePricingSchema = new Schema<ITeamSizePricing>(
   {
-    earlyBirdPrice: { type: Number, required: true },
     normalPrice: { type: Number, required: true },
   },
   { _id: false }
@@ -98,17 +95,16 @@ const SettingsSchema = new Schema<ISettings>(
     adminContactNumber: { type: String, default: '' },
 
     // Pricing
-    earlyBirdEnabled: { type: Boolean, default: false },
     pricing: {
       type: {
-        team4: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 500, normalPrice: 600 }) },
-        team5: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 600, normalPrice: 725 }) },
-        team6: { type: TeamSizePricingSchema, default: () => ({ earlyBirdPrice: 700, normalPrice: 850 }) },
+        team4: { type: TeamSizePricingSchema, default: () => ({ normalPrice: 600 }) },
+        team5: { type: TeamSizePricingSchema, default: () => ({ normalPrice: 725 }) },
+        team6: { type: TeamSizePricingSchema, default: () => ({ normalPrice: 850 }) },
       },
       default: () => ({
-        team4: { earlyBirdPrice: 500, normalPrice: 600 },
-        team5: { earlyBirdPrice: 600, normalPrice: 725 },
-        team6: { earlyBirdPrice: 700, normalPrice: 850 },
+        team4: { normalPrice: 600 },
+        team5: { normalPrice: 725 },
+        team6: { normalPrice: 850 },
       }),
     },
 

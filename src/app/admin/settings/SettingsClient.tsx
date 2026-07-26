@@ -19,11 +19,10 @@ export function SettingsClient() {
     registrationReceivedEmailTemplate: '',
     registrationConfirmedEmailTemplate: '',
     
-    earlyBirdEnabled: false,
     pricing: {
-      team4: { earlyBirdPrice: 0, normalPrice: 0 },
-      team5: { earlyBirdPrice: 0, normalPrice: 0 },
-      team6: { earlyBirdPrice: 0, normalPrice: 0 },
+      team4: { normalPrice: 0 },
+      team5: { normalPrice: 0 },
+      team6: { normalPrice: 0 },
     },
     upiId: '',
     adminContactNumber: '',
@@ -70,18 +69,14 @@ export function SettingsClient() {
         registrationReceivedEmailTemplate: settings.registrationReceivedEmailTemplate ?? '',
         registrationConfirmedEmailTemplate: settings.registrationConfirmedEmailTemplate ?? '',
         
-        earlyBirdEnabled: settings.earlyBirdEnabled ?? false,
         pricing: {
           team4: {
-            earlyBirdPrice: settings.pricing?.team4?.earlyBirdPrice ?? 500,
             normalPrice: settings.pricing?.team4?.normalPrice ?? 600,
           },
           team5: {
-            earlyBirdPrice: settings.pricing?.team5?.earlyBirdPrice ?? 600,
             normalPrice: settings.pricing?.team5?.normalPrice ?? 725,
           },
           team6: {
-            earlyBirdPrice: settings.pricing?.team6?.earlyBirdPrice ?? 700,
             normalPrice: settings.pricing?.team6?.normalPrice ?? 850,
           },
         },
@@ -173,15 +168,7 @@ export function SettingsClient() {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-end bg-void/30 p-4 border border-glass-border rounded-[14px]">
         <div>
-          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Early Bird (₹)</label>
-          <input 
-            type="number" name={`pricing.${teamSize}.earlyBirdPrice`} required min="0"
-            className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
-            value={p.earlyBirdPrice} onChange={handleChange}
-          />
-        </div>
-        <div>
-          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Normal Price (₹)</label>
+          <label className="block text-xs text-text-muted mb-2 uppercase font-mono tracking-wider">{label} - Price (₹)</label>
           <input 
             type="number" name={`pricing.${teamSize}.normalPrice`} required min="0"
             className="w-full bg-void border border-glass-border rounded-[14px] px-4 py-3 text-white focus:outline-none focus:border-pulse"
@@ -318,14 +305,6 @@ export function SettingsClient() {
             <div>
               <h2 className="text-2xl font-display font-bold text-white uppercase">Pricing Configuration</h2>
               <p className="text-text-muted text-sm mt-1">Set the entry fees based on team sizes.</p>
-            </div>
-            
-            <div className="flex items-center gap-3 bg-void/50 px-4 py-2 rounded-full border border-glass-border shadow-inner">
-              <span className="text-sm font-medium">Early Bird Mode</span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" name="earlyBirdEnabled" className="sr-only peer" checked={formData.earlyBirdEnabled} onChange={handleChange} />
-                <div className="w-11 h-6 bg-void-alt border border-glass-border peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-pulse"></div>
-              </label>
             </div>
           </div>
 

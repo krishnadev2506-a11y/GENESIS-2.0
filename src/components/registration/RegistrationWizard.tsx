@@ -324,16 +324,6 @@ export function RegistrationWizard() {
     const pricing = settings.pricing[teamKey];
     if (!pricing) return { originalPrice: 0, finalPrice: 0, discount: 0 };
     
-    // If Early Bird is enabled, use earlyBirdPrice (food is implicitly included)
-    if (settings.earlyBirdEnabled) {
-      return {
-        originalPrice: pricing.earlyBirdPrice,
-        finalPrice: pricing.earlyBirdPrice,
-        discount: 0
-      };
-    }
-
-    // Otherwise, choose base price
     const basePrice = pricing.normalPrice;
 
     return {
@@ -594,11 +584,6 @@ export function RegistrationWizard() {
               <h2 className="text-2xl font-display font-bold text-white mb-6">Payment Details</h2>
               
               <div className="bg-white/5 p-6 rounded-2xl border border-white/10 mb-8 relative">
-                {settings?.earlyBirdEnabled && (
-                  <div className="absolute -top-3 -right-3 bg-pulse text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg border border-pulse-bright/50">
-                    Early Bird Active!
-                  </div>
-                )}
                 <h3 className="font-semibold text-lg mb-4">Fee Summary</h3>
                 <div className="flex justify-between py-2 border-b border-white/10">
                   <span className="text-text-muted">Registration ({formData.participantCount} Members)</span>

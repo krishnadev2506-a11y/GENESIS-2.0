@@ -39,7 +39,6 @@ export interface ITeam extends Document {
   paymentStatus: 'pending_verification' | 'verified' | 'rejected';
   registrationStatus: 'submitted' | 'confirmed';
   amountPaid: number;
-  isEarlyBird: boolean;
   checkedIn: boolean;
   checkedInAt: Date | null;
   credentials: { username: string; passwordHash: string; temporaryPassword?: string } | null;
@@ -99,7 +98,6 @@ const TeamSchema = new Schema<ITeam>(
       default: 'submitted',
     },
     amountPaid: { type: Number, default: 0 },
-    isEarlyBird: { type: Boolean, default: false },
     checkedIn: { type: Boolean, default: false },
     checkedInAt: { type: Date, default: null },
     credentials: {

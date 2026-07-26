@@ -22,6 +22,12 @@ export default function Home() {
       <LazyLoadSection minHeight="300px">
         <RegistrationCTA />
       </LazyLoadSection>
+      <div className="max-w-4xl mx-auto px-6 py-6 text-center border border-white/5 bg-white/[0.02] mt-4 mb-16 rounded-2xl">
+        <p className="text-text-muted text-sm font-mono tracking-wide">
+          <span className="text-pulse font-bold mr-2 uppercase">Notice:</span> 
+          Main meals will not be provided during the event. Only light snacks and refreshments will be served.
+        </p>
+      </div>
       <Footer />
     </main>
   );

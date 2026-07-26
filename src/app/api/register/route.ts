@@ -52,7 +52,6 @@ export async function POST(req: NextRequest) {
     }
 
     let amountPaid = 0;
-    let isEarlyBird = false;
     const settings = await Settings.findOne({});
     const participantCount = validatedData.members.length;
 
@@ -61,12 +60,7 @@ export async function POST(req: NextRequest) {
       const pricingObj = settings.pricing[teamKey];
       
       if (pricingObj) {
-        if (settings.earlyBirdEnabled) {
-          amountPaid = pricingObj.earlyBirdPrice;
-          isEarlyBird = true;
-        } else {
-          amountPaid = pricingObj.normalPrice;
-        }
+        amountPaid = pricingObj.normalPrice;
       }
     }
     
@@ -75,8 +69,7 @@ export async function POST(req: NextRequest) {
       ...validatedData,
       paymentStatus: 'pending_verification',
       registrationStatus: 'submitted',
-      amountPaid,
-      isEarlyBird
+      amountPaid
     });
     
     // Send emails (await to prevent premature serverless termination)

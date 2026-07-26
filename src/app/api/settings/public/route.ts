@@ -5,7 +5,7 @@ import Settings from '@/models/Settings';
 /**
  * Public settings endpoint — no auth required.
  * Returns only non-sensitive settings needed by the registration form
- * and event pages: pricing, early bird, food toggle, themes, registration status.
+ * and event pages: pricing, food toggle, themes, registration status.
  */
 
 // Use ISR with shorter revalidation for settings changes to reflect quickly
@@ -20,7 +20,6 @@ export async function GET() {
 
     const publicSettings = {
       registrationOpen: settings.registrationOpen,
-      earlyBirdEnabled: settings.earlyBirdEnabled,
       pricing: settings.pricing,
       eventDate: settings.eventDate,
       eventEndDate: settings.eventEndDate,
