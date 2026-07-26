@@ -78,7 +78,7 @@ export function TeamsClient() {
   };
 
   const handleAddMember = () => {
-    const newMember = { name: '', role: '', email: '', phone: '', college: '', semester: '', isLeader: false };
+    const newMember = { name: '', role: 'Member', email: '', phone: '', college: '', semester: '', isLeader: false };
     setEditedTeam({ ...editedTeam, members: [...editedTeam.members, newMember] });
   };
 

@@ -73,6 +73,10 @@ export async function PATCH(
     
     return NextResponse.json({ success: true, team });
   } catch (error: any) {
+    if (error.name === 'ValidationError') {
+      const messages = Object.values(error.errors).map((err: any) => err.message);
+      return NextResponse.json({ error: messages.join(', ') }, { status: 400 });
+    }
     if (error.message === 'Authentication required' || error.message === 'Insufficient permissions') {
       return NextResponse.json({ error: error.message }, { status: 403 });
     }
