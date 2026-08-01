@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 import { requireAuth } from '@/lib/auth';
@@ -40,6 +41,9 @@ export async function PATCH(req: NextRequest) {
     });
     
     await settings.save();
+    
+    // Revalidate public settings route so changes reflect immediately on registration page
+    revalidatePath('/api/settings/public');
     
     return NextResponse.json({ success: true, settings });
   } catch (error: any) {
