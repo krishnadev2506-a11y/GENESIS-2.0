@@ -8,7 +8,7 @@ export interface IStationScores {
   codeReviewChallenge: number;
   aiEngineeringChallenge: number;
   deploymentSprint: number;
-  mockTechnicalInterview: number; // Only used for 'professional' route
+  mockTechnicalInterview: number; // Legacy field — kept for data compatibility
 }
 
 // ----- Team Member -----
@@ -27,7 +27,7 @@ export interface ITeamMember {
 
 export interface ITeam extends Document {
   teamName: string;
-  route: 'foundation' | 'professional';
+  route: 'foundation';
   college?: string;
   semester?: string;
   contactNumber?: string;
@@ -78,7 +78,7 @@ const TeamMemberSchema = new Schema<ITeamMember>({
 const TeamSchema = new Schema<ITeam>(
   {
     teamName: { type: String, required: true, unique: true },
-    route: { type: String, enum: ['foundation', 'professional'], required: true },
+    route: { type: String, enum: ['foundation'], required: true, default: 'foundation' },
     college: { type: String },
     semester: { type: String },
     contactNumber: { type: String },

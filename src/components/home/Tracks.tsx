@@ -178,7 +178,7 @@ export function Tracks() {
     },
   });
 
-  const getThemeText = (themeKey: 'themeFoundation' | 'themeProfessional') => {
+  const getThemeText = (themeKey: 'themeFoundation') => {
     if (isLoading || !settings) return { title: 'Loading...', tagline: 'Please wait' };
     const theme = settings[themeKey];
     if (theme?.published) {
@@ -188,7 +188,6 @@ export function Tracks() {
   };
 
   const foundationTheme = getThemeText('themeFoundation');
-  const professionalTheme = getThemeText('themeProfessional');
 
   const tracks = [
     {
@@ -208,23 +207,6 @@ export function Tracks() {
       badgeText: 'text-[#4ade80]',
       note: 'Cloud infra not expected.',
     },
-    {
-      id: 'professional',
-      badge: 'P',
-      year: '4th Year Students',
-      title: 'Professional Track',
-      themeTitle: professionalTheme.title,
-      themeTagline: professionalTheme.tagline,
-      route: '/event/professional',
-      color: 'from-[#c4b5fd] to-[#a855f7]',
-      borderColor: 'rgba(167,139,250,0.35)',
-      glowColor: 'rgba(139,92,246,0.15)',
-      iconBg: 'rgba(139,92,246,0.12)',
-      iconBorder: 'rgba(167,139,250,0.3)',
-      checkColor: '#c4b5fd',
-      badgeText: 'text-[#c4b5fd]',
-      note: 'Must justify technical choices.',
-    },
   ];
 
   return (
@@ -235,17 +217,17 @@ export function Tracks() {
       <StaggerContainer className="space-y-10 sm:space-y-16">
         <div className="mx-auto max-w-3xl text-center">
           <FadeUp as="p" className="mb-3 text-sm uppercase tracking-[0.28em] text-accent-secondary">
-            Competition Tracks
+            Competition Track
           </FadeUp>
           <FadeUp as="h2" className="text-3xl font-display font-bold text-white uppercase tracking-[0.16em] md:text-5xl">
-            Your Academic Year, Your Track
+            2nd &amp; 3rd Year Track
           </FadeUp>
           <FadeUp as="p" className="mt-5 text-base sm:text-lg text-text-muted max-w-2xl mx-auto">
-            Each track is calibrated to the expected engineering maturity of its year group. Expectations scale accordingly.
+            Calibrated specifically for 2nd and 3rd year engineering students. Build, test, and ship your software under real conditions.
           </FadeUp>
         </div>
 
-        <div className="grid grid-cols-1 gap-6 sm:gap-8 lg:grid-cols-2 max-w-5xl mx-auto">
+        <div className="grid grid-cols-1 max-w-2xl mx-auto">
           {tracks.map((track, index) => (
             <TrackCard key={track.id} track={track} index={index} />
           ))}
@@ -254,7 +236,7 @@ export function Tracks() {
         {/* Bottom note */}
         <FadeUp>
           <p className="text-center text-xs sm:text-sm uppercase tracking-[0.22em] text-text-muted/60">
-            Participants compete only within their own academic year track.
+            Exclusively for 2nd &amp; 3rd year undergraduate students.
           </p>
         </FadeUp>
       </StaggerContainer>

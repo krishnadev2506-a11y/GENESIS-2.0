@@ -25,7 +25,6 @@ export async function GET() {
       eventEndDate: settings.eventEndDate,
       qrCodeImageUrl: settings.qrCodeImageUrl,
       themeFoundation: settings.themeFoundation,
-      themeProfessional: settings.themeProfessional,
       prizePool: settings.prizePool,
       upiId: settings.upiId,
       adminContactNumber: settings.adminContactNumber,

@@ -41,7 +41,7 @@ export async function GET(req: NextRequest) {
     }
     
     if (route) {
-      const validRoutes = ['foundation', 'professional'];
+      const validRoutes = ['foundation'];
       if (validRoutes.includes(route)) {
         query.route = route;
       }

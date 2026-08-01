@@ -23,7 +23,7 @@ export default async function FoundationPage() {
 
   return (
     <main className="min-h-screen bg-void pt-20">
-      <EventJourney route="foundation" theme={theme} />
+      <EventJourney theme={theme} />
       <Footer />
     </main>
   );

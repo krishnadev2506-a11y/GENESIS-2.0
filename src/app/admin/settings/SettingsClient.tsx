@@ -34,13 +34,7 @@ export function SettingsClient() {
       releaseDate: '',
       published: false
     },
-    themeProfessional: {
-      title: '',
-      tagline: '',
-      description: '',
-      releaseDate: '',
-      published: false
-    },
+
     prizePool: 'Will be released soon..'
   });
 
@@ -90,13 +84,7 @@ export function SettingsClient() {
           releaseDate: formatLocalDate(settings.themeFoundation?.releaseDate),
           published: settings.themeFoundation?.published ?? false,
         },
-        themeProfessional: {
-          title: settings.themeProfessional?.title ?? '',
-          tagline: settings.themeProfessional?.tagline ?? '',
-          description: settings.themeProfessional?.description ?? '',
-          releaseDate: formatLocalDate(settings.themeProfessional?.releaseDate),
-          published: settings.themeProfessional?.published ?? false,
-        },
+
         prizePool: settings.prizePool ?? 'Will be released soon..'
       });
     }
@@ -154,10 +142,7 @@ export function SettingsClient() {
         ...formData.themeFoundation,
         releaseDate: formData.themeFoundation.releaseDate ? new Date(formData.themeFoundation.releaseDate).toISOString() : null
       },
-      themeProfessional: {
-        ...formData.themeProfessional,
-        releaseDate: formData.themeProfessional.releaseDate ? new Date(formData.themeProfessional.releaseDate).toISOString() : null
-      }
+
     };
     updateMutation.mutate(payload);
   };
@@ -179,7 +164,7 @@ export function SettingsClient() {
     );
   };
 
-  const renderThemeSection = (trackKey: 'themeFoundation' | 'themeProfessional', titlePrefix: string) => {
+  const renderThemeSection = (trackKey: 'themeFoundation', titlePrefix: string) => {
     const t = formData[trackKey];
     return (
       <GlassCard className="p-8">
@@ -343,8 +328,7 @@ export function SettingsClient() {
 
 
         {/* Theme Releases */}
-        {renderThemeSection('themeFoundation', 'Foundation Track')}
-        {renderThemeSection('themeProfessional', 'Professional Track')}
+        {renderThemeSection('themeFoundation', 'Foundation Track (2nd & 3rd Year)')}
 
         {/* Prize Pool */}
         <GlassCard className="p-8">

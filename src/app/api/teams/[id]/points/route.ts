@@ -10,10 +10,7 @@ const STATION_KEYS = [
   'codeReviewChallenge',
   'aiEngineeringChallenge',
   'deploymentSprint',
-  'mockTechnicalInterview',
 ] as const;
-
-const FOUNDATION_STATION_KEYS = STATION_KEYS.filter(k => k !== 'mockTechnicalInterview');
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -54,26 +51,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       return NextResponse.json({ error: 'stationScores object is required' }, { status: 400 });
     }
 
-    // Fetch team to check route
     const team = await Team.findById(id);
     if (!team) {
       return NextResponse.json({ error: 'Team not found' }, { status: 404 });
     }
 
-    // Validate: mockTechnicalInterview only allowed for professional route
-    if (team.route === 'foundation' && stationScores.mockTechnicalInterview && stationScores.mockTechnicalInterview > 0) {
-      return NextResponse.json(
-        { error: 'Mock Technical Interview scores are only available for Professional route teams' },
-        { status: 400 }
-      );
-    }
-
-    // Build update object, only updating provided fields
-    const allowedKeys = team.route === 'foundation' ? FOUNDATION_STATION_KEYS : STATION_KEYS;
+    // Build update object — only update the 5 allowed station keys
     const updateObj: Record<string, number> = {};
     let totalPoints = 0;
 
-    for (const key of allowedKeys) {
+    for (const key of STATION_KEYS) {
       const value = stationScores[key];
       if (value !== undefined) {
         if (typeof value !== 'number' || value < 0) {
@@ -86,7 +73,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     // Re-read all station scores after applying updates to compute total
     const currentScores = team.stationScores || {
       debugArena: 0, systemDesignSprint: 0, codeReviewChallenge: 0,
-      aiEngineeringChallenge: 0, deploymentSprint: 0, mockTechnicalInterview: 0,
+      aiEngineeringChallenge: 0, deploymentSprint: 0,
     };
 
     for (const key of STATION_KEYS) {
@@ -95,11 +82,6 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       } else {
         totalPoints += (currentScores as any)[key] || 0;
       }
-    }
-
-    // For foundation route, zero out mock interview in total
-    if (team.route === 'foundation') {
-      totalPoints -= (currentScores.mockTechnicalInterview || 0);
     }
 
     updateObj['scoreboardPoints'] = totalPoints;
@@ -116,3 +98,4 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     return NextResponse.json({ error: error.message || 'Internal server error' }, { status: 500 });
   }
 }
+

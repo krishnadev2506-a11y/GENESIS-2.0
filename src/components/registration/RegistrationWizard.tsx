@@ -469,15 +469,11 @@ export function RegistrationWizard() {
                 />
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-text-primary block">Track</label>
-                  <SegmentedToggle
-                    options={[
-                      { label: 'Foundation (2nd/3rd Yr)', value: 'foundation' },
-                      { label: 'Professional (4th Yr)', value: 'professional' }
-                    ]}
-                    value={formData.route}
-                    onChange={(val) => setFormData({ ...formData, route: val as 'foundation' | 'professional' })}
-                  />
+                  <label className="text-sm font-medium text-text-primary block">Competition Track</label>
+                  <div className="flex items-center justify-between px-4 py-3 bg-void/70 border border-glass-border rounded-[14px] text-white">
+                    <span className="text-sm font-medium text-emerald-400">Foundation Track</span>
+                    <span className="text-xs px-2.5 py-1 bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 rounded-full font-mono">2nd &amp; 3rd Year</span>
+                  </div>
                 </div>
 
                 <div>

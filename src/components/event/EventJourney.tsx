@@ -156,38 +156,24 @@ const Icons = {
 };
 
 interface EventJourneyProps {
-  route: 'foundation' | 'professional';
   theme: IThemeRelease;
 }
 
-export function EventJourney({ route, theme }: EventJourneyProps) {
-  const isProfessional = route === 'professional';
+export function EventJourney({ theme }: EventJourneyProps) {
+  const stations = [
+    { name: 'AI Engineering Battle', icon: <Icons.ai /> },
+    { name: 'Constraint Drop', icon: <Icons.lightning /> },
+    { name: 'Red Team Attack', icon: <Icons.shield /> },
+    { name: 'Lightning Feature', icon: <Icons.stopwatch /> },
+    { name: 'Best UI/UX', icon: <Icons.ui /> },
+  ];
 
-  const stations = isProfessional
-    ? [
-        { name: 'AI Engineering Battle', icon: <Icons.ai /> },
-        { name: 'Constraint Drop', icon: <Icons.lightning /> },
-        { name: 'Red Team Attack', icon: <Icons.shield /> },
-        { name: 'Lightning Feature', icon: <Icons.stopwatch /> },
-        { name: 'Mock Technical Interview', icon: <Icons.interview /> },
-        { name: 'Resume Analysis', icon: <Icons.resume /> },
-      ]
-    : [
-        { name: 'AI Engineering Battle', icon: <Icons.ai /> },
-        { name: 'Constraint Drop', icon: <Icons.lightning /> },
-        { name: 'Red Team Attack', icon: <Icons.shield /> },
-        { name: 'Lightning Feature', icon: <Icons.stopwatch /> },
-        { name: 'Best UI/UX', icon: <Icons.ui /> },
-      ];
-
-  const colorPrimary = isProfessional ? 'text-purple-400' : 'text-blue-400';
-  const colorGlow = isProfessional ? 'rgba(168,85,247,0.15)' : 'rgba(96,165,250,0.15)';
-  const colorBorder = isProfessional ? 'rgba(168,85,247,0.3)' : 'rgba(96,165,250,0.3)';
-  const bgGradient = isProfessional 
-    ? 'from-[#1a0b2e] to-[#0c0814]' 
-    : 'from-[#0f172a] to-[#0c0814]';
-  const blobColor1 = isProfessional ? 'bg-purple-600/20' : 'bg-blue-600/20';
-  const blobColor2 = isProfessional ? 'bg-indigo-600/20' : 'bg-cyan-600/20';
+  const colorPrimary = 'text-blue-400';
+  const colorGlow = 'rgba(96,165,250,0.15)';
+  const colorBorder = 'rgba(96,165,250,0.3)';
+  const bgGradient = 'from-[#0f172a] to-[#0c0814]';
+  const blobColor1 = 'bg-blue-600/20';
+  const blobColor2 = 'bg-cyan-600/20';
 
   return (
     <div className={`relative min-h-screen pt-24 pb-32 overflow-hidden bg-gradient-to-b ${bgGradient}`}>
@@ -226,13 +212,13 @@ export function EventJourney({ route, theme }: EventJourneyProps) {
           <FadeUp>
             <div className="inline-block p-[1px] rounded-full bg-gradient-to-r from-white/10 via-white/30 to-white/10 mb-4 shadow-[0_0_20px_rgba(255,255,255,0.05)]">
               <div className={`px-5 py-2 rounded-full bg-black/40 backdrop-blur-md text-xs sm:text-sm font-bold uppercase tracking-[0.3em] ${colorPrimary}`}>
-                {isProfessional ? 'Professional Route Details' : 'Foundation Route Details'}
+                2nd &amp; 3rd Year Track Details
               </div>
             </div>
           </FadeUp>
           
           <FadeUp as="h1" className="text-4xl md:text-6xl lg:text-7xl font-display font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 tracking-tight drop-shadow-sm">
-            {theme.published ? theme.title : (isProfessional ? 'PRO TRACK' : 'FOUNDATION')}
+            {theme.published ? theme.title : 'FOUNDATION TRACK'}
           </FadeUp>
           
           <FadeUp as="p" className="text-xl md:text-2xl text-white/70 italic font-light">
@@ -250,7 +236,7 @@ export function EventJourney({ route, theme }: EventJourneyProps) {
         <div className="relative">
           <FadeUp className="text-center mb-16">
             <h2 className="text-2xl font-display font-bold text-white uppercase tracking-[0.2em] opacity-90">Execution Timeline</h2>
-            <div className={`h-1 w-24 mx-auto mt-6 rounded-full bg-gradient-to-r ${isProfessional ? 'from-purple-500/0 via-purple-500 to-purple-500/0' : 'from-blue-500/0 via-blue-500 to-blue-500/0'}`} />
+            <div className="h-1 w-24 mx-auto mt-6 rounded-full bg-gradient-to-r from-blue-500/0 via-blue-500 to-blue-500/0" />
           </FadeUp>
 
           <div className="space-y-8 relative">

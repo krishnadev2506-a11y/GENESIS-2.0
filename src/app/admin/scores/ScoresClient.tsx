@@ -10,9 +10,7 @@ import { useDebounce } from '@/hooks/useDebounce';
 import { Search, Save } from 'lucide-react';
 import { useToast } from '@/components/ui/Toast';
 import { getFriendlyErrorMessage } from '@/lib/errors';
-type RouteType = 'foundation' | 'professional';
-
-const FOUNDATION_STATIONS = [
+const STATIONS = [
   { key: 'debugArena', label: 'Debug Arena' },
   { key: 'systemDesignSprint', label: 'System Design' },
   { key: 'codeReviewChallenge', label: 'Code Review' },
@@ -20,15 +18,9 @@ const FOUNDATION_STATIONS = [
   { key: 'deploymentSprint', label: 'Deployment' },
 ];
 
-const PROFESSIONAL_STATIONS = [
-  ...FOUNDATION_STATIONS,
-  { key: 'mockTechnicalInterview', label: 'Mock Interview' },
-];
-
 export function ScoresClient() {
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
-  const [route, setRoute] = useState<RouteType>('foundation');
   const debouncedSearch = useDebounce(search, 500);
   
   const [pendingScores, setPendingScores] = useState<Record<string, Record<string, string>>>({});
@@ -38,12 +30,11 @@ export function ScoresClient() {
   const { error, success } = useToast();
 
   const { data, isLoading } = useQuery({
-    queryKey: ['teams', 'scores', page, debouncedSearch, route],
+    queryKey: ['teams', 'scores', page, debouncedSearch],
     queryFn: async () => {
       const params = new URLSearchParams({ 
         page: page.toString(), 
         limit: '20',
-        route,
       });
       if (debouncedSearch) params.append('search', debouncedSearch);
       
@@ -106,7 +97,7 @@ export function ScoresClient() {
     setPendingScores(newPending);
   };
 
-  const stations = route === 'foundation' ? FOUNDATION_STATIONS : PROFESSIONAL_STATIONS;
+  const stations = STATIONS;
 
   return (
     <div className="space-y-6">
@@ -124,25 +115,6 @@ export function ScoresClient() {
               className="pl-12"
             />
           </div>
-
-          <div className="flex bg-void/50 p-1 rounded-lg border border-glass-border">
-            <button
-              onClick={() => { setRoute('foundation'); setPage(1); }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                route === 'foundation' ? "bg-pulse text-white shadow-sm" : "text-text-muted hover:text-white hover:bg-white/5"
-              }`}
-            >
-              Foundation
-            </button>
-            <button
-              onClick={() => { setRoute('professional'); setPage(1); }}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-all ${
-                route === 'professional' ? "bg-pulse text-white shadow-sm" : "text-text-muted hover:text-white hover:bg-white/5"
-              }`}
-            >
-              Professional
-            </button>
-          </div>
         </div>
       </GlassCard>
 
@@ -153,7 +125,7 @@ export function ScoresClient() {
           </div>
         ) : data?.teams?.length === 0 ? (
           <div className="py-16 text-center text-text-muted">
-            No teams found for this route.
+            No teams found.
           </div>
         ) : (
           <div className="overflow-x-auto">

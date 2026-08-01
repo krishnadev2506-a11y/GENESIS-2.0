@@ -12,7 +12,7 @@ export const teamMemberSchema = z.object({
 
 export const teamRegistrationSchema = z.object({
   teamName: z.string().min(2, "Team name must be at least 2 characters").max(50, "Team name must be under 50 characters"),
-  route: z.enum(['foundation', 'professional']),
+  route: z.literal('foundation'),
   college: z.string().max(60, "College name is too long").optional().or(z.literal('')),
   semester: z.string().optional().or(z.literal('')),
   contactNumber: z.string().regex(/^[0-9]{10}$/, "Please enter exactly 10 digits for the phone number.").optional().or(z.literal('')),

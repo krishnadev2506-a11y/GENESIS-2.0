@@ -13,39 +13,24 @@ export const metadata = {
 export const revalidate = 60;
 
 export default async function LeaderboardPage() {
-  let foundationTeams: any[] = [];
-  let professionalTeams: any[] = [];
+  let teams: any[] = [];
   let loadError = false;
 
   try {
     await connectDB();
 
     // Fetch verified and checked-in teams, sorted by points descending, then by creation date ascending (as tie-breaker)
-    const baseQuery = {
-      paymentStatus: 'verified' as const,
+    const rawTeams = await Team.find({
+      paymentStatus: 'verified',
       checkedIn: true,
       scoreboardPoints: { $gt: 0 }
-    };
-
-    const fetchTeams = async (routeType: 'foundation' | 'professional') => {
-      return await Team.find({ ...baseQuery, route: routeType })
-        .sort({ scoreboardPoints: -1, createdAt: 1 })
-        .select('teamName college scoreboardPoints route')
-        .lean();
-    };
-
-    const [fTeams, pTeams] = await Promise.all([
-      fetchTeams('foundation'),
-      fetchTeams('professional')
-    ]);
+    })
+      .sort({ scoreboardPoints: -1, createdAt: 1 })
+      .select('teamName college scoreboardPoints route')
+      .lean();
 
     // Format for serialization (ObjectId to string)
-    foundationTeams = fTeams.map(t => ({
-      ...t,
-      _id: t._id.toString()
-    }));
-    
-    professionalTeams = pTeams.map(t => ({
+    teams = rawTeams.map(t => ({
       ...t,
       _id: t._id.toString()
     }));
@@ -77,10 +62,7 @@ export default async function LeaderboardPage() {
             <p>Please try refreshing the page in a few moments.</p>
           </div>
         ) : (
-          <LeaderboardTabs 
-            foundationTeams={foundationTeams} 
-            professionalTeams={professionalTeams} 
-          />
+          <LeaderboardTabs teams={teams} />
         )}
       </div>
     </main>

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { LeaderboardChart } from '@/components/leaderboard/LeaderboardChart';
 
@@ -12,43 +11,12 @@ interface TeamData {
 }
 
 interface LeaderboardTabsProps {
-  foundationTeams: TeamData[];
-  professionalTeams: TeamData[];
+  teams: TeamData[];
 }
 
-export function LeaderboardTabs({ foundationTeams, professionalTeams }: LeaderboardTabsProps) {
-  const [activeTab, setActiveTab] = useState<'foundation' | 'professional'>('foundation');
-
-  const teams = activeTab === 'foundation' ? foundationTeams : professionalTeams;
-
+export function LeaderboardTabs({ teams }: LeaderboardTabsProps) {
   return (
     <div className="space-y-8">
-      {/* Tabs */}
-      <div className="flex justify-center mb-8">
-        <div className="flex bg-void/80 p-1 rounded-xl border border-glass-border backdrop-blur-md shadow-[0_0_20px_rgba(139,92,246,0.1)]">
-          <button
-            onClick={() => setActiveTab('foundation')}
-            className={`px-6 py-3 text-sm md:text-base font-display font-medium rounded-lg transition-all duration-300 ${
-              activeTab === 'foundation' 
-                ? "bg-pulse text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]" 
-                : "text-text-muted hover:text-white hover:bg-white/5"
-            }`}
-          >
-            Foundation Route
-          </button>
-          <button
-            onClick={() => setActiveTab('professional')}
-            className={`px-6 py-3 text-sm md:text-base font-display font-medium rounded-lg transition-all duration-300 ${
-              activeTab === 'professional' 
-                ? "bg-pulse text-white shadow-[0_0_15px_rgba(139,92,246,0.4)]" 
-                : "text-text-muted hover:text-white hover:bg-white/5"
-            }`}
-          >
-            Professional Route
-          </button>
-        </div>
-      </div>
-
       {/* Chart */}
       {teams.length > 0 && (
         <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -68,7 +36,7 @@ export function LeaderboardTabs({ foundationTeams, professionalTeams }: Leaderbo
           <div className="py-20 text-center">
             <div className="text-4xl mb-4">🏆</div>
             <h3 className="text-xl font-display font-bold text-white mb-2">No Scores Yet</h3>
-            <p className="text-text-muted">The competition hasn't awarded any points for this route yet.</p>
+            <p className="text-text-muted">The competition hasn't awarded any points yet.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">

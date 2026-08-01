@@ -16,15 +16,26 @@ type ExportMember = {
   isLeader: boolean;
 };
 
+type ExportStationScores = {
+  debugArena: number;
+  systemDesignSprint: number;
+  codeReviewChallenge: number;
+  aiEngineeringChallenge: number;
+  deploymentSprint: number;
+  mockTechnicalInterview: number;
+};
+
 type ExportTeam = {
   id: string;
   teamName: string;
+  route: string;
   college: string;
   semester: string;
   contactNumber: string;
   email: string;
   members: ExportMember[];
   memberCount: number;
+  amountPaid: number;
   paymentScreenshotUrl: string;
   paymentScreenshotPublicId: string;
   transactionId: string;
@@ -33,7 +44,9 @@ type ExportTeam = {
   checkedIn: boolean;
   checkedInAt: string | null;
   credentialsUsername: string;
+  credentialsTemporaryPassword: string;
   scoreboardPoints: number;
+  stationScores: ExportStationScores;
   mustResetPassword: boolean;
   createdAt: string;
   updatedAt: string;
@@ -42,67 +55,102 @@ type ExportTeam = {
 type SheetValue = string | number | boolean | null;
 type SheetRow = Record<string, SheetValue>;
 
-const csvColumns: Array<keyof ExportTeam> = [
-  'id',
-  'teamName',
-  'college',
-  'semester',
-  'contactNumber',
-  'email',
-  'memberCount',
-  'members',
-  'paymentScreenshotUrl',
-  'paymentScreenshotPublicId',
-  'transactionId',
-  'paymentStatus',
-  'registrationStatus',
-  'checkedIn',
-  'checkedInAt',
-  'credentialsUsername',
-  'scoreboardPoints',
-  'mustResetPassword',
-  'createdAt',
-  'updatedAt',
-];
-
 const teamSheetColumns = [
   { key: 'id', header: 'Team ID' },
   { key: 'teamName', header: 'Team Name' },
+  { key: 'route', header: 'Track / Route' },
   { key: 'college', header: 'College' },
   { key: 'semester', header: 'Semester' },
-  { key: 'contactNumber', header: 'Contact Number' },
+  { key: 'contactNumber', header: 'Team Contact Number' },
   { key: 'email', header: 'Team Email' },
-  { key: 'memberCount', header: 'Member Count' },
-  { key: 'membersJson', header: 'Members JSON' },
-  { key: 'paymentScreenshotUrl', header: 'Payment Screenshot URL' },
-  { key: 'paymentScreenshotPublicId', header: 'Payment Screenshot Public ID' },
-  { key: 'transactionId', header: 'Transaction ID' },
+  { key: 'memberCount', header: 'Total Members' },
   { key: 'paymentStatus', header: 'Payment Status' },
+  { key: 'amountPaid', header: 'Amount Paid (₹)' },
+  { key: 'transactionId', header: 'Transaction ID' },
   { key: 'registrationStatus', header: 'Registration Status' },
   { key: 'checkedIn', header: 'Checked In' },
   { key: 'checkedInAt', header: 'Checked In At' },
-  { key: 'credentialsUsername', header: 'Credentials Username' },
-  { key: 'scoreboardPoints', header: 'Scoreboard Points' },
-  { key: 'mustResetPassword', header: 'Must Reset Password' },
-  { key: 'createdAt', header: 'Created At' },
-  { key: 'updatedAt', header: 'Updated At' },
+  { key: 'credentialsUsername', header: 'Username' },
+  { key: 'credentialsTemporaryPassword', header: 'Password (Temp)' },
+  { key: 'scoreboardPoints', header: 'Total Points' },
+  { key: 'scoreDebugArena', header: 'Debug Arena Score' },
+  { key: 'scoreSystemDesign', header: 'System Design Score' },
+  { key: 'scoreCodeReview', header: 'Code Review Score' },
+  { key: 'scoreAiEngineering', header: 'AI Engineering Score' },
+  { key: 'scoreDeployment', header: 'Deployment Score' },
+  { key: 'scoreMockInterview', header: 'Mock Interview Score' },
+  { key: 'membersSummary', header: 'All Members Summary' },
+  // Flattened Leader (Member 1)
+  { key: 'leaderName', header: 'Leader Name' },
+  { key: 'leaderRole', header: 'Leader Role' },
+  { key: 'leaderEmail', header: 'Leader Email' },
+  { key: 'leaderPhone', header: 'Leader Phone' },
+  { key: 'leaderCollege', header: 'Leader College' },
+  { key: 'leaderSemester', header: 'Leader Semester' },
+  // Flattened Member 2
+  { key: 'member2Name', header: 'Member 2 Name' },
+  { key: 'member2Role', header: 'Member 2 Role' },
+  { key: 'member2Email', header: 'Member 2 Email' },
+  { key: 'member2Phone', header: 'Member 2 Phone' },
+  { key: 'member2College', header: 'Member 2 College' },
+  { key: 'member2Semester', header: 'Member 2 Semester' },
+  // Flattened Member 3
+  { key: 'member3Name', header: 'Member 3 Name' },
+  { key: 'member3Role', header: 'Member 3 Role' },
+  { key: 'member3Email', header: 'Member 3 Email' },
+  { key: 'member3Phone', header: 'Member 3 Phone' },
+  { key: 'member3College', header: 'Member 3 College' },
+  { key: 'member3Semester', header: 'Member 3 Semester' },
+  // Flattened Member 4
+  { key: 'member4Name', header: 'Member 4 Name' },
+  { key: 'member4Role', header: 'Member 4 Role' },
+  { key: 'member4Email', header: 'Member 4 Email' },
+  { key: 'member4Phone', header: 'Member 4 Phone' },
+  { key: 'member4College', header: 'Member 4 College' },
+  { key: 'member4Semester', header: 'Member 4 Semester' },
+  // Flattened Member 5
+  { key: 'member5Name', header: 'Member 5 Name' },
+  { key: 'member5Role', header: 'Member 5 Role' },
+  { key: 'member5Email', header: 'Member 5 Email' },
+  { key: 'member5Phone', header: 'Member 5 Phone' },
+  { key: 'member5College', header: 'Member 5 College' },
+  { key: 'member5Semester', header: 'Member 5 Semester' },
+  // Flattened Member 6
+  { key: 'member6Name', header: 'Member 6 Name' },
+  { key: 'member6Role', header: 'Member 6 Role' },
+  { key: 'member6Email', header: 'Member 6 Email' },
+  { key: 'member6Phone', header: 'Member 6 Phone' },
+  { key: 'member6College', header: 'Member 6 College' },
+  { key: 'member6Semester', header: 'Member 6 Semester' },
+  // Metadata
+  { key: 'paymentScreenshotUrl', header: 'Payment Screenshot URL' },
+  { key: 'createdAt', header: 'Registration Date' },
+  { key: 'updatedAt', header: 'Last Updated' },
 ] as const;
 
 const memberSheetColumns = [
   { key: 'teamId', header: 'Team ID' },
   { key: 'teamName', header: 'Team Name' },
-  { key: 'college', header: 'Team College' },
-  { key: 'semester', header: 'Team Semester' },
-  { key: 'contactNumber', header: 'Team Contact Number' },
+  { key: 'route', header: 'Track / Route' },
+  { key: 'teamCollege', header: 'Team College' },
+  { key: 'teamSemester', header: 'Team Semester' },
+  { key: 'teamContactNumber', header: 'Team Contact Number' },
   { key: 'teamEmail', header: 'Team Email' },
+  { key: 'paymentStatus', header: 'Payment Status' },
+  { key: 'amountPaid', header: 'Amount Paid (₹)' },
+  { key: 'transactionId', header: 'Transaction ID' },
+  { key: 'registrationStatus', header: 'Registration Status' },
+  { key: 'checkedIn', header: 'Checked In' },
+  { key: 'credentialsUsername', header: 'Team Username' },
+  { key: 'scoreboardPoints', header: 'Scoreboard Points' },
   { key: 'memberIndex', header: 'Member Index' },
+  { key: 'isLeader', header: 'Is Leader' },
   { key: 'name', header: 'Member Name' },
   { key: 'role', header: 'Role' },
   { key: 'email', header: 'Member Email' },
   { key: 'phone', header: 'Phone' },
   { key: 'memberCollege', header: 'Member College' },
   { key: 'memberSemester', header: 'Member Semester' },
-  { key: 'isLeader', header: 'Is Leader' },
 ] as const;
 
 function toIsoString(value: unknown) {
@@ -116,21 +164,113 @@ function escapeCsv(value: unknown) {
     return '';
   }
 
-  const normalized = typeof value === 'string' ? value : JSON.stringify(value);
+  const normalized = typeof value === 'string' ? value : String(value);
   return `"${normalized.replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`;
 }
 
-type CsvTeam = Omit<ExportTeam, 'members'> & { members: string };
+function transformTeamToSheetRow(row: ExportTeam): SheetRow {
+  const leader = row.members.find((m) => m.isLeader) || row.members[0];
+  const membersWithoutLeader = row.members.filter((m) => m !== leader);
+
+  const getMemberAt = (index: number) => {
+    // 0 is leader, 1 is 2nd member, etc.
+    if (index === 0) return leader;
+    return membersWithoutLeader[index - 1];
+  };
+
+  const m1 = getMemberAt(0);
+  const m2 = getMemberAt(1);
+  const m3 = getMemberAt(2);
+  const m4 = getMemberAt(3);
+  const m5 = getMemberAt(4);
+  const m6 = getMemberAt(5);
+
+  const membersSummary = row.members
+    .map(
+      (m, i) =>
+        `${i + 1}. ${m.name} (${m.role}${m.isLeader ? ' - LEADER' : ''}) | Phone: ${m.phone || 'N/A'} | Email: ${m.email} | College: ${m.college || row.college || 'N/A'} (S${m.semester || row.semester || 'N/A'})`
+    )
+    .join('\n');
+
+  return {
+    id: row.id,
+    teamName: row.teamName,
+    route: row.route ? row.route.charAt(0).toUpperCase() + row.route.slice(1) : 'Foundation',
+    college: row.college,
+    semester: row.semester,
+    contactNumber: row.contactNumber,
+    email: row.email,
+    memberCount: row.memberCount,
+    paymentStatus: row.paymentStatus ? row.paymentStatus.replace('_', ' ').toUpperCase() : 'PENDING',
+    amountPaid: row.amountPaid || 0,
+    transactionId: row.transactionId || '',
+    registrationStatus: row.registrationStatus ? row.registrationStatus.toUpperCase() : 'SUBMITTED',
+    checkedIn: row.checkedIn ? 'Yes' : 'No',
+    checkedInAt: row.checkedInAt || '',
+    credentialsUsername: row.credentialsUsername || '',
+    credentialsTemporaryPassword: row.credentialsTemporaryPassword || '',
+    scoreboardPoints: row.scoreboardPoints || 0,
+    scoreDebugArena: row.stationScores?.debugArena ?? 0,
+    scoreSystemDesign: row.stationScores?.systemDesignSprint ?? 0,
+    scoreCodeReview: row.stationScores?.codeReviewChallenge ?? 0,
+    scoreAiEngineering: row.stationScores?.aiEngineeringChallenge ?? 0,
+    scoreDeployment: row.stationScores?.deploymentSprint ?? 0,
+    scoreMockInterview: row.stationScores?.mockTechnicalInterview ?? 0,
+    membersSummary,
+    // Leader
+    leaderName: m1?.name || '',
+    leaderRole: m1?.role || 'Leader',
+    leaderEmail: m1?.email || '',
+    leaderPhone: m1?.phone || '',
+    leaderCollege: m1?.college || row.college || '',
+    leaderSemester: m1?.semester || row.semester || '',
+    // Member 2
+    member2Name: m2?.name || '',
+    member2Role: m2?.role || '',
+    member2Email: m2?.email || '',
+    member2Phone: m2?.phone || '',
+    member2College: m2?.college || row.college || '',
+    member2Semester: m2?.semester || row.semester || '',
+    // Member 3
+    member3Name: m3?.name || '',
+    member3Role: m3?.role || '',
+    member3Email: m3?.email || '',
+    member3Phone: m3?.phone || '',
+    member3College: m3?.college || row.college || '',
+    member3Semester: m3?.semester || row.semester || '',
+    // Member 4
+    member4Name: m4?.name || '',
+    member4Role: m4?.role || '',
+    member4Email: m4?.email || '',
+    member4Phone: m4?.phone || '',
+    member4College: m4?.college || row.college || '',
+    member4Semester: m4?.semester || row.semester || '',
+    // Member 5
+    member5Name: m5?.name || '',
+    member5Role: m5?.role || '',
+    member5Email: m5?.email || '',
+    member5Phone: m5?.phone || '',
+    member5College: m5?.college || row.college || '',
+    member5Semester: m5?.semester || row.semester || '',
+    // Member 6
+    member6Name: m6?.name || '',
+    member6Role: m6?.role || '',
+    member6Email: m6?.email || '',
+    member6Phone: m6?.phone || '',
+    member6College: m6?.college || row.college || '',
+    member6Semester: m6?.semester || row.semester || '',
+    // URLs
+    paymentScreenshotUrl: row.paymentScreenshotUrl || '',
+    createdAt: row.createdAt || '',
+    updatedAt: row.updatedAt || '',
+  };
+}
 
 function buildCsv(rows: ExportTeam[]) {
-  const header = csvColumns.join(',');
+  const header = teamSheetColumns.map((col) => escapeCsv(col.header)).join(',');
   const lines = rows.map((row) => {
-    const csvRow: CsvTeam = {
-      ...row,
-      members: JSON.stringify(row.members),
-    };
-
-    return csvColumns.map((column) => escapeCsv(csvRow[column])).join(',');
+    const transformed = transformTeamToSheetRow(row);
+    return teamSheetColumns.map((column) => escapeCsv(transformed[column.key])).join(',');
   });
 
   return ['\ufeff' + header, ...lines].join('\n');
@@ -169,7 +309,7 @@ const crcTable = new Uint32Array(256);
 for (let index = 0; index < 256; index += 1) {
   let crc = index;
   for (let bit = 0; bit < 8; bit += 1) {
-    crc = (crc & 1) ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
+    crc = crc & 1 ? 0xedb88320 ^ (crc >>> 1) : crc >>> 1;
   }
   crcTable[index] = crc >>> 0;
 }
@@ -277,45 +417,32 @@ function buildSheetXml(rows: SheetRow[], columns: ReadonlyArray<{ key: string; h
 }
 
 function buildXlsx(rows: ExportTeam[]) {
-  const teamRows: SheetRow[] = rows.map((row) => ({
-    id: row.id,
-    teamName: row.teamName,
-    college: row.college,
-    semester: row.semester,
-    contactNumber: row.contactNumber,
-    email: row.email,
-    memberCount: row.memberCount,
-    membersJson: JSON.stringify(row.members),
-    paymentScreenshotUrl: row.paymentScreenshotUrl,
-    paymentScreenshotPublicId: row.paymentScreenshotPublicId,
-    transactionId: row.transactionId,
-    paymentStatus: row.paymentStatus,
-    registrationStatus: row.registrationStatus,
-    checkedIn: row.checkedIn,
-    checkedInAt: row.checkedInAt || '',
-    credentialsUsername: row.credentialsUsername,
-    scoreboardPoints: row.scoreboardPoints,
-    mustResetPassword: row.mustResetPassword,
-    createdAt: row.createdAt,
-    updatedAt: row.updatedAt,
-  }));
+  const teamRows: SheetRow[] = rows.map((row) => transformTeamToSheetRow(row));
 
   const memberRows: SheetRow[] = rows.flatMap((row) =>
     row.members.map((member, index) => ({
       teamId: row.id,
       teamName: row.teamName,
-      college: row.college,
-      semester: row.semester,
-      contactNumber: row.contactNumber,
+      route: row.route ? row.route.charAt(0).toUpperCase() + row.route.slice(1) : 'Foundation',
+      teamCollege: row.college,
+      teamSemester: row.semester,
+      teamContactNumber: row.contactNumber,
       teamEmail: row.email,
+      paymentStatus: row.paymentStatus ? row.paymentStatus.replace('_', ' ').toUpperCase() : 'PENDING',
+      amountPaid: row.amountPaid || 0,
+      transactionId: row.transactionId || '',
+      registrationStatus: row.registrationStatus ? row.registrationStatus.toUpperCase() : 'SUBMITTED',
+      checkedIn: row.checkedIn ? 'Yes' : 'No',
+      credentialsUsername: row.credentialsUsername || '',
+      scoreboardPoints: row.scoreboardPoints || 0,
       memberIndex: index + 1,
+      isLeader: member.isLeader ? 'Yes' : 'No',
       name: member.name,
       role: member.role,
       email: member.email,
-      phone: member.phone,
-      memberCollege: member.college,
-      memberSemester: member.semester,
-      isLeader: member.isLeader,
+      phone: member.phone || '',
+      memberCollege: member.college || row.college || '',
+      memberSemester: member.semester || row.semester || '',
     }))
   );
 
@@ -323,7 +450,7 @@ function buildXlsx(rows: ExportTeam[]) {
 <workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
   <sheets>
     <sheet name="Teams" sheetId="1" r:id="rId1"/>
-    <sheet name="Members" sheetId="2" r:id="rId2"/>
+    <sheet name="All Participants" sheetId="2" r:id="rId2"/>
   </sheets>
 </workbook>`;
 
@@ -364,7 +491,7 @@ function buildXlsx(rows: ExportTeam[]) {
 
 function buildFilename(format: ExportFormat) {
   const stamp = new Date().toISOString().replace(/:/g, '-').replace(/\.\d{3}Z$/, 'Z');
-  return `participants-export-${stamp}.${format}`;
+  return `genesis-teams-export-${stamp}.${format}`;
 }
 
 export async function GET(req: NextRequest) {
@@ -372,13 +499,11 @@ export async function GET(req: NextRequest) {
     await connectDB();
     await requireAuth(req, 'admin');
 
-    const format = (req.nextUrl.searchParams.get('format') === 'xlsx'
-      ? 'xlsx'
-      : 'csv') as ExportFormat;
+    const format = (req.nextUrl.searchParams.get('format') === 'xlsx' ? 'xlsx' : 'csv') as ExportFormat;
 
     const teams = await Team.find().sort({ createdAt: 1 }).lean();
 
-    const participants: ExportTeam[] = teams.map((team) => {
+    const participants: ExportTeam[] = teams.map((team: any) => {
       const college: string = team.college ?? '';
       const semester: string = team.semester ?? '';
       const contactNumber: string = team.contactNumber ?? '';
@@ -386,11 +511,12 @@ export async function GET(req: NextRequest) {
       return {
         id: team._id.toString(),
         teamName: team.teamName,
+        route: team.route ?? 'foundation',
         college,
         semester,
         contactNumber,
         email: team.email,
-        members: (team.members || []).map((member) => {
+        members: (team.members || []).map((member: any) => {
           const memberCollege: string = member.college ?? '';
           const memberSemester: string = member.semester ?? '';
           const memberPhone: string = member.phone ?? '';
@@ -402,20 +528,30 @@ export async function GET(req: NextRequest) {
             phone: memberPhone,
             college: memberCollege,
             semester: memberSemester,
-            isLeader: member.isLeader,
+            isLeader: Boolean(member.isLeader),
           };
         }),
         memberCount: team.members?.length ?? 0,
-        paymentScreenshotUrl: team.paymentScreenshotUrl,
-        paymentScreenshotPublicId: team.paymentScreenshotPublicId,
-        transactionId: team.transactionId,
+        amountPaid: team.amountPaid ?? 0,
+        paymentScreenshotUrl: team.paymentScreenshotUrl ?? '',
+        paymentScreenshotPublicId: team.paymentScreenshotPublicId ?? '',
+        transactionId: team.transactionId ?? '',
         paymentStatus: team.paymentStatus,
         registrationStatus: team.registrationStatus,
-        checkedIn: team.checkedIn,
+        checkedIn: Boolean(team.checkedIn),
         checkedInAt: toIsoString(team.checkedInAt),
         credentialsUsername: team.credentials?.username ?? '',
+        credentialsTemporaryPassword: team.credentials?.temporaryPassword ?? '',
         scoreboardPoints: team.scoreboardPoints ?? 0,
-        mustResetPassword: team.mustResetPassword,
+        stationScores: {
+          debugArena: team.stationScores?.debugArena ?? 0,
+          systemDesignSprint: team.stationScores?.systemDesignSprint ?? 0,
+          codeReviewChallenge: team.stationScores?.codeReviewChallenge ?? 0,
+          aiEngineeringChallenge: team.stationScores?.aiEngineeringChallenge ?? 0,
+          deploymentSprint: team.stationScores?.deploymentSprint ?? 0,
+          mockTechnicalInterview: team.stationScores?.mockTechnicalInterview ?? 0,
+        },
+        mustResetPassword: Boolean(team.mustResetPassword),
         createdAt: toIsoString(team.createdAt) ?? '',
         updatedAt: toIsoString(team.updatedAt) ?? '',
       };
@@ -444,5 +580,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: message }, { status });
   }
 }
+
 
 

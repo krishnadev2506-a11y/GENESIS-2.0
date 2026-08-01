@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import Image from 'next/image';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { X, Eye, Pencil, Save, Trash2, Plus } from 'lucide-react';
+import { X, Eye, Pencil, Save, Trash2, Plus, Printer } from 'lucide-react';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Badge } from '@/components/ui/Badge';
@@ -27,6 +27,119 @@ export function TeamsClient() {
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
   const { error: toastError, success } = useToast();
+
+  const handlePrintTeam = (team: any) => {
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      window.print();
+      return;
+    }
+    const membersHtml = (team.members || [])
+      .map(
+        (m: any, i: number) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${i + 1}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; font-weight: bold;">
+          ${m.name} ${m.isLeader ? '<span style="background: #e0f2fe; color: #0369a1; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-left: 4px;">LEADER</span>' : ''}
+        </td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${m.role || 'Member'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${m.email || '-'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${m.phone || '-'}</td>
+        <td style="padding: 8px; border: 1px solid #ddd;">${m.college || team.college || '-'} (S${m.semester || team.semester || '-'})</td>
+      </tr>
+    `
+      )
+      .join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>GENESIS 2.0 - Team ${team.teamName}</title>
+          <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 28px; color: #111; line-height: 1.5; background: #fff; }
+            .header { border-bottom: 2px solid #2563eb; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+            h1 { margin: 0; font-size: 24px; color: #1e293b; text-transform: uppercase; }
+            .subtitle { color: #64748b; font-size: 14px; margin-top: 4px; }
+            .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+            .card { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; }
+            .card h3 { margin-top: 0; margin-bottom: 10px; font-size: 12px; text-transform: uppercase; color: #475569; letter-spacing: 0.5px; border-bottom: 1px solid #e2e8f0; padding-bottom: 6px; }
+            .card p { margin: 5px 0; font-size: 13px; display: flex; justify-content: space-between; }
+            .card p span.label { color: #64748b; }
+            .card p span.val { font-weight: 600; color: #0f172a; }
+            table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; }
+            th { background: #f1f5f9; padding: 8px; border: 1px solid #ddd; text-align: left; font-size: 11px; text-transform: uppercase; color: #475569; }
+            .footer { margin-top: 36px; border-top: 1px dashed #cbd5e1; padding-top: 16px; display: flex; justify-content: space-between; font-size: 12px; color: #64748b; }
+            @media print {
+              body { padding: 0; }
+              @page { margin: 1.5cm; }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <div>
+              <h1>GENESIS 2.0 &bull; TEAM DETAILS SHEET</h1>
+              <div class="subtitle">Participant Dossier & Event Verification Form</div>
+            </div>
+            <div style="text-align: right;">
+              <div style="font-size: 18px; font-weight: bold; color: #2563eb;">${team.teamName}</div>
+              <div style="font-size: 12px; color: #64748b; text-transform: uppercase;">Track: ${team.route || 'Foundation'}</div>
+            </div>
+          </div>
+
+          <div class="grid">
+            <div class="card">
+              <h3>Team Information</h3>
+              <p><span class="label">College:</span> <span class="val">${team.college || 'N/A'}</span></p>
+              <p><span class="label">Semester:</span> <span class="val">Semester ${team.semester || 'N/A'}</span></p>
+              <p><span class="label">Team Email:</span> <span class="val">${team.email}</span></p>
+              <p><span class="label">Contact Phone:</span> <span class="val">${team.contactNumber || 'N/A'}</span></p>
+              <p><span class="label">Total Members:</span> <span class="val">${team.members?.length || 0} Members</span></p>
+            </div>
+
+            <div class="card">
+              <h3>Payment & Status</h3>
+              <p><span class="label">Payment Status:</span> <span class="val" style="color: ${team.paymentStatus === 'verified' ? '#16a34a' : '#ea580c'};">${(team.paymentStatus || 'PENDING').toUpperCase()}</span></p>
+              <p><span class="label">Amount Paid:</span> <span class="val">₹${team.amountPaid || 0}</span></p>
+              <p><span class="label">Transaction ID / UTR:</span> <span class="val" style="font-family: monospace;">${team.transactionId || 'N/A'}</span></p>
+              <p><span class="label">Event Check-In:</span> <span class="val">${team.checkedIn ? 'YES (Checked In)' : 'NO'}</span></p>
+              ${team.credentials?.username ? `<p><span class="label">Team Username:</span> <span class="val" style="font-family: monospace;">${team.credentials.username}</span></p>` : ''}
+            </div>
+          </div>
+
+          <h3 style="font-size: 13px; text-transform: uppercase; color: #1e293b; margin-bottom: 6px; letter-spacing: 0.5px;">Team Members Roster</h3>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 30px; text-align: center;">#</th>
+                <th>Member Name</th>
+                <th>Role</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th>College & Sem</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${membersHtml}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            <div>Generated: ${new Date().toLocaleString()}</div>
+            <div>Desk Officer Sign: _______________________</div>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
   
   const debouncedSearch = useDebounce(search, 500);
 
@@ -245,6 +358,9 @@ export function TeamsClient() {
               <div className="flex gap-2 items-center">
                 {!isEditing ? (
                   <>
+                    <Button variant="secondary" size="sm" onClick={() => handlePrintTeam(selectedTeam)} title="Print Team Dossier / Verification Sheet">
+                      <Printer className="w-4 h-4 mr-2" /> Print
+                    </Button>
                     {!isDeleted && (
                       <>
                         <Button variant="secondary" size="sm" onClick={() => { setIsEditing(true); setEditedTeam(JSON.parse(JSON.stringify(selectedTeam))); }}>
@@ -305,8 +421,7 @@ export function TeamsClient() {
                         <div className="flex flex-col gap-1 mt-4">
                           <label className="text-text-muted uppercase text-[10px] tracking-wider">Route</label>
                           <select className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.route || 'foundation'} onChange={e => handleTeamChange('route', e.target.value)}>
-                            <option value="foundation">Foundation</option>
-                            <option value="professional">Professional</option>
+                            <option value="foundation">Foundation (2nd &amp; 3rd Year)</option>
                           </select>
                         </div>
                         <div className="flex flex-col gap-1 mt-2">
