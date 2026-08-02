@@ -19,8 +19,8 @@ export async function POST(req: NextRequest) {
     let identifier, password;
     try {
       const parsed = loginSchema.parse(body);
-      identifier = parsed.identifier;
-      password = parsed.password;
+      identifier = parsed.identifier.trim();
+      password = parsed.password.trim();
     } catch (error) {
       if (error instanceof z.ZodError) {
         return NextResponse.json({ error: (error as any).issues[0].message }, { status: 400 });
@@ -58,8 +58,10 @@ export async function POST(req: NextRequest) {
 
     await connectDB();
     
+    const escapedIdentifier = identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
     // Try Admin Login First
-    const admin = await AdminUser.findOne({ email: { $regex: new RegExp(`^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } });
+    const admin = await AdminUser.findOne({ email: { $regex: new RegExp(`^${escapedIdentifier}$`, 'i') } });
     
     if (admin) {
       const isMatch = await comparePassword(password, admin.passwordHash);
@@ -74,11 +76,12 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Try Team Login
+    // Try Team Login (matches Team Username, Team Root Email, or any Member Email)
     const team = await Team.findOne({
       $or: [
-        { 'credentials.username': { $regex: new RegExp(`^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } },
-        { email: { $regex: new RegExp(`^${identifier.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } }
+        { 'credentials.username': { $regex: new RegExp(`^${escapedIdentifier}$`, 'i') } },
+        { email: { $regex: new RegExp(`^${escapedIdentifier}$`, 'i') } },
+        { 'members.email': { $regex: new RegExp(`^${escapedIdentifier}$`, 'i') } }
       ]
     }).sort({ 'credentials.passwordHash': -1 });
     

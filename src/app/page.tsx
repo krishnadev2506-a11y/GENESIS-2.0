@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic';
 import { LazyLoadSection } from '@/components/ui/LazyLoadSection';
 
 const Tracks = dynamic(() => import('@/components/home/Tracks').then(mod => mod.Tracks), { ssr: true });
+const GuidelinesSection = dynamic(() => import('@/components/home/GuidelinesSection').then(mod => mod.GuidelinesSection), { ssr: true });
 const RegistrationCTA = dynamic(() => import('@/components/home/RegistrationCTA').then(mod => mod.RegistrationCTA), { ssr: true });
 const Footer = dynamic(() => import('@/components/home/Footer').then(mod => mod.Footer), { ssr: true });
 
@@ -18,6 +19,9 @@ export default function Home() {
       <EventIntro />
       <LazyLoadSection minHeight="600px">
         <Tracks />
+      </LazyLoadSection>
+      <LazyLoadSection minHeight="500px">
+        <GuidelinesSection />
       </LazyLoadSection>
       <LazyLoadSection minHeight="300px">
         <RegistrationCTA />

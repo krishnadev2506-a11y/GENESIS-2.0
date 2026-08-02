@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { verifyToken } from '@/lib/auth';
@@ -8,6 +9,7 @@ import { GlassCard } from '@/components/ui/GlassCard';
 import { Badge } from '@/components/ui/Badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { ConstellationThread } from '@/components/ui/ConstellationThread';
+import { FileText, Download, ArrowRight } from 'lucide-react';
 
 export const metadata = {
   title: 'Dashboard | GENESIS 2.0',
@@ -136,6 +138,48 @@ export default async function DashboardPage() {
               <Badge variant={team.checkedIn ? 'success' : 'pending'} className="mb-1">
                 {team.checkedIn ? 'Done' : 'Pending'}
               </Badge>
+            </div>
+          </GlassCard>
+        </div>
+
+        {/* Guidelines Banner Card (Span 12) */}
+        <div className="md:col-span-12">
+          <GlassCard className="p-6 relative overflow-hidden" hoverEffect={false}>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-pulse/20 border border-pulse/30 flex items-center justify-center text-pulse shrink-0">
+                  <FileText size={24} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-display font-bold text-white text-lg tracking-wide uppercase">
+                      Buildathon Guidelines
+                    </h3>
+                    <Badge variant="default" className="text-[10px] uppercase font-mono">Official</Badge>
+                  </div>
+                  <p className="text-xs text-text-muted mt-0.5">
+                    Start: <span className="text-white font-mono font-medium">01 Aug 2026, 10:00 PM IST</span> &bull; Mandatory Git &bull; Academic Year Tracks
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+                <Link
+                  href="/dashboard/guidelines"
+                  className="px-4 py-2.5 rounded-xl bg-glass border border-glass-border hover:border-pulse/40 text-xs font-bold text-white transition-all inline-flex items-center gap-1.5"
+                >
+                  <span>View Details</span>
+                  <ArrowRight size={14} />
+                </Link>
+                <a
+                  href="/GENESIS_2.0_Buildathon_Guidelines.pdf"
+                  download="GENESIS_2.0_Buildathon_Guidelines.pdf"
+                  className="px-5 py-2.5 rounded-xl font-bold uppercase tracking-wider text-xs text-white transition-all bg-[linear-gradient(135deg,#6d28d9_0%,#a855f7_100%)] border border-pulse/40 shadow-[0_0_15px_rgba(168,85,247,0.25)] hover:shadow-[0_0_25px_rgba(168,85,247,0.45)] inline-flex items-center gap-2"
+                >
+                  <Download size={14} />
+                  <span>Download PDF</span>
+                </a>
+              </div>
             </div>
           </GlassCard>
         </div>

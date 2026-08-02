@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { LayoutDashboard, Mail, Users, CheckSquare, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, Mail, Users, CheckSquare, LogOut, Menu, X, Award, FileText } from 'lucide-react';
 import { m, AnimatePresence } from 'framer-motion';
 import { BrandWordmark } from '@/components/brand/BrandWordmark';
 
@@ -26,8 +26,10 @@ export function DashboardShell({
 
   const navItems = [
     { name: 'Overview', href: '/dashboard', icon: LayoutDashboard },
+    { name: 'Guidelines', href: '/dashboard/guidelines', icon: FileText },
     { name: 'Inbox', href: '/dashboard/inbox', icon: Mail, badge: 2 }, // Mock unread count
     { name: 'Team Details', href: '/dashboard/team', icon: Users },
+    { name: 'Certificates', href: '/dashboard/certificates', icon: Award },
     { name: 'Check-In', href: '/dashboard/checkin', icon: CheckSquare, disabled: true },
   ];
 

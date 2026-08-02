@@ -470,8 +470,24 @@ export function TeamsClient() {
                               </p>
                               <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
                                 <span className="text-text-muted uppercase text-[10px] tracking-wider w-24 shrink-0">Password</span> 
-                                <span className="text-white font-mono bg-void/50 px-2 py-0.5 rounded text-sm">
-                                  {selectedTeam.credentials?.temporaryPassword ? selectedTeam.credentials.temporaryPassword : <span className="text-success text-xs">Set by participant (Private)</span>}
+                                <span className="text-white font-mono bg-void/50 px-2 py-0.5 rounded text-sm flex items-center gap-2">
+                                  {selectedTeam.credentials?.temporaryPassword ? (
+                                    <>
+                                      <span>{selectedTeam.credentials.temporaryPassword}</span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          navigator.clipboard.writeText(selectedTeam.credentials.temporaryPassword);
+                                          success("Copied", "Password copied to clipboard");
+                                        }}
+                                        className="text-[10px] text-pulse hover:underline cursor-pointer ml-1 bg-pulse/10 px-1.5 py-0.5 rounded border border-pulse/20"
+                                      >
+                                        Copy
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <span className="text-success text-xs">Set by participant (Private)</span>
+                                  )}
                                 </span>
                               </p>
                             </div>
@@ -489,12 +505,22 @@ export function TeamsClient() {
                                   btn.innerText = "Processing...";
                                   try {
                                     const res = await fetch(`/api/teams/${selectedTeam._id}/reset-credentials`, { method: 'POST' });
-                                    if (!res.ok) throw new Error('Failed to reset credentials');
                                     const data = await res.json();
-                                    success("Credentials Reset", "New credentials have been generated and emailed successfully.");
+                                    if (!res.ok) throw new Error(data.error || 'Failed to reset credentials');
+                                    
+                                    if (data.emailSent) {
+                                      success("Credentials Reset", "New credentials have been generated and emailed successfully.");
+                                    } else {
+                                      toastError(
+                                        "Credentials Reset (Email Failed)",
+                                        "Credentials were reset in the database, but email delivery failed. You can copy the temporary password shown above and share it directly."
+                                      );
+                                    }
+                                    
                                     if (data.team) {
                                       setSelectedTeam(data.team);
                                     }
+                                    queryClient.invalidateQueries({ queryKey: ['teams'] });
                                   } catch (err) {
                                     toastError("Reset Failed", getFriendlyErrorMessage(err));
                                   } finally {

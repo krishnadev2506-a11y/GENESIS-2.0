@@ -3,7 +3,7 @@ import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import AuditLog from '@/models/AuditLog';
 import { requireAuth, generateCredentials, hashPassword } from '@/lib/auth';
-import { sendRegistrationConfirmed, sendVerificationConfirmation, sendAdminVerificationAlert } from '@/lib/mail';
+import { sendTeamCredentials, sendAdminVerificationAlert } from '@/lib/mail';
 import mongoose from 'mongoose';
 import { logger } from '@/lib/logger';
 
@@ -46,18 +46,19 @@ export async function PATCH(
     
     await team.save();
     
-    // Send email with credentials
-    const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
+    // Send email with credentials to all members and team root email
+    const allMemberEmails = Array.from(
+      new Set([...(team.members || []).map((m: any) => m.email), team.email].filter(Boolean))
+    );
     
     // Send emails concurrently (we must await to prevent serverless termination)
     await Promise.allSettled([
-      sendRegistrationConfirmed(allMemberEmails, team.teamName, username, password),
-      sendVerificationConfirmation(allMemberEmails, team.teamName),
+      sendTeamCredentials(allMemberEmails, team.teamName, username, password, false),
       sendAdminVerificationAlert(team.teamName)
     ]).then(results => {
       results.forEach((result, index) => {
         if (result.status === 'rejected') {
-          logger.error(`Failed to send confirmation email type ${index === 0 ? 'RegistrationConfirmed' : index === 1 ? 'VerificationConfirmation' : 'AdminVerificationAlert'} for team ${team._id}:`, result.reason);
+          logger.error(`Failed to send email type ${index === 0 ? 'TeamCredentials' : 'AdminVerificationAlert'} for team ${team._id}:`, result.reason);
         }
       });
     });

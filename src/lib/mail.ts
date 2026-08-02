@@ -126,88 +126,105 @@ export async function sendAdminRegistrationAlert(teamName: string, college: stri
   });
 }
 
-export async function sendTeamCredentials(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
-  const contentStr = process.env.EMAIL_TEMPLATE_CREDENTIALS || `
-    <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Welcome to GENESIS 2.0!</h2>
-    <p style="margin: 0 0 16px 0; line-height: 1.6;">Hello Team <strong>{{teamName}}</strong>,</p>
-    <p style="margin: 0 0 16px 0; line-height: 1.6;">Your registration has been verified. Here are your login credentials for the dashboard:</p>
-    <div style="background-color: #111827; border: 1px solid #374151; border-radius: 8px; padding: 20px; margin-bottom: 24px; text-align: center;">
-      <p style="margin: 0 0 12px 0; color: #9CA3AF; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Username</p>
-      <p style="margin: 0 0 20px 0; color: #FFFFFF; font-size: 20px; font-weight: bold; font-family: monospace;">{{username}}</p>
-      <p style="margin: 0 0 12px 0; color: #9CA3AF; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">Password</p>
-      <p style="margin: 0; color: #FFFFFF; font-size: 20px; font-weight: bold; font-family: monospace;">{{password}}</p>
-    </div>
-    <p style="margin: 0 0 16px 0; line-height: 1.6; color: #F87171;">⚠️ <strong>IMPORTANT:</strong> Keep these credentials safe. Anyone with this password can access your team's dashboard.</p>
-  `;
-  
-  const content = contentStr
-    .replace(/{{teamName}}/g, teamName)
-    .replace(/{{username}}/g, username)
-    .replace(/{{password}}/g, password);
-
-  const loginUrl = `${getBaseUrl()}/login`;
-  const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
-  const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
-  
-  const fullHtml = emailTemplate(`
-    ${content}
-    <div style="text-align: center; margin-top: 32px;">
-      <a href="${loginUrl}" style="display: inline-block; background-color: #4F46E5; color: #FFFFFF; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold; font-size: 16px; transition: background-color 0.2s;">Access Dashboard</a>
-    </div>
-  `);
-
-  const promises = toEmails.map(to => 
-    sendEmail({
-      toEmails: [to],
-      subject: `Your GENESIS 2.0 Login Credentials`,
-      textContent,
-      htmlContent: fullHtml
-    }).catch(err => logger.error(`Failed to send credentials to ${to}:`, err))
-  );
-
-  await Promise.allSettled(promises);
+export interface EmailResult {
+  success: boolean;
+  sentCount: number;
+  errors: string[];
 }
 
-export async function sendRegistrationConfirmed(toEmails: string[], teamName: string, username: string, password: string): Promise<void> {
-  await connectDB();
-  let contentStr = '';
-  try {
-    // @ts-ignore
-    const settings = await Settings.getSettings();
-    contentStr = settings.registrationConfirmedEmailTemplate || 'Confirmed! User: {{username}}, Pass: {{password}}';
-  } catch (err) {
-    logger.error('Error fetching settings for email template', err);
-    contentStr = 'Confirmed! User: {{username}}, Pass: {{password}}';
+export async function sendTeamCredentials(
+  toEmails: string[],
+  teamName: string,
+  username: string,
+  password: string,
+  isReset: boolean = false
+): Promise<EmailResult> {
+  if (!toEmails || toEmails.length === 0) {
+    logger.warn(`sendTeamCredentials called with 0 emails for team ${teamName}`);
+    return { success: false, sentCount: 0, errors: ['No recipient email addresses provided'] };
   }
 
-  contentStr = contentStr
-    .replace(/{{teamName}}/g, teamName)
-    .replace(/{{username}}/g, username)
-    .replace(/{{password}}/g, password);
-
   const loginUrl = `${getBaseUrl()}/login`;
-  const textContent = `${contentStr}\n\nAccess Dashboard here: ${loginUrl}`;
-  const formattedContent = contentStr.split('\n').map(p => p.trim() ? `<p style="margin: 0 0 16px 0;">${p}</p>` : '').join('');
-  
-  const content = `
-    ${formattedContent}
-    <div style="text-align: center; margin-top: 32px;">
-      <a href="${loginUrl}" style="display: inline-block; background-color: #4F46E5; color: #ffffff; text-decoration: none; padding: 14px 28px; border-radius: 8px; font-weight: bold;">Access Dashboard</a>
-    </div>
-  `;
-  const htmlContent = emailTemplate(content);
+  const heading = isReset ? 'Your Credentials Have Been Reset' : 'Welcome to GENESIS 2.0!';
+  const messageText = isReset
+    ? `Your team credentials for <strong>${teamName}</strong> have been updated by the event administrators. Please use your new password below to log in:`
+    : `Your registration for team <strong>${teamName}</strong> has been successfully verified! Here are your dashboard credentials:`;
 
-  const promises = toEmails.map(to => 
-    sendEmail({
-      toEmails: [to],
-      subject: "You are confirmed for GENESIS 2.0 - Welcome!",
-      textContent,
-      htmlContent
-    }).catch(err => logger.error(`Failed to send registration confirmed email to ${to}:`, err))
-  );
+  const content = `
+    <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 16px; font-weight: bold;">${heading}</h2>
+    <p style="margin: 0 0 16px 0; line-height: 1.6; color: #D1D5DB;">Hello Team <strong>${teamName}</strong>,</p>
+    <p style="margin: 0 0 20px 0; line-height: 1.6; color: #D1D5DB;">${messageText}</p>
+    
+    <div style="background-color: #111827; border: 1px solid #374151; border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+      <div style="margin-bottom: 16px;">
+        <span style="display: block; color: #9CA3AF; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 6px;">Team Username</span>
+        <div style="background: #030712; border: 1px solid #1F2937; border-radius: 8px; padding: 12px 16px; color: #93C5FD; font-size: 18px; font-weight: bold; font-family: 'Courier New', Courier, monospace; letter-spacing: 1px;">
+          ${username}
+        </div>
+      </div>
+      <div>
+        <span style="display: block; color: #9CA3AF; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; margin-bottom: 6px;">Temporary Password</span>
+        <div style="background: #030712; border: 1px solid #1F2937; border-radius: 8px; padding: 12px 16px; color: #6EE7B7; font-size: 18px; font-weight: bold; font-family: 'Courier New', Courier, monospace; letter-spacing: 1px;">
+          ${password}
+        </div>
+      </div>
+      <p style="margin: 12px 0 0 0; color: #9CA3AF; font-size: 12px; text-align: center;">
+        💡 You can log in using either this <strong>Username</strong> or any team member's <strong>registered email</strong>.
+      </p>
+    </div>
+
+    <div style="text-align: center; margin: 32px 0 24px 0;">
+      <a href="${loginUrl}" style="display: inline-block; background-color: #4F46E5; color: #FFFFFF; text-decoration: none; padding: 14px 32px; border-radius: 8px; font-weight: bold; font-size: 16px; box-shadow: 0 4px 14px rgba(79, 70, 229, 0.4);">
+        Log In to Dashboard &rarr;
+      </a>
+    </div>
+
+    <p style="margin: 0; line-height: 1.6; color: #EF4444; font-size: 13px;">
+      ⚠️ <strong>IMPORTANT:</strong> For security, you will be prompted to set your own permanent password upon your first login.
+    </p>
+  `;
+
+  const textContent = `${heading}\n\nTeam: ${teamName}\nUsername: ${username}\nPassword: ${password}\n\nLogin URL: ${loginUrl}\n\nNote: You can also log in using any team member's registered email.`;
+  const subject = isReset 
+    ? `[GENESIS 2.0] Your Login Credentials (Reset)` 
+    : `[GENESIS 2.0] Your Login Credentials`;
+
+  const fullHtml = emailTemplate(content);
+
+  const errors: string[] = [];
+  let sentCount = 0;
+
+  const promises = toEmails.map(async (to) => {
+    try {
+      await sendEmail({
+        toEmails: [to],
+        subject,
+        textContent,
+        htmlContent: fullHtml,
+      });
+      sentCount++;
+    } catch (err: any) {
+      const errMsg = err?.message || String(err);
+      logger.error(`Failed to send credentials to ${to}:`, err);
+      errors.push(`${to}: ${errMsg}`);
+    }
+  });
 
   await Promise.allSettled(promises);
-  logger.info(`Sent registration confirmed emails to ${toEmails.length} recipients for team ${teamName}`);
+  return {
+    success: sentCount > 0,
+    sentCount,
+    errors,
+  };
+}
+
+export async function sendRegistrationConfirmed(
+  toEmails: string[],
+  teamName: string,
+  username: string,
+  password: string
+): Promise<EmailResult> {
+  return sendTeamCredentials(toEmails, teamName, username, password, false);
 }
 
 export async function sendAdminMessage(to: string, subject: string, body: string): Promise<void> {

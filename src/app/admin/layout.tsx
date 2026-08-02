@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, ShieldCheck, CheckSquare, Calendar, Mail, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, CheckSquare, Calendar, Mail, Settings, LogOut, Award } from 'lucide-react';
 import { m } from 'framer-motion';
 
 export default function AdminLayout({
@@ -46,6 +46,7 @@ export default function AdminLayout({
     { name: 'Check-In', href: '/admin/checkin', icon: CheckSquare },
     { name: 'Schedule', href: '/admin/schedule', icon: Calendar },
     { name: 'Messages', href: '/admin/messages', icon: Mail },
+    { name: 'Certificates', href: '/admin/certificates', icon: Award },
     { name: 'Settings', href: '/admin/settings', icon: Settings },
   ];
 
