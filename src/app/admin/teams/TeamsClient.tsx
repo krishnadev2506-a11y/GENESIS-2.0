@@ -509,7 +509,7 @@ export function TeamsClient() {
                                     if (!res.ok) throw new Error(data.error || 'Failed to reset credentials');
                                     
                                     if (data.emailSent) {
-                                      success("Credentials Reset", "New credentials have been generated and emailed successfully.");
+                                      success("Credentials Reset", `New credentials have been generated and emailed to all ${data.sentCount || ''} recipient(s) successfully.`);
                                     } else {
                                       toastError(
                                         "Credentials Reset (Email Failed)",

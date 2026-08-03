@@ -3,8 +3,9 @@ import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import AuditLog from '@/models/AuditLog';
 import { requireAuth } from '@/lib/auth';
-import { sendAdminMessage } from '@/lib/mail';
+import { sendAdminMessageBatch } from '@/lib/mail';
 import mongoose from 'mongoose';
+import { logger } from '@/lib/logger';
 
 export async function PATCH(
   req: NextRequest,
@@ -46,10 +47,19 @@ export async function PATCH(
     const emailBody = `Hi Team ${team.teamName},\n\nWe encountered an issue while verifying your payment for GENESIS 2.0.\n\nReason: ${reason}\n\nPlease reply to this email or contact the organizers to resolve this issue and complete your registration.\n\nBest regards,\nThe GENESIS 2.0 Team`;
     
     try {
-      const allMemberEmails = team.members.map((m: any) => m.email).filter(Boolean);
-      await Promise.allSettled(allMemberEmails.map(email => sendAdminMessage(email, subject, emailBody)));
+      const allMemberEmails = Array.from(
+        new Set(
+          [
+            ...(team.members || []).map((m: any) => m.email?.trim().toLowerCase()),
+            team.email?.trim().toLowerCase(),
+          ].filter(Boolean)
+        )
+      );
+      if (allMemberEmails.length > 0) {
+        await sendAdminMessageBatch(allMemberEmails, subject, emailBody);
+      }
     } catch (err) {
-      console.error('Failed to send rejection email:', err);
+      logger.error('Failed to send rejection email:', err);
     }
     
     // Audit log

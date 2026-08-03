@@ -46,12 +46,19 @@ export async function PATCH(
     
     await team.save();
     
-    // Send email with credentials to all members and team root email
+    // Send email with credentials to all members and team root email (trimmed and deduplicated)
     const allMemberEmails = Array.from(
-      new Set([...(team.members || []).map((m: any) => m.email), team.email].filter(Boolean))
+      new Set(
+        [
+          ...(team.members || []).map((m: any) => m.email?.trim().toLowerCase()),
+          team.email?.trim().toLowerCase(),
+        ].filter(Boolean)
+      )
     );
     
-    // Send emails concurrently (we must await to prevent serverless termination)
+    logger.info(`Verifying team ${team.teamName} and sending credentials to ${allMemberEmails.length} recipient(s): ${allMemberEmails.join(', ')}`);
+
+    // Send emails (await to prevent serverless termination)
     await Promise.allSettled([
       sendTeamCredentials(allMemberEmails, team.teamName, username, password, false),
       sendAdminVerificationAlert(team.teamName)

@@ -3,9 +3,12 @@ import { logger } from '@/lib/logger';
 import { connectDB } from '@/lib/db';
 import Settings from '@/models/Settings';
 
-// Use Gmail SMTP
+// Use Gmail SMTP with connection pooling for stable multi-recipient delivery
 const transporter = nodemailer.createTransport({
   service: 'gmail',
+  pool: true,
+  maxConnections: 3,
+  maxMessages: 100,
   auth: {
     user: process.env.EMAIL_USER || 'krishnadev2506@gmail.com',
     pass: process.env.EMAIL_PASS,
@@ -82,6 +85,9 @@ function emailTemplate(content: string) {
 }
 
 export async function sendRegistrationReceived(toEmails: string[], teamName: string, participantNames: string[] = []): Promise<void> {
+  const cleanEmails = Array.from(new Set(toEmails.map(e => e?.trim().toLowerCase()).filter(Boolean)));
+  if (cleanEmails.length === 0) return;
+
   const content = `
     <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Registration Received!</h2>
     <p style="margin: 0 0 16px 0; line-height: 1.6;">Hello ${participantNames.length > 0 ? participantNames.join(', ') : 'there'},</p>
@@ -93,16 +99,16 @@ export async function sendRegistrationReceived(toEmails: string[], teamName: str
   
   const textContent = `Registration Received!\n\nHello ${participantNames.length > 0 ? participantNames.join(', ') : 'there'},\n\nWe have successfully received the registration for your team ${teamName}.\n\nYour registration is currently Pending Verification. You will receive another email once your registration is confirmed.\n\nSTRICTLY NO REFUNDS: Registration fees are non-refundable under any circumstances.`;
 
-  const promises = toEmails.map(to => 
-    sendEmail({
-      toEmails: [to],
+  try {
+    await sendEmail({
+      toEmails: cleanEmails,
       subject: "We have received your GENESIS 2.0 registration",
       textContent,
       htmlContent: emailTemplate(content)
-    }).catch(err => logger.error(`Failed to send registration received email to ${to}:`, err))
-  );
-
-  await Promise.allSettled(promises);
+    });
+  } catch (err) {
+    logger.error(`Failed to send registration received email to ${cleanEmails.join(', ')}:`, err);
+  }
 }
 
 export async function sendAdminRegistrationAlert(teamName: string, college: string, memberCount: number): Promise<void> {
@@ -142,6 +148,14 @@ export async function sendTeamCredentials(
   if (!toEmails || toEmails.length === 0) {
     logger.warn(`sendTeamCredentials called with 0 emails for team ${teamName}`);
     return { success: false, sentCount: 0, errors: ['No recipient email addresses provided'] };
+  }
+
+  const cleanEmails = Array.from(
+    new Set(toEmails.map(e => e?.trim().toLowerCase()).filter(Boolean))
+  );
+
+  if (cleanEmails.length === 0) {
+    return { success: false, sentCount: 0, errors: ['No valid recipient email addresses'] };
   }
 
   const loginUrl = `${getBaseUrl()}/login`;
@@ -191,31 +205,47 @@ export async function sendTeamCredentials(
 
   const fullHtml = emailTemplate(content);
 
-  const errors: string[] = [];
-  let sentCount = 0;
-
-  const promises = toEmails.map(async (to) => {
-    try {
-      await sendEmail({
-        toEmails: [to],
-        subject,
-        textContent,
-        htmlContent: fullHtml,
-      });
-      sentCount++;
-    } catch (err: any) {
-      const errMsg = err?.message || String(err);
-      logger.error(`Failed to send credentials to ${to}:`, err);
-      errors.push(`${to}: ${errMsg}`);
+  try {
+    // Deliver to all team members simultaneously in a single SMTP call
+    await sendEmail({
+      toEmails: cleanEmails,
+      subject,
+      textContent,
+      htmlContent: fullHtml,
+    });
+    logger.info(`Credentials email delivered to ${cleanEmails.length} member(s) of team ${teamName}`);
+    return {
+      success: true,
+      sentCount: cleanEmails.length,
+      errors: [],
+    };
+  } catch (primaryErr: any) {
+    logger.warn(`Simultaneous email delivery failed for ${teamName}, running sequential fallback:`, primaryErr);
+    let sentCount = 0;
+    const errors: string[] = [];
+    for (const to of cleanEmails) {
+      try {
+        await sendEmail({
+          toEmails: [to],
+          subject,
+          textContent,
+          htmlContent: fullHtml,
+        });
+        sentCount++;
+        // Small delay between connections to prevent SMTP throttling
+        await new Promise((res) => setTimeout(res, 250));
+      } catch (err: any) {
+        const errMsg = err?.message || String(err);
+        logger.error(`Sequential fallback failed to send credentials to ${to}:`, err);
+        errors.push(`${to}: ${errMsg}`);
+      }
     }
-  });
-
-  await Promise.allSettled(promises);
-  return {
-    success: sentCount > 0,
-    sentCount,
-    errors,
-  };
+    return {
+      success: sentCount > 0,
+      sentCount,
+      errors,
+    };
+  }
 }
 
 export async function sendRegistrationConfirmed(
@@ -284,6 +314,9 @@ export async function sendAdminMessageBatch(toEmails: string[], subject: string,
 }
 
 export async function sendVerificationConfirmation(toEmails: string[], teamName: string): Promise<void> {
+  const cleanEmails = Array.from(new Set(toEmails.map(e => e?.trim().toLowerCase()).filter(Boolean)));
+  if (cleanEmails.length === 0) return;
+
   const loginUrl = `${getBaseUrl()}/login`;
   const content = `
     <h2 style="color: #F5F3FF; font-size: 24px; margin-top: 0; margin-bottom: 24px; font-weight: bold;">Verification Confirmed! 🎉</h2>
@@ -297,16 +330,16 @@ export async function sendVerificationConfirmation(toEmails: string[], teamName:
   
   const textContent = `Verification Confirmed!\n\nGreat news! Your team ${teamName} has been verified for GENESIS 2.0.\nYou can now log in to the dashboard to view your status and get ready for the event.\n\nLogin URL: ${loginUrl}`;
 
-  const promises = toEmails.map(to => 
-    sendEmail({
-      toEmails: [to],
+  try {
+    await sendEmail({
+      toEmails: cleanEmails,
       subject: `Your Team ${teamName} is Verified!`,
       textContent,
       htmlContent: emailTemplate(content)
-    }).catch(err => logger.error(`Failed to send verification confirmation to ${to}:`, err))
-  );
-
-  await Promise.allSettled(promises);
+    });
+  } catch (err) {
+    logger.error(`Failed to send verification confirmation to ${cleanEmails.join(', ')}:`, err);
+  }
 }
 
 export async function sendAdminVerificationAlert(teamName: string, verifiedBy: string = 'Admin'): Promise<void> {

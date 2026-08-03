@@ -74,16 +74,22 @@ export async function POST(req: NextRequest) {
     
     // Send emails (await to prevent premature serverless termination)
     try {
-      const leader = validatedData.members.find(m => m.isLeader) || validatedData.members[0];
-      const leaderEmails = [leader.email].filter(Boolean);
-      const leaderNames = [leader.name].filter(Boolean);
+      const allMemberEmails = Array.from(
+        new Set(
+          [
+            ...validatedData.members.map(m => m.email?.trim().toLowerCase()),
+            validatedData.email?.trim().toLowerCase(),
+          ].filter(Boolean)
+        )
+      );
+      const participantNames = validatedData.members.map(m => m.name).filter(Boolean);
       await Promise.allSettled([
-        sendRegistrationReceived(leaderEmails, validatedData.teamName, leaderNames),
+        sendRegistrationReceived(allMemberEmails, validatedData.teamName, participantNames),
         sendAdminRegistrationAlert(validatedData.teamName, validatedData.college || 'N/A', validatedData.members.length)
       ]);
-      } catch (err) {
-        logger.error('Failed to send registration email', err);
-      }
+    } catch (err) {
+      logger.error('Failed to send registration email', err);
+    }
       
       logger.info('Team registered successfully', { teamId: newTeam._id, teamName: newTeam.teamName, route: newTeam.route });
       return NextResponse.json({ success: true, teamId: newTeam._id }, { status: 201 });

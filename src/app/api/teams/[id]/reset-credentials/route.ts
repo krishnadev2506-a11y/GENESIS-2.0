@@ -37,13 +37,19 @@ export async function POST(
 
     await team.save();
 
-    // Gather all recipient emails (all members + team root email)
+    // Gather all recipient emails (all members + team root email), trimmed and deduplicated
     const allMemberEmails = Array.from(
-      new Set([...(team.members || []).map((m: any) => m.email), team.email].filter(Boolean))
+      new Set(
+        [
+          ...(team.members || []).map((m: any) => m.email?.trim().toLowerCase()),
+          team.email?.trim().toLowerCase(),
+        ].filter(Boolean)
+      )
     );
 
     let emailResult = { success: false, sentCount: 0, errors: [] as string[] };
     if (allMemberEmails.length > 0) {
+      logger.info(`Resetting credentials for team ${team.teamName} and sending to ${allMemberEmails.length} recipient(s): ${allMemberEmails.join(', ')}`);
       emailResult = await sendTeamCredentials(allMemberEmails, team.teamName, username, password, true);
     } else {
       emailResult.errors.push('No recipient email addresses found on this team record');
