@@ -78,9 +78,9 @@ const SettingsSchema = new Schema<ISettings>(
     // Existing
     qrCodeImageUrl: { type: String, default: '' },
     qrCodeImagePublicId: { type: String, default: '' },
-    eventDate: { type: Date, default: new Date('2026-07-10T00:00:00Z') },
-    eventEndDate: { type: Date, default: new Date('2026-07-11T23:59:59Z') },
-    registrationOpen: { type: Boolean, default: true },
+    eventDate: { type: Date, default: new Date('2026-09-19T00:00:00Z') },
+    eventEndDate: { type: Date, default: new Date('2026-09-20T23:59:59Z') },
+    registrationOpen: { type: Boolean, default: false },
     registrationReceivedEmailTemplate: { 
       type: String, 
       default: 'Dear {{teamName}},\n\nYour registration for GENESIS has been received successfully! Our team is currently reviewing your payment details. You will receive another email with your dashboard login credentials once your payment is verified.\n\nThank you,\nGENESIS Team' 

@@ -155,9 +155,9 @@ export function SubmissionRequirements() {
                   During evaluation, teams will present their project demonstration, walk through the technical implementation, and be asked to justify engineering decisions. Judges may inspect source code directly.
                 </p>
               </div>
-              <Link href="/register" className="flex-shrink-0">
-                <Button size="sm" variant="primary">Register Now</Button>
-              </Link>
+              <Button size="sm" variant="secondary" disabled className="flex-shrink-0 cursor-not-allowed opacity-80 border-danger/40 text-danger bg-danger/10">
+                Registration Closed
+              </Button>
             </div>
           </div>
         </FadeUp>

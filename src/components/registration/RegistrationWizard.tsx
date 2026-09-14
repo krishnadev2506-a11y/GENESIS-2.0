@@ -356,12 +356,12 @@ export function RegistrationWizard() {
     );
   }
 
-  if (settings && settings.registrationOpen === false) {
+  if (!settings || settings.registrationOpen === false) {
     return (
       <div className="w-full max-w-4xl mx-auto text-center mt-12">
         <GlassCard className="p-8 max-w-md mx-auto">
-          <h2 className="text-2xl font-display font-bold text-white mb-4">Registration Closed</h2>
-          <p className="text-text-muted">We are currently not accepting new registrations. Please check back later.</p>
+          <h2 className="text-2xl font-display font-bold text-danger mb-4">Registration Closed</h2>
+          <p className="text-text-muted">Registrations for GENESIS 2.0 Buildathon are now officially closed. Thank you for your interest!</p>
         </GlassCard>
       </div>
     );
@@ -408,7 +408,7 @@ export function RegistrationWizard() {
           <div className="space-y-3 text-sm text-text-muted">
             <p>📋 Your registration is under review by the organizing team.</p>
             <p>✅ Once your payment is verified, you&apos;ll receive login credentials via email.</p>
-            <p>📅 The event is on <strong className="text-white">7,8 AUGUST</strong>.</p>
+            <p>📅 The event is on <strong className="text-white">19,20 SEPTEMBER</strong>.</p>
             <p>🚫 <strong className="text-white uppercase">Strictly No Refunds: Registration fees are non-refundable under any circumstances.</strong></p>
           </div>
 

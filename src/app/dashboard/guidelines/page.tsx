@@ -60,7 +60,7 @@ export default function GuidelinesPage() {
               </h2>
             </div>
             <div className="p-3.5 rounded-xl bg-void/60 border border-amber-500/20 text-amber-300 font-mono text-sm font-bold">
-              Official Start: 01 August 2026 — 10:00 PM IST
+              Official Start: 15 September 2026 — 10:00 PM IST
             </div>
             <p className="text-xs text-text-muted leading-relaxed">
               No repositories, local project folders, source code, backend/frontend code, or configs may exist prior to this timestamp. The committee verifies commit & repo creation timestamps.

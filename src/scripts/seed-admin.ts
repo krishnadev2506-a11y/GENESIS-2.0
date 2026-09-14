@@ -15,8 +15,8 @@ const AdminUserSchema = new mongoose.Schema({
 });
 
 const SettingsSchema = new mongoose.Schema({
-  eventDate: { type: Date, default: new Date('2026-07-10T00:00:00Z') },
-  eventEndDate: { type: Date, default: new Date('2026-07-11T23:59:59Z') },
+  eventDate: { type: Date, default: new Date('2026-09-19T00:00:00Z') },
+  eventEndDate: { type: Date, default: new Date('2026-09-20T23:59:59Z') },
   entryFee: { type: Number, default: 600 },
   extraMemberFee: { type: Number, default: 125 },
 });

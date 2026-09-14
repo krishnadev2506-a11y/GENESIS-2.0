@@ -30,7 +30,7 @@ export function Footer() {
           <div>
             <h4 className="label-caps mb-4 text-sm text-white">Participate</h4>
             <ul className="space-y-3">
-              <li><Link href="/register" className="text-text-muted transition-colors hover:text-accent-secondary">Register Now</Link></li>
+              <li><span className="text-danger/80 text-xs font-semibold cursor-not-allowed">Registration Closed</span></li>
               <li><Link href="/schedule" className="text-text-muted transition-colors hover:text-accent-secondary">Schedule</Link></li>
               <li><Link href="/login" className="text-text-muted transition-colors hover:text-accent-secondary">Participant Login</Link></li>
             </ul>

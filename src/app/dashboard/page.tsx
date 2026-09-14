@@ -158,7 +158,7 @@ export default async function DashboardPage() {
                     <Badge variant="default" className="text-[10px] uppercase font-mono">Official</Badge>
                   </div>
                   <p className="text-xs text-text-muted mt-0.5">
-                    Start: <span className="text-white font-mono font-medium">01 Aug 2026, 10:00 PM IST</span> &bull; Mandatory Git &bull; Academic Year Tracks
+                    Start: <span className="text-white font-mono font-medium">15 Sep 2026, 10:00 PM IST</span> &bull; Mandatory Git &bull; Academic Year Tracks
                   </p>
                 </div>
               </div>

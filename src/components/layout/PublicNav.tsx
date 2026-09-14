@@ -100,9 +100,9 @@ export function PublicNav() {
               <Link href="/login" tabIndex={-1} prefetch={true}>
                 <Button variant="ghost" size="sm">Login</Button>
               </Link>
-              <Link href="/register" tabIndex={-1} prefetch={true}>
-                <Button variant="primary" size="sm">Join The Event</Button>
-              </Link>
+              <Button variant="secondary" size="sm" disabled className="cursor-not-allowed opacity-80 border-danger/40 text-danger bg-danger/10">
+                Registration Closed
+              </Button>
             </div>
           </nav>
 
@@ -148,9 +148,9 @@ export function PublicNav() {
                 );
               })}
               <div className="mt-6 glass-surface rounded-[22px] p-4 text-xs uppercase tracking-[0.18em] text-text-muted sm:text-sm sm:tracking-[0.22em]">
-                <div className="mb-2 flex items-center gap-2 text-white">
-                  <span className="h-2 w-2 rounded-full bg-blue-400 shadow-[0_0_12px_rgba(96,165,250,0.85)]"></span>
-                  Live registrations open
+                <div className="mb-2 flex items-center gap-2 text-danger">
+                  <span className="h-2 w-2 rounded-full bg-red-500 shadow-[0_0_12px_rgba(239,68,68,0.85)]"></span>
+                  Registrations Closed
                 </div>
                 Team buildathon experience with workshops and challenges.
               </div>
@@ -161,9 +161,9 @@ export function PublicNav() {
               </div>
             </nav>
             <div className="p-6 sm:p-6">
-              <Link href="/register" onClick={() => setMobileMenuOpen(false)} tabIndex={-1} prefetch={true}>
-                <Button variant="primary" size="lg" className="w-full">Join The Event</Button>
-              </Link>
+              <Button variant="secondary" size="lg" disabled className="w-full cursor-not-allowed opacity-80 border-danger/40 text-danger bg-danger/10">
+                Registration Closed
+              </Button>
             </div>
           </m.div>
         )}

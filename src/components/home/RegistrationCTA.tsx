@@ -82,7 +82,7 @@ export function RegistrationCTA() {
             <div className="mb-12 flex flex-col items-center justify-center gap-8 md:flex-row md:gap-16">
               <div className="flex flex-col items-center p-5 rounded-2xl bg-white/5 border border-white/5 backdrop-blur-sm shadow-inner group-hover:bg-white/10 transition-colors duration-500 min-w-[200px]">
                 <span className="mb-2 text-xs font-bold uppercase tracking-[0.25em] text-accent-secondary/80">Event Date</span>
-                <span className="text-lg sm:text-xl font-display font-bold text-white tracking-widest">7th & 8th August</span>
+                <span className="text-lg sm:text-xl font-display font-bold text-white tracking-widest">19th & 20th September</span>
                 <span className="mt-2 text-[9px] sm:text-[10px] uppercase tracking-[0.1em] text-white/50">(No Overnighters)</span>
               </div>
               
@@ -95,11 +95,9 @@ export function RegistrationCTA() {
             </div>
 
             <div className="flex flex-col items-center justify-center gap-6 sm:flex-row" style={{ transform: "translateZ(30px)" }}>
-              <Link href="/register" id="cta-register-btn">
-                <Button size="lg" variant="primary" className="px-14 py-4 text-sm font-bold uppercase tracking-widest shadow-[0_0_30px_rgba(168,85,247,0.4)] hover:shadow-[0_0_50px_rgba(168,85,247,0.6)] hover:-translate-y-1 transition-all">
-                  Register Now
-                </Button>
-              </Link>
+              <Button size="lg" variant="secondary" disabled className="px-14 py-4 text-sm font-bold uppercase tracking-widest cursor-not-allowed opacity-80 border-danger/40 text-danger bg-danger/10">
+                Registration Closed
+              </Button>
             </div>
             
           </div>

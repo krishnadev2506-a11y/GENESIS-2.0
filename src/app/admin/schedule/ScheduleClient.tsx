@@ -82,8 +82,8 @@ export function ScheduleClient() {
               className="w-full bg-void border border-glass-border rounded-[10px] px-4 py-2 text-white"
               value={day} onChange={(e) => setDay(Number(e.target.value))}
             >
-              <option value={1}>Day 1 (August 7)</option>
-              <option value={2}>Day 2 (August 8)</option>
+              <option value={1}>Day 1 (September 19)</option>
+              <option value={2}>Day 2 (September 20)</option>
             </select>
           </div>
           <div>

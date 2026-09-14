@@ -9,7 +9,7 @@ export function GuidelinesSection() {
     {
       icon: Clock,
       title: 'Official Dev Window',
-      detail: 'Commences 01 August 2026 at 10:00 PM IST. Repositories, directories, and code must not exist before this time.',
+      detail: 'Commences 15 September 2026 at 10:00 PM IST. Repositories, directories, and code must not exist before this time.',
       accent: 'text-amber-400',
       border: 'border-amber-400/20',
       bg: 'bg-amber-400/10',
@@ -115,7 +115,7 @@ export function GuidelinesSection() {
 
           {/* Footer Note inside card */}
           <div className="mt-8 pt-6 border-t border-glass-border/50 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-text-muted font-mono">
-            <span>Official start: 01 Aug 2026, 10:00 PM IST</span>
+            <span>Official start: 15 Sep 2026, 10:00 PM IST</span>
             <span className="text-pulse-bright font-semibold">Objective: Don&apos;t just build software. Engineer it.</span>
           </div>
         </GlassCard>
