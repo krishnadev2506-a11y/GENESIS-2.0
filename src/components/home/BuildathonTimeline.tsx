@@ -31,7 +31,7 @@ const phases = [
     phase: '03',
     label: 'Buildathon Day',
     detail: 'Feature completion, bug fixes, performance & security improvements, deployment, documentation, and final presentation.',
-    date: 'September 19 & 20',
+    date: 'September 19',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -52,7 +52,7 @@ const phases = [
     phase: '04',
     label: 'Judging',
     detail: 'Judges review live demos, inspect source code, and ask technical questions about architecture and engineering decisions.',
-    date: 'September 20',
+    date: 'September 19',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
@@ -64,7 +64,7 @@ const phases = [
     phase: '05',
     label: 'Results',
     detail: 'Winners announced per track. All participants receive feedback on their engineering implementation.',
-    date: 'September 20',
+    date: 'September 19',
     icon: (
       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />

@@ -79,7 +79,7 @@ const SettingsSchema = new Schema<ISettings>(
     qrCodeImageUrl: { type: String, default: '' },
     qrCodeImagePublicId: { type: String, default: '' },
     eventDate: { type: Date, default: new Date('2026-09-19T00:00:00Z') },
-    eventEndDate: { type: Date, default: new Date('2026-09-20T23:59:59Z') },
+    eventEndDate: { type: Date, default: new Date('2026-09-19T23:59:59Z') },
     registrationOpen: { type: Boolean, default: false },
     registrationReceivedEmailTemplate: { 
       type: String, 
