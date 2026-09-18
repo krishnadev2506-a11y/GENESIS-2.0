@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import Team from '@/models/Team';
-import { drawChallenge, type ChallengePhase } from '@/lib/challenge-distributor';
+import { type ChallengePhase } from '@/lib/challenge-distributor';
+import { drawFairChallenge } from '@/lib/challenge-catalog';
 
 const phaseToField = { feature: 'featureChallenge', situation: 'situationChallenge' } as const;
 
@@ -34,7 +35,21 @@ export async function POST(request: NextRequest) {
 
     await connectDB();
     const field = phaseToField[phase];
-    const challenge = { ...drawChallenge(phase), assignedAt: new Date() };
+    const currentTeam = await Team.findById(auth.teamId, 'teamName projectIdea').lean();
+    if (!currentTeam) return NextResponse.json({ error: 'Team not found' }, { status: 404 });
+
+    const selected = await drawFairChallenge(phase, currentTeam);
+    const challenge = {
+      id: selected._id.toString(),
+      title: selected.title,
+      problem: selected.problem,
+      mission: selected.mission,
+      specialRequirement: selected.specialRequirement,
+      oneLineSolution: selected.oneLineSolution,
+      judgeCheck: selected.judgeCheck,
+      difficulty: selected.difficulty,
+      assignedAt: new Date(),
+    };
     const team = await Team.findOneAndUpdate(
       { _id: auth.teamId, [field]: { $exists: false } },
       { $set: { [field]: challenge } },

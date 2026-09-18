@@ -414,6 +414,10 @@ export function TeamsClient() {
                           <label className="text-text-muted uppercase text-[10px] tracking-wider">Semester</label>
                           <input className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.semester} onChange={e => handleTeamChange('semester', e.target.value)} />
                         </div>
+                        <div className="flex flex-col gap-1 md:col-span-2">
+                          <label className="text-text-muted uppercase text-[10px] tracking-wider">Project Idea (optional)</label>
+                          <textarea className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white min-h-20" value={editedTeam.projectIdea || ''} onChange={e => handleTeamChange('projectIdea', e.target.value)} placeholder="A short project idea improves challenge-fit matching." maxLength={500} />
+                        </div>
                         <div className="flex flex-col gap-1">
                           <label className="text-text-muted uppercase text-[10px] tracking-wider">Points</label>
                           <input type="number" className="bg-void/50 border border-glass-border rounded px-2 py-1 text-white" value={editedTeam.scoreboardPoints} onChange={e => handleTeamChange('scoreboardPoints', parseInt(e.target.value) || 0)} />
@@ -457,6 +461,7 @@ export function TeamsClient() {
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Email</span> <span className="text-white font-medium">{selectedTeam.email}</span></p>
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Contact</span> <span className="text-white font-medium">{selectedTeam.contactNumber}</span></p>
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Semester</span> <span className="text-white font-medium">{selectedTeam.semester}</span></p>
+                        {selectedTeam.projectIdea && <p className="flex flex-col gap-1"><span className="text-text-muted uppercase text-[10px] tracking-wider">Project Idea</span> <span className="text-white font-medium">{selectedTeam.projectIdea}</span></p>}
                         <p className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4"><span className="text-text-muted uppercase text-[10px] tracking-wider w-32 shrink-0">Points</span> <span className="text-white font-medium">{selectedTeam.scoreboardPoints}</span></p>
                         
                         {/* Credentials Section */}

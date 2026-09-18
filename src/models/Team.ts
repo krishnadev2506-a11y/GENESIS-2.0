@@ -43,6 +43,7 @@ export interface ITeam extends Document {
   college?: string;
   semester?: string;
   contactNumber?: string;
+  projectIdea?: string;
   email: string;
   members: ITeamMember[];
   paymentScreenshotUrl: string;
@@ -108,6 +109,7 @@ const TeamSchema = new Schema<ITeam>(
     college: { type: String },
     semester: { type: String },
     contactNumber: { type: String },
+    projectIdea: { type: String, trim: true, maxlength: 500 },
     email: { type: String, required: true },
     members: [TeamMemberSchema],
     paymentScreenshotUrl: { type: String, required: true },

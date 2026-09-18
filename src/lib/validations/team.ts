@@ -16,6 +16,7 @@ export const teamRegistrationSchema = z.object({
   college: z.string().max(60, "College name is too long").optional().or(z.literal('')),
   semester: z.string().optional().or(z.literal('')),
   contactNumber: z.string().regex(/^[0-9]{10}$/, "Please enter exactly 10 digits for the phone number.").optional().or(z.literal('')),
+  projectIdea: z.string().max(500, "Project idea is too long").optional().or(z.literal('')),
   email: z.string().email("Invalid primary email address"),
   members: z.array(teamMemberSchema)
     .min(1, "At least one member is required")
