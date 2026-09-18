@@ -27,10 +27,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Incorrect current password' }, { status: 401 });
     }
     
-    team.credentials.passwordHash = await hashPassword(newPassword);
-    team.credentials.temporaryPassword = undefined;
-    team.mustResetPassword = false;
-    await team.save();
+    // Update only the password fields. A full document save can revalidate
+    // unrelated legacy registration fields and prevent a participant from
+    // completing an otherwise valid password change.
+    const passwordHash = await hashPassword(newPassword);
+    await Team.updateOne(
+      { _id: team._id },
+      {
+        $set: {
+          'credentials.passwordHash': passwordHash,
+          mustResetPassword: false,
+        },
+        $unset: {
+          'credentials.temporaryPassword': 1,
+        },
+      },
+      { runValidators: true }
+    );
     
     return NextResponse.json({ success: true });
   } catch (error) {
