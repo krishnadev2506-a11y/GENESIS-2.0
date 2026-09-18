@@ -11,6 +11,15 @@ export interface IChallengeDefinition extends Document {
   oneLineSolution: string;
   judgeCheck: string;
   difficulty: number;
+  logicalId?: string;
+  weight?: number;
+  before?: string;
+  solutionDirection?: string;
+  after?: string;
+  metric?: string;
+  metricExplanation?: string;
+  category?: string;
+  catalogVersion?: string;
   keywords: string[];
   enabled: boolean;
   createdAt: Date;
@@ -27,6 +36,15 @@ const ChallengeDefinitionSchema = new Schema<IChallengeDefinition>(
     oneLineSolution: { type: String, required: true, trim: true },
     judgeCheck: { type: String, required: true, trim: true },
     difficulty: { type: Number, required: true, min: 1, max: 10 },
+    logicalId: { type: String, trim: true, index: true },
+    weight: { type: Number, min: 1 },
+    before: { type: String, trim: true },
+    solutionDirection: { type: String, trim: true },
+    after: { type: String, trim: true },
+    metric: { type: String, trim: true },
+    metricExplanation: { type: String, trim: true },
+    category: { type: String, trim: true },
+    catalogVersion: { type: String, trim: true },
     keywords: { type: [String], default: [] },
     enabled: { type: Boolean, default: true, index: true },
   },

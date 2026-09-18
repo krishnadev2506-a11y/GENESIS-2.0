@@ -53,6 +53,13 @@ export async function POST(request: NextRequest) {
       oneLineSolution: selected.oneLineSolution,
       judgeCheck: selected.judgeCheck,
       difficulty: selected.difficulty,
+      logicalId: selected.logicalId,
+      before: selected.before,
+      solutionDirection: selected.solutionDirection,
+      after: selected.after,
+      metric: selected.metric,
+      metricExplanation: selected.metricExplanation,
+      category: selected.category,
       assignedAt: new Date(),
     };
     const team = await Team.findOneAndUpdate(

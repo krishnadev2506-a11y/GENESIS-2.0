@@ -9,6 +9,8 @@ export interface DistributedChallenge {
   oneLineSolution: string;
   judgeCheck: string;
   difficulty: number;
+  logicalId?: string;
+  weight?: number;
 }
 
 type FeatureSeed = Omit<DistributedChallenge, 'id'>;
@@ -46,7 +48,7 @@ const features: FeatureSeed[] = ([
   ['PERSONALIZED HOME PAGE', 'Show users useful information based on their own context.', 'At least two users must see meaningful differences.', 'Use role, preferences, history, or data to customize the home page.', 'Use two users and demonstrate differences.', 5],
 ] as SeedTuple[]).map(([title, problem, specialRequirement, oneLineSolution, judgeCheck, difficulty]) => ({ title, problem, specialRequirement, oneLineSolution, judgeCheck, difficulty }));
 
-const situations: FeatureSeed[] = ([
+const legacySituations: FeatureSeed[] = ([
   ['CHANGE THE DATABASE', 'The project can no longer use its current database. Important data must continue to work with another database.', 'Adapt the application data layer and move or convert required data to the new database.', 'Adapt the existing project to work with the new database.', 'Demonstrate important functionality working with the replacement database.', 6],
   ['API NOT WORKING', 'An external API suddenly stops working, so a dependent feature may fail.', 'Add error handling and a suitable fallback when the API is unavailable.', 'Make the affected feature continue working where possible or fail gracefully.', 'Simulate API failure and demonstrate the application behavior.', 5],
   ['MAKE IT MOBILE FRIENDLY', 'Users now access the project mainly from mobile phones and an important workflow is difficult on small screens.', 'Make the workflow responsive and use mobile-friendly controls.', 'Adapt the important workflow for mobile users.', 'Demonstrate the workflow on a mobile-sized screen.', 4],
@@ -69,7 +71,7 @@ function createPool(seeds: FeatureSeed[], weights: number[], phase: ChallengePha
 }
 
 export const featureChallenges = createPool(features, featureWeights, 'feature');
-export const situationChallenges = createPool(situations, situationWeights, 'situation');
+export const situationChallenges = createPool(legacySituations, situationWeights, 'situation');
 
 export function drawChallenge(phase: ChallengePhase): DistributedChallenge {
   const pool = phase === 'feature' ? featureChallenges : situationChallenges;

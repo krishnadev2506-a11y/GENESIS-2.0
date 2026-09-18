@@ -12,6 +12,7 @@ interface ChallengeSpinWheelProps {
   entries?: string[];
   onSpinStart: () => void;
   onSpinComplete: () => Promise<void>;
+  prepareSpin?: () => Promise<string | null>;
 }
 
 const LABELS = {
@@ -37,10 +38,10 @@ function slicePath(index: number, total: number) {
   return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
 }
 
-export function ChallengeSpinWheel({ phase, disabled = false, entries, onSpinStart, onSpinComplete }: ChallengeSpinWheelProps) {
+export function ChallengeSpinWheel({ phase, disabled = false, entries, onSpinStart, onSpinComplete, prepareSpin }: ChallengeSpinWheelProps) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const labels = (entries?.length ? entries : LABELS[phase]).slice(0, 16);
+  const labels = entries?.length ? entries : LABELS[phase];
   const colors = COLORS[phase];
   const accent = phase === 'feature' ? '#a855f7' : '#f97316';
 
@@ -49,7 +50,20 @@ export function ChallengeSpinWheel({ phase, disabled = false, entries, onSpinSta
 
     setSpinning(true);
     onSpinStart();
-    setRotation((current) => current + 2160 + Math.floor(Math.random() * 360));
+    let winnerIndex = Math.floor(Math.random() * labels.length);
+    if (prepareSpin) {
+      const title = await prepareSpin();
+      if (!title) { setSpinning(false); return; }
+      const matchingIndexes = labels.map((label, index) => label === title ? index : -1).filter((index) => index >= 0);
+      winnerIndex = matchingIndexes[Math.floor(Math.random() * matchingIndexes.length)];
+    }
+    setRotation((current) => {
+      const angle = 360 / labels.length;
+      const desired = (360 - ((winnerIndex + 0.5) * angle) % 360) % 360;
+      const currentAngle = ((current % 360) + 360) % 360;
+      const adjustment = (desired - currentAngle + 360) % 360;
+      return current + 2160 + adjustment;
+    });
 
     // Match the reveal pacing of the original Lightning feature wheel.
     await new Promise((resolve) => setTimeout(resolve, 4800));
@@ -80,11 +94,11 @@ export function ChallengeSpinWheel({ phase, disabled = false, entries, onSpinSta
               {labels.map((label, index) => {
                 const angle = (index + 0.5) * (360 / labels.length);
                 return (
-                  <g key={label}>
-                    <path d={slicePath(index, labels.length)} fill={colors[index]} stroke="#090714" strokeWidth="2" />
+                  <g key={`${label}-${index}`}>
+                    <path d={slicePath(index, labels.length)} fill={colors[index % colors.length]} stroke="#090714" strokeWidth="2" />
                     <g transform={`rotate(${angle - 90} 200 200)`}>
-                      <text x="200" y="62" textAnchor="middle" fill="#fff" fontSize={labels.length > 10 ? '10' : '15'} fontWeight="800">
-                        {label.length > 18 ? `${label.slice(0, 17)}…` : label}
+                      <text x="200" y={labels.length > 24 ? '42' : '62'} textAnchor="middle" fill="#fff" fontSize={labels.length > 24 ? '6' : labels.length > 10 ? '10' : '15'} fontWeight="800">
+                        {label.length > (labels.length > 24 ? 13 : 18) ? `${label.slice(0, labels.length > 24 ? 12 : 17)}…` : label}
                       </text>
                     </g>
                   </g>

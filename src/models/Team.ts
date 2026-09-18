@@ -32,6 +32,13 @@ export interface IChallengeAssignment {
   oneLineSolution: string;
   judgeCheck: string;
   difficulty: number;
+  logicalId?: string;
+  before?: string;
+  solutionDirection?: string;
+  after?: string;
+  metric?: string;
+  metricExplanation?: string;
+  category?: string;
   assignedAt: Date;
 }
 
@@ -97,6 +104,13 @@ const ChallengeAssignmentSchema = new Schema<IChallengeAssignment>({
   oneLineSolution: { type: String, required: true },
   judgeCheck: { type: String, required: true },
   difficulty: { type: Number, required: true },
+  logicalId: { type: String },
+  before: { type: String },
+  solutionDirection: { type: String },
+  after: { type: String },
+  metric: { type: String },
+  metricExplanation: { type: String },
+  category: { type: String },
   assignedAt: { type: Date, required: true },
 }, { _id: false });
 

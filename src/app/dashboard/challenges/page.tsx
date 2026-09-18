@@ -4,6 +4,7 @@ import { verifyToken } from '@/lib/auth';
 import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import { TeamChallengePanel } from '@/components/challenges/TeamChallengePanel';
+import { phase2WheelEntries, phase2Situations } from '@/data/phase2-situations';
 import Settings from '@/models/Settings';
 
 export const dynamic = 'force-dynamic';
@@ -17,5 +18,5 @@ export default async function TeamChallengesPage() {
   if (!team) redirect('/login');
   // @ts-ignore
   const settings = await Settings.getSettings();
-  return <TeamChallengePanel initialFeature={team.featureChallenge as any} initialSituation={team.situationChallenge as any} phase1Open={settings.phase1SpinOpen} phase2Open={settings.phase2SpinOpen} />;
+  return <TeamChallengePanel initialFeature={team.featureChallenge as any} initialSituation={team.situationChallenge as any} phase1Open={settings.phase1SpinOpen} phase2Open={settings.phase2SpinOpen} situationWheelEntries={phase2WheelEntries.map((id) => phase2Situations.find((item) => item.id === id)!.title)} />;
 }

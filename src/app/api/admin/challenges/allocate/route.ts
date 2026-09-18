@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     if (!team) return NextResponse.json({ error: 'Team not found' }, { status: 404 });
     if ((team as any)[field]) return NextResponse.json({ error: 'This team already has an allocation for this phase' }, { status: 409 });
     const selected = await drawFairChallenge(phase, team, true);
-    const assignment = { id: selected._id.toString(), title: selected.title, problem: selected.problem, mission: selected.mission, specialRequirement: selected.specialRequirement, oneLineSolution: selected.oneLineSolution, judgeCheck: selected.judgeCheck, difficulty: selected.difficulty, assignedAt: new Date() };
+    const assignment = { id: selected._id.toString(), title: selected.title, problem: selected.problem, mission: selected.mission, specialRequirement: selected.specialRequirement, oneLineSolution: selected.oneLineSolution, judgeCheck: selected.judgeCheck, difficulty: selected.difficulty, logicalId: selected.logicalId, before: selected.before, solutionDirection: selected.solutionDirection, after: selected.after, metric: selected.metric, metricExplanation: selected.metricExplanation, category: selected.category, assignedAt: new Date() };
     const updated = await Team.findOneAndUpdate({ _id: teamId, [field]: { $exists: false } }, { $set: { [field]: assignment } }, { new: true, projection: { teamName: 1, [field]: 1 } }).lean();
     if (!updated) return NextResponse.json({ error: 'Allocation was updated by another administrator. Refresh and try again.' }, { status: 409 });
     return NextResponse.json({ success: true, assignment });
