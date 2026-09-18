@@ -33,13 +33,13 @@ export async function GET(req: NextRequest) {
     await requireAuth(req, 'admin');
     await ensureChallengeCatalog();
     const definitions = await ChallengeDefinition.find().sort({ phase: 1, title: 1 }).lean();
-    const teams = await Team.find({}, 'featureChallenge.title situationChallenge.title').lean();
+    const teams = await Team.find({}, 'teamName projectIdea featureChallenge situationChallenge').sort({ teamName: 1 }).lean();
     const usage = new Map<string, number>();
     teams.forEach((team: any) => ['featureChallenge', 'situationChallenge'].forEach((field) => {
       const title = team[field]?.title?.toLowerCase();
       if (title) usage.set(title, (usage.get(title) || 0) + 1);
     }));
-    return NextResponse.json({ challenges: definitions.map((item) => ({ ...item, usageCount: usage.get(item.title.toLowerCase()) || 0 })) });
+    return NextResponse.json({ challenges: definitions.map((item) => ({ ...item, usageCount: usage.get(item.title.toLowerCase()) || 0 })), teams });
   } catch (error) {
     return errorResponse(error);
   }

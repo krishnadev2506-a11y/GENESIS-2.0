@@ -9,6 +9,7 @@ type Phase = 'feature' | 'situation';
 interface ChallengeSpinWheelProps {
   phase: Phase;
   disabled?: boolean;
+  entries?: string[];
   onSpinStart: () => void;
   onSpinComplete: () => Promise<void>;
 }
@@ -36,10 +37,10 @@ function slicePath(index: number, total: number) {
   return `M ${center} ${center} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`;
 }
 
-export function ChallengeSpinWheel({ phase, disabled = false, onSpinStart, onSpinComplete }: ChallengeSpinWheelProps) {
+export function ChallengeSpinWheel({ phase, disabled = false, entries, onSpinStart, onSpinComplete }: ChallengeSpinWheelProps) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const labels = LABELS[phase];
+  const labels = (entries?.length ? entries : LABELS[phase]).slice(0, 16);
   const colors = COLORS[phase];
   const accent = phase === 'feature' ? '#a855f7' : '#f97316';
 
@@ -82,8 +83,8 @@ export function ChallengeSpinWheel({ phase, disabled = false, onSpinStart, onSpi
                   <g key={label}>
                     <path d={slicePath(index, labels.length)} fill={colors[index]} stroke="#090714" strokeWidth="2" />
                     <g transform={`rotate(${angle - 90} 200 200)`}>
-                      <text x="200" y="62" textAnchor="middle" fill="#fff" fontSize="15" fontWeight="800">
-                        {label}
+                      <text x="200" y="62" textAnchor="middle" fill="#fff" fontSize={labels.length > 10 ? '10' : '15'} fontWeight="800">
+                        {label.length > 18 ? `${label.slice(0, 17)}…` : label}
                       </text>
                     </g>
                   </g>

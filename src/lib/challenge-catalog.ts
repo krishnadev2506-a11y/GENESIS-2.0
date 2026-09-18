@@ -45,7 +45,7 @@ function stableHash(value: string) {
   return hash >>> 0;
 }
 
-export async function drawFairChallenge(phase: ChallengePhase, team: TeamForAllocation) {
+export async function drawFairChallenge(phase: ChallengePhase, team: TeamForAllocation, unassignedOnly = false) {
   await ensureChallengeCatalog();
   const definitions = await ChallengeDefinition.find({ phase, enabled: true }).lean();
   if (definitions.length === 0) throw new Error(`No active ${phase} challenges are available`);
@@ -58,8 +58,10 @@ export async function drawFairChallenge(phase: ChallengePhase, team: TeamForAllo
     if (title) usage.set(title, (usage.get(title) || 0) + 1);
   });
 
-  const minimumUse = Math.min(...definitions.map((item) => usage.get(item.title.toLowerCase()) || 0));
-  const leastUsed = definitions.filter((item) => (usage.get(item.title.toLowerCase()) || 0) === minimumUse);
+  const candidates = unassignedOnly ? definitions.filter((item) => (usage.get(item.title.toLowerCase()) || 0) === 0) : definitions;
+  if (candidates.length === 0) throw new Error(`No unallocated ${phase} challenges are available`);
+  const minimumUse = Math.min(...candidates.map((item) => usage.get(item.title.toLowerCase()) || 0));
+  const leastUsed = candidates.filter((item) => (usage.get(item.title.toLowerCase()) || 0) === minimumUse);
   const teamWords = new Set(keywordList(`${team.teamName} ${team.projectIdea || ''}`));
 
   return leastUsed.sort((a, b) => {
