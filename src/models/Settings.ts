@@ -131,7 +131,7 @@ const SettingsSchema = new Schema<ISettings>(
     },
     prizePool: {
       type: String,
-      default: 'Will be released soon..'
+      default: '₹20,000'
     },
   },
   { timestamps: true }

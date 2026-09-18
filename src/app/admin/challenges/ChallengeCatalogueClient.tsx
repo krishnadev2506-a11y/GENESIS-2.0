@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Pencil, X, Search, BookOpen, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Search, BookOpen, BarChart3, RotateCcw, MailWarning } from 'lucide-react';
 import { getFriendlyErrorMessage } from '@/lib/errors';
 
 type Phase = 'feature' | 'situation';
@@ -17,6 +17,7 @@ export default function ChallengeCatalogueClient() {
   const [editing, setEditing] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [actionLoading, setActionLoading] = useState('');
   const [error, setError] = useState('');
 
   const load = async () => {
@@ -51,12 +52,35 @@ export default function ChallengeCatalogueClient() {
     } catch (err) { setError(getFriendlyErrorMessage(err)); }
   };
   const beginEdit = (challenge: Challenge) => { setEditing(challenge._id); setDraft({ phase: challenge.phase, title: challenge.title, problem: challenge.problem, mission: challenge.mission || '', specialRequirement: challenge.specialRequirement || '', oneLineSolution: challenge.oneLineSolution, judgeCheck: challenge.judgeCheck, difficulty: challenge.difficulty, keywords: challenge.keywords, enabled: challenge.enabled }); setError(''); };
+  const resetAllocations = async (targetPhase: Phase) => {
+    const label = targetPhase === 'feature' ? 'Phase 1 feature' : 'Phase 2 situation';
+    if (!window.confirm(`Reset every ${label} allocation? This permanently clears assigned challenges for all teams, allowing them to spin again.`)) return;
+    setActionLoading(`reset-${targetPhase}`); setError('');
+    try {
+      const res = await fetch('/api/admin/challenges/reset', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phase: targetPhase }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unable to reset allocations');
+      await load();
+      window.alert(`${data.resetCount} ${label} allocation(s) reset.`);
+    } catch (err) { setError(getFriendlyErrorMessage(err)); } finally { setActionLoading(''); }
+  };
+  const resetAllCredentials = async () => {
+    if (!window.confirm('Reset login passwords for every verified team and email the new temporary credentials to all registered participants? Existing participant passwords will stop working immediately.')) return;
+    setActionLoading('credentials'); setError('');
+    try {
+      const res = await fetch('/api/admin/credentials/reset-all', { method: 'POST' });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unable to reset and email credentials');
+      window.alert(`Credentials reset for ${data.teamCount} teams. Email reached ${data.recipients} participant recipient(s); ${data.failedTeams} team delivery attempt(s) failed.`);
+    } catch (err) { setError(getFriendlyErrorMessage(err)); } finally { setActionLoading(''); }
+  };
   const filtered = items.filter((item) => item.phase === phase && `${item.title} ${item.problem} ${item.keywords.join(' ')}`.toLowerCase().includes(query.toLowerCase()));
   const usage = filtered.reduce((total, item) => total + item.usageCount, 0);
 
   return <div className="space-y-6">
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><h1 className="flex items-center gap-3 text-3xl font-display font-bold text-white"><BookOpen className="text-pulse" />Challenge Catalogue</h1><p className="mt-2 max-w-3xl text-sm text-text-muted">Manage the live challenge pool. Allocations prefer the least-used active challenge; matching keywords give a small, deterministic fit preference for a team name or saved project idea.</p></div><div className="rounded-xl border border-ion/25 bg-ion/10 px-4 py-3 text-sm text-ion"><BarChart3 className="mr-2 inline h-4 w-4" />{usage} assignments across this view</div></div>
     {error && <p className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
+    <section className="grid gap-3 rounded-2xl border border-danger/30 bg-danger/5 p-5 lg:grid-cols-3"><div className="lg:col-span-3"><h2 className="font-display text-lg font-bold text-danger">Administrative resets</h2><p className="mt-1 text-sm text-text-muted">These actions affect all teams. Each action asks for confirmation before it runs.</p></div><button onClick={() => void resetAllocations('feature')} disabled={Boolean(actionLoading)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm font-bold text-danger transition hover:bg-danger/20 disabled:opacity-50"><RotateCcw className="h-4 w-4" />{actionLoading === 'reset-feature' ? 'Resetting…' : 'Reset Phase 1 allocations'}</button><button onClick={() => void resetAllocations('situation')} disabled={Boolean(actionLoading)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm font-bold text-danger transition hover:bg-danger/20 disabled:opacity-50"><RotateCcw className="h-4 w-4" />{actionLoading === 'reset-situation' ? 'Resetting…' : 'Reset Phase 2 allocations'}</button><button onClick={() => void resetAllCredentials()} disabled={Boolean(actionLoading)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-danger px-4 py-3 text-sm font-bold text-white transition hover:bg-danger/80 disabled:opacity-50"><MailWarning className="h-4 w-4" />{actionLoading === 'credentials' ? 'Sending credentials…' : 'Reset & email all credentials'}</button></section>
     <div className="flex flex-wrap gap-3"><button onClick={() => { setPhase('feature'); reset(); }} className={`rounded-xl px-4 py-2 text-sm font-semibold ${phase === 'feature' ? 'bg-pulse text-white' : 'bg-white/5 text-text-muted'}`}>Phase 1 · Features</button><button onClick={() => { setPhase('situation'); reset(); }} className={`rounded-xl px-4 py-2 text-sm font-semibold ${phase === 'situation' ? 'bg-ion text-void' : 'bg-white/5 text-text-muted'}`}>Phase 2 · Situations</button></div>
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_420px]">
       <section className="overflow-hidden rounded-2xl border border-glass-border bg-glass/30"><div className="flex flex-col gap-3 border-b border-glass-border p-5 sm:flex-row sm:items-center sm:justify-between"><div className="font-display text-lg font-bold text-white">{filtered.length} challenges</div><label className="flex items-center gap-2 rounded-lg border border-glass-border bg-void/50 px-3 py-2 text-text-muted"><Search className="h-4 w-4" /><input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search challenges" className="w-full bg-transparent text-sm text-white outline-none" /></label></div>{loading ? <p className="p-10 text-text-muted">Loading catalogue…</p> : <div className="divide-y divide-glass-border">{filtered.map((item) => <article key={item._id} className="p-5"><div className="flex gap-4"><div className="min-w-0 flex-1"><div className="flex flex-wrap items-center gap-2"><h2 className="font-display text-lg font-bold text-white">{item.title}</h2><span className="rounded-full bg-white/10 px-2 py-0.5 text-xs text-white">{item.difficulty}/10</span><span className={`rounded-full px-2 py-0.5 text-xs ${item.enabled ? 'bg-success/10 text-success' : 'bg-danger/10 text-danger'}`}>{item.enabled ? 'Active' : 'Disabled'}</span><span className="rounded-full bg-pulse/10 px-2 py-0.5 text-xs text-pulse">Used {item.usageCount}×</span></div><p className="mt-2 text-sm leading-relaxed text-text-muted">{item.problem}</p><p className="mt-3 text-xs text-text-muted">Keywords: {item.keywords.join(', ') || 'Automatic'}</p></div><div className="flex h-fit gap-1"><button aria-label={`Edit ${item.title}`} onClick={() => beginEdit(item)} className="rounded-lg p-2 text-text-muted hover:bg-white/10 hover:text-white"><Pencil className="h-4 w-4" /></button><button aria-label={`Remove ${item.title}`} onClick={() => void remove(item)} className="rounded-lg p-2 text-text-muted hover:bg-danger/10 hover:text-danger"><Trash2 className="h-4 w-4" /></button></div></div></article>)}{filtered.length === 0 && <p className="p-10 text-center text-text-muted">No challenges match this view.</p>}</div>}</section>

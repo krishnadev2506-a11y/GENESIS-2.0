@@ -64,7 +64,7 @@ export function PrizePoolBanner() {
               {/* Amount */}
               <div className="flex items-center">
                 <span className="text-[2.75rem] leading-none sm:text-6xl font-display font-black text-transparent bg-clip-text bg-gradient-to-br from-white via-purple-50 to-blue-200 drop-shadow-[0_0_25px_rgba(59,130,246,0.5)] tracking-tight">
-                  15k
+                  20k
                 </span>
               </div>
               

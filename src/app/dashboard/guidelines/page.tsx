@@ -1,5 +1,5 @@
 import { GlassCard } from '@/components/ui/GlassCard';
-import { FileText, Download, Clock, GitBranch, ShieldCheck, Layers, Sparkles, Terminal, CheckCircle2 } from 'lucide-react';
+import { Download, Clock, GitBranch, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
 
 export const metadata = {
   title: 'Guidelines | GENESIS 2.0',
@@ -15,7 +15,7 @@ export default function GuidelinesPage() {
             Buildathon Guidelines
           </h1>
           <p className="text-text-muted font-body text-[16px] mt-1">
-            Official rules, development windows, track expectations, and evaluation rubric.
+            Official rules, development windows, and evaluation rubric.
           </p>
         </div>
         <a
@@ -97,81 +97,8 @@ export default function GuidelinesPage() {
         </GlassCard>
       </div>
 
-      {/* Track Expectations Detailed */}
-      <GlassCard className="p-6 md:p-8 space-y-6" hoverEffect={false}>
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-400">
-            <Layers size={20} />
-          </div>
-          <div>
-            <h2 className="font-display font-bold text-white text-xl tracking-wide uppercase">
-              Track Expectations
-            </h2>
-            <p className="text-xs text-text-muted mt-0.5">
-              Participants compete only within their academic year for fair assessment.
-            </p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          {/* 2nd Year */}
-          <div className="p-5 rounded-xl bg-void/50 border border-glass-border flex flex-col justify-between">
-            <div>
-              <div className="text-xs font-mono text-emerald-400 uppercase tracking-wider font-bold mb-2">
-                Second Year Track
-              </div>
-              <h3 className="font-display font-bold text-white text-base mb-2">
-                Software Fundamentals
-              </h3>
-              <p className="text-xs text-text-muted mb-4">
-                Full-stack CRUD, auth, password hashing, DB integration, input validation, responsive UI, Git, env vars, README.
-              </p>
-            </div>
-            <div className="text-[11px] text-emerald-400/80 font-mono bg-emerald-500/10 p-2 rounded-lg border border-emerald-500/20">
-              Bonus: Deployment, search, pagination, image upload, email verify.
-            </div>
-          </div>
-
-          {/* 3rd Year */}
-          <div className="p-5 rounded-xl bg-void/50 border border-glass-border flex flex-col justify-between">
-            <div>
-              <div className="text-xs font-mono text-purple-400 uppercase tracking-wider font-bold mb-2">
-                Third Year Track
-              </div>
-              <h3 className="font-display font-bold text-white text-base mb-2">
-                Production-Ready Web
-              </h3>
-              <p className="text-xs text-text-muted mb-4">
-                Everything in 2nd year + Cloud DB (Atlas, Supabase, Neon), Cloud Storage (Cloudinary, S3), Docker, JWT/OAuth, Rate Limiting, standard architecture (MVC/Microservices).
-              </p>
-            </div>
-            <div className="text-[11px] text-purple-400/80 font-mono bg-purple-500/10 p-2 rounded-lg border border-purple-500/20">
-              Cloud deploy: Vercel, Render, Railway.
-            </div>
-          </div>
-
-          {/* 4th Year */}
-          <div className="p-5 rounded-xl bg-void/50 border border-glass-border flex flex-col justify-between">
-            <div>
-              <div className="text-xs font-mono text-blue-400 uppercase tracking-wider font-bold mb-2">
-                Fourth Year Track
-              </div>
-              <h3 className="font-display font-bold text-white text-base mb-2">
-                Cloud &amp; DevOps Scale
-              </h3>
-              <p className="text-xs text-text-muted mb-4">
-                AWS/Cloud infra (EC2, ECS, App Runner), RDS/Aurora, CI/CD GitHub Actions, Secrets management, HTTPS, RBAC, query optimization &amp; caching.
-              </p>
-            </div>
-            <div className="text-[11px] text-blue-400/80 font-mono bg-blue-500/10 p-2 rounded-lg border border-blue-500/20">
-              Teams must justify architecture &amp; trade-offs.
-            </div>
-          </div>
-        </div>
-      </GlassCard>
-
-      {/* Evaluation Rubric & Side Quests */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Evaluation Rubric */}
+      <div>
         <GlassCard className="p-6 space-y-4" hoverEffect={false}>
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
@@ -191,33 +118,6 @@ export default function GuidelinesPage() {
             <span className="p-2 rounded-lg bg-void/40 border border-glass-border">✓ Security &amp; auth</span>
             <span className="p-2 rounded-lg bg-void/40 border border-glass-border">✓ Deployment stability</span>
             <span className="p-2 rounded-lg bg-void/40 border border-glass-border">✓ Technical justification</span>
-          </div>
-        </GlassCard>
-
-        <GlassCard className="p-6 space-y-4 flex flex-col justify-between" hoverEffect={false}>
-          <div>
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 rounded-xl bg-pink-500/10 border border-pink-500/20 text-pink-400">
-                <Terminal size={20} />
-              </div>
-              <h2 className="font-display font-bold text-white text-lg tracking-wide uppercase">
-                Surprise Side Quests
-              </h2>
-            </div>
-            <p className="text-xs text-text-muted leading-relaxed">
-              Throughout the event, teams will encounter unannounced side challenges testing adaptability, rapid problem-solving, and communication. Participation adds to your overall evaluation and bonus recognitions!
-            </p>
-          </div>
-          <div className="pt-3 border-t border-glass-border flex items-center justify-between">
-            <span className="text-xs text-text-muted font-mono">Need the complete handbook?</span>
-            <a
-              href="/GENESIS_2.0_Buildathon_Guidelines.pdf"
-              download="GENESIS_2.0_Buildathon_Guidelines.pdf"
-              className="text-xs font-bold text-pulse hover:text-pulse-bright inline-flex items-center gap-1.5 transition-colors"
-            >
-              <Download size={14} />
-              Download PDF
-            </a>
           </div>
         </GlassCard>
       </div>

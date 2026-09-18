@@ -35,7 +35,7 @@ export function SettingsClient() {
       published: false
     },
 
-    prizePool: 'Will be released soon..'
+    prizePool: '₹20,000'
   });
 
   const { data: settings, isLoading } = useQuery({
@@ -85,7 +85,7 @@ export function SettingsClient() {
           published: settings.themeFoundation?.published ?? false,
         },
 
-        prizePool: settings.prizePool ?? 'Will be released soon..'
+        prizePool: settings.prizePool ?? '₹20,000'
       });
     }
   }, [settings]);

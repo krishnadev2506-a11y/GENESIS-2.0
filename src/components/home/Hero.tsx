@@ -171,13 +171,13 @@ export function Hero() {
                           animate={{ opacity: [0.5, 1, 0.5] }}
                           transition={{ duration: 1.5, repeat: Infinity }}
                         >
-                          <span className="text-[10px] sm:text-xs font-bold text-[#c4b5fd]">??</span>
+                          <span className="text-[10px] sm:text-xs font-bold text-[#c4b5fd]">20</span>
                           <m.span
                             className="text-[10px] sm:text-xs font-bold text-[#c4b5fd]"
                             animate={{ opacity: [0.3, 1, 0.3] }}
                             transition={{ duration: 1, repeat: Infinity, delay: 0.5 }}
                           >
-                            ?
+                            K
                           </m.span>
                         </m.div>
                       </div>
@@ -189,7 +189,7 @@ export function Hero() {
                       Prize Pool
                     </h3>
                     <p className="text-xs text-white/40 mt-0.5 tracking-wider">
-                      Loading...
+                      ₹20,000 total prizes
                     </p>
                     
                     <div className="flex items-center gap-3 mt-2">
@@ -203,7 +203,7 @@ export function Hero() {
                           transition={{ duration: 1, repeat: Infinity }}
                         />
                         <span className="text-[9px] uppercase tracking-[0.1em] text-white/30">
-                          TBA
+                          Announced
                         </span>
                       </div>
                       
@@ -214,7 +214,7 @@ export function Hero() {
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
                         <span className="text-[9px] uppercase tracking-[0.1em] text-white/30">
-                          Coming Soon
+                          Prize Pool
                         </span>
                       </div>
                     </div>
