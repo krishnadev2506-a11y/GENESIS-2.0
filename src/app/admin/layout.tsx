@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
-import { LayoutDashboard, Users, ShieldCheck, CheckSquare, Calendar, Mail, Settings, LogOut, Award } from 'lucide-react';
+import { LayoutDashboard, Users, ShieldCheck, CheckSquare, Calendar, Mail, Settings, LogOut, Award, Sparkles } from 'lucide-react';
 import { m } from 'framer-motion';
 
 export default function AdminLayout({
@@ -41,6 +41,7 @@ export default function AdminLayout({
   const navItems = [
     { name: 'Overview', href: '/admin', icon: LayoutDashboard },
     { name: 'Teams', href: '/admin/teams', icon: Users },
+    { name: 'Challenges', href: '/admin/challenges', icon: Sparkles },
     { name: 'Scores', href: '/admin/scores', icon: LayoutDashboard }, // using LayoutDashboard icon for Scores
     { name: 'Verification', href: '/admin/verification', icon: ShieldCheck, badge: pendingCount && pendingCount > 0 ? pendingCount : null },
     { name: 'Check-In', href: '/admin/checkin', icon: CheckSquare },
@@ -157,5 +158,4 @@ export default function AdminLayout({
     </div>
   );
 }
-
 

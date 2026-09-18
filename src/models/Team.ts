@@ -23,6 +23,18 @@ export interface ITeamMember {
   isLeader: boolean;
 }
 
+export interface IChallengeAssignment {
+  id: string;
+  title: string;
+  problem: string;
+  mission?: string;
+  specialRequirement?: string;
+  oneLineSolution: string;
+  judgeCheck: string;
+  difficulty: number;
+  assignedAt: Date;
+}
+
 // ----- Team -----
 
 export interface ITeam extends Document {
@@ -45,6 +57,8 @@ export interface ITeam extends Document {
   stationScores: IStationScores;
   scoreboardPoints: number;
   mustResetPassword: boolean;
+  featureChallenge?: IChallengeAssignment;
+  situationChallenge?: IChallengeAssignment;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -72,6 +86,18 @@ const TeamMemberSchema = new Schema<ITeamMember>({
   semester: { type: String },
   isLeader: { type: Boolean, default: false },
 });
+
+const ChallengeAssignmentSchema = new Schema<IChallengeAssignment>({
+  id: { type: String, required: true },
+  title: { type: String, required: true },
+  problem: { type: String, required: true },
+  mission: { type: String },
+  specialRequirement: { type: String },
+  oneLineSolution: { type: String, required: true },
+  judgeCheck: { type: String, required: true },
+  difficulty: { type: Number, required: true },
+  assignedAt: { type: Date, required: true },
+}, { _id: false });
 
 // ----- Main schema -----
 
@@ -118,6 +144,8 @@ const TeamSchema = new Schema<ITeam>(
     },
     scoreboardPoints: { type: Number, default: 0 },
     mustResetPassword: { type: Boolean, default: true },
+    featureChallenge: { type: ChallengeAssignmentSchema, default: undefined },
+    situationChallenge: { type: ChallengeAssignmentSchema, default: undefined },
   },
   { timestamps: true }
 );
