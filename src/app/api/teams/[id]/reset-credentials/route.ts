@@ -31,11 +31,21 @@ export async function POST(
     const { password } = generateCredentials(team.teamName);
     const passwordHash = await hashPassword(password);
 
-    // Update team credentials
+    // Update only the fields owned by this action. Calling `team.save()` validates
+    // every field in the record, which can block a credential reset for an older
+    // otherwise usable registration that has unrelated legacy data.
+    await Team.updateOne(
+      { _id: team._id },
+      {
+        $set: {
+          credentials: { username, passwordHash, temporaryPassword: password },
+          mustResetPassword: true,
+        },
+      },
+      { runValidators: true }
+    );
     team.credentials = { username, passwordHash, temporaryPassword: password };
     team.mustResetPassword = true;
-
-    await team.save();
 
     // Gather all recipient emails (all members + team root email), trimmed and deduplicated
     const allMemberEmails = Array.from(
