@@ -8,6 +8,7 @@ import { useToast } from '@/components/ui/Toast';
 import { useRouter } from 'next/navigation';
 import { AlertError } from '@/components/ui/AlertError';
 import { getFriendlyErrorMessage } from '@/lib/errors';
+import { LoaderCircle } from 'lucide-react';
 
 export default function ResetPasswordPage() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -97,8 +98,15 @@ export default function ResetPasswordPage() {
             error={passwordError}
           />
           
-          <Button type="submit" variant="primary" className="w-full" isLoading={isLoading}>
-            Update Password
+          <Button type="submit" variant="primary" className="w-full" disabled={isLoading} aria-busy={isLoading}>
+            {isLoading ? (
+              <>
+                <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden="true" />
+                Updating Password…
+              </>
+            ) : (
+              'Update Password'
+            )}
           </Button>
         </form>
       </GlassCard>
