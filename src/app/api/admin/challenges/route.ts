@@ -5,6 +5,7 @@ import { requireAuth } from '@/lib/auth';
 import ChallengeDefinition from '@/models/ChallengeDefinition';
 import Team from '@/models/Team';
 import { ensureChallengeCatalog, keywordList } from '@/lib/challenge-catalog';
+import Settings from '@/models/Settings';
 
 const challengeSchema = z.object({
   phase: z.enum(['feature', 'situation']),
@@ -32,6 +33,8 @@ export async function GET(req: NextRequest) {
     await connectDB();
     await requireAuth(req, 'admin');
     await ensureChallengeCatalog();
+    // @ts-ignore
+    const settings = await Settings.getSettings();
     const definitions = await ChallengeDefinition.find().sort({ phase: 1, title: 1 }).lean();
     const teams = await Team.find({}, 'teamName projectIdea featureChallenge situationChallenge').sort({ teamName: 1 }).lean();
     const usage = new Map<string, number>();
@@ -39,7 +42,7 @@ export async function GET(req: NextRequest) {
       const title = team[field]?.title?.toLowerCase();
       if (title) usage.set(title, (usage.get(title) || 0) + 1);
     }));
-    return NextResponse.json({ challenges: definitions.map((item) => ({ ...item, usageCount: usage.get(item.title.toLowerCase()) || 0 })), teams });
+    return NextResponse.json({ challenges: definitions.map((item) => ({ ...item, usageCount: usage.get(item.title.toLowerCase()) || 0 })), teams, selection: { feature: settings.phase1SpinOpen, situation: settings.phase2SpinOpen } });
   } catch (error) {
     return errorResponse(error);
   }

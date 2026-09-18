@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth';
 import Team from '@/models/Team';
 import { type ChallengePhase } from '@/lib/challenge-distributor';
 import { drawFairChallenge } from '@/lib/challenge-catalog';
+import Settings from '@/models/Settings';
 
 const phaseToField = { feature: 'featureChallenge', situation: 'situationChallenge' } as const;
 
@@ -34,6 +35,10 @@ export async function POST(request: NextRequest) {
     if (phase !== 'feature' && phase !== 'situation') return NextResponse.json({ error: 'Invalid phase' }, { status: 400 });
 
     await connectDB();
+    // @ts-ignore
+    const settings = await Settings.getSettings();
+    const isOpen = phase === 'feature' ? settings.phase1SpinOpen : settings.phase2SpinOpen;
+    if (!isOpen) return NextResponse.json({ error: `Phase ${phase === 'feature' ? '1' : '2'} challenge selection is currently closed by the administrators` }, { status: 403 });
     const field = phaseToField[phase];
     const currentTeam = await Team.findById(auth.teamId, 'teamName projectIdea').lean();
     if (!currentTeam) return NextResponse.json({ error: 'Team not found' }, { status: 404 });

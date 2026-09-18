@@ -45,6 +45,8 @@ export interface ISettings extends Document {
 
   // Prize Pool
   prizePool: string;
+  phase1SpinOpen: boolean;
+  phase2SpinOpen: boolean;
 }
 
 interface ISettingsModel extends Model<ISettings> {
@@ -133,6 +135,8 @@ const SettingsSchema = new Schema<ISettings>(
       type: String,
       default: '₹20,000'
     },
+    phase1SpinOpen: { type: Boolean, default: false },
+    phase2SpinOpen: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

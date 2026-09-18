@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Plus, Trash2, Pencil, X, Search, BookOpen, BarChart3, RotateCcw, MailWarning } from 'lucide-react';
+import { Plus, Trash2, Pencil, X, Search, BookOpen, BarChart3, RotateCcw, MailWarning, Lock, Unlock } from 'lucide-react';
 import { getFriendlyErrorMessage } from '@/lib/errors';
 import { ChallengeSpinWheel } from '@/components/challenges/ChallengeSpinWheel';
 
@@ -14,6 +14,7 @@ const emptyDraft = (): Draft => ({ phase: 'feature', title: '', problem: '', mis
 export default function ChallengeCatalogueClient() {
   const [items, setItems] = useState<Challenge[]>([]);
   const [teams, setTeams] = useState<TeamAllocation[]>([]);
+  const [selection, setSelection] = useState<Record<Phase, boolean>>({ feature: false, situation: false });
   const [tab, setTab] = useState<'catalogue' | 'overview' | 'emergency'>('catalogue');
   const [phase, setPhase] = useState<Phase>('feature');
   const [query, setQuery] = useState('');
@@ -32,6 +33,7 @@ export default function ChallengeCatalogueClient() {
       if (!res.ok) throw new Error(data.error || 'Unable to load challenge catalogue');
       setItems(data.challenges);
       setTeams(data.teams || []);
+      setSelection(data.selection || { feature: false, situation: false });
     } catch (err) { setError(getFriendlyErrorMessage(err)); } finally { setLoading(false); }
   };
   useEffect(() => { void load(); }, []);
@@ -57,6 +59,17 @@ export default function ChallengeCatalogueClient() {
     } catch (err) { setError(getFriendlyErrorMessage(err)); }
   };
   const beginEdit = (challenge: Challenge) => { setEditing(challenge._id); setDraft({ phase: challenge.phase, title: challenge.title, problem: challenge.problem, mission: challenge.mission || '', specialRequirement: challenge.specialRequirement || '', oneLineSolution: challenge.oneLineSolution, judgeCheck: challenge.judgeCheck, difficulty: challenge.difficulty, keywords: challenge.keywords, enabled: challenge.enabled }); setError(''); };
+  const toggleSelection = async (targetPhase: Phase) => {
+    const open = !selection[targetPhase];
+    if (!window.confirm(`${open ? 'Open' : 'Close'} Phase ${targetPhase === 'feature' ? '1' : '2'} challenge selection for participants?`)) return;
+    setActionLoading(`selection-${targetPhase}`); setError('');
+    try {
+      const res = await fetch('/api/admin/challenges/selection', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ phase: targetPhase, open }) });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Unable to change challenge selection');
+      setSelection((current) => ({ ...current, [targetPhase]: open }));
+    } catch (err) { setError(getFriendlyErrorMessage(err)); } finally { setActionLoading(''); }
+  };
   const resetAllocations = async (targetPhase: Phase) => {
     const label = targetPhase === 'feature' ? 'Phase 1 feature' : 'Phase 2 situation';
     if (!window.confirm(`Reset every ${label} allocation? This permanently clears assigned challenges for all teams, allowing them to spin again.`)) return;
@@ -85,6 +98,7 @@ export default function ChallengeCatalogueClient() {
   return <div className="space-y-6">
     <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between"><div><h1 className="flex items-center gap-3 text-3xl font-display font-bold text-white"><BookOpen className="text-pulse" />Challenge Catalogue</h1><p className="mt-2 max-w-3xl text-sm text-text-muted">Manage the live challenge pool. Allocations prefer the least-used active challenge; matching keywords give a small, deterministic fit preference for a team name or saved project idea.</p></div><div className="rounded-xl border border-ion/25 bg-ion/10 px-4 py-3 text-sm text-ion"><BarChart3 className="mr-2 inline h-4 w-4" />{usage} assignments across this view</div></div>
     {error && <p className="rounded-xl border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
+    <section className="grid gap-3 rounded-2xl border border-pulse/30 bg-pulse/5 p-5 lg:grid-cols-2"><div className="lg:col-span-2"><h2 className="font-display text-lg font-bold text-white">Participant challenge selection</h2><p className="mt-1 text-sm text-text-muted">Open or close each phase independently. Closed phases are enforced by the server.</p></div>{(['feature', 'situation'] as Phase[]).map((targetPhase) => <button key={targetPhase} onClick={() => void toggleSelection(targetPhase)} disabled={Boolean(actionLoading)} className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-bold transition disabled:opacity-50 ${selection[targetPhase] ? 'bg-success/15 text-success hover:bg-success/25' : 'bg-danger/10 text-danger hover:bg-danger/20'}`}>{selection[targetPhase] ? <Unlock className="h-4 w-4" /> : <Lock className="h-4 w-4" />}{actionLoading === `selection-${targetPhase}` ? 'Updating…' : `Phase ${targetPhase === 'feature' ? '1' : '2'}: ${selection[targetPhase] ? 'Open — click to close' : 'Closed — click to open'}`}</button>)}</section>
     <div className="flex flex-wrap gap-2 rounded-xl border border-glass-border bg-glass/30 p-2"><TabButton active={tab === 'catalogue'} onClick={() => setTab('catalogue')}>Catalogue</TabButton><TabButton active={tab === 'overview'} onClick={() => setTab('overview')}>Assignments & teams</TabButton><TabButton active={tab === 'emergency'} onClick={() => setTab('emergency')}>Emergency spin</TabButton></div>
     {tab === 'overview' ? <AllocationOverview teams={teams} /> : tab === 'emergency' ? <EmergencySpin items={items} teams={teams} onComplete={load} onError={setError} /> : <>
     <section className="grid gap-3 rounded-2xl border border-danger/30 bg-danger/5 p-5 lg:grid-cols-3"><div className="lg:col-span-3"><h2 className="font-display text-lg font-bold text-danger">Administrative resets</h2><p className="mt-1 text-sm text-text-muted">These actions affect all teams. Each action asks for confirmation before it runs.</p></div><button onClick={() => void resetAllocations('feature')} disabled={Boolean(actionLoading)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm font-bold text-danger transition hover:bg-danger/20 disabled:opacity-50"><RotateCcw className="h-4 w-4" />{actionLoading === 'reset-feature' ? 'Resetting…' : 'Reset Phase 1 allocations'}</button><button onClick={() => void resetAllocations('situation')} disabled={Boolean(actionLoading)} className="inline-flex items-center justify-center gap-2 rounded-xl border border-danger/40 bg-danger/10 px-4 py-3 text-sm font-bold text-danger transition hover:bg-danger/20 disabled:opacity-50"><RotateCcw className="h-4 w-4" />{actionLoading === 'reset-situation' ? 'Resetting…' : 'Reset Phase 2 allocations'}</button><button onClick={() => void resetAllCredentials()} disabled={Boolean(actionLoading)} className="inline-flex items-center justify-center gap-2 rounded-xl bg-danger px-4 py-3 text-sm font-bold text-white transition hover:bg-danger/80 disabled:opacity-50"><MailWarning className="h-4 w-4" />{actionLoading === 'credentials' ? 'Sending credentials…' : 'Reset & email all credentials'}</button></section>
