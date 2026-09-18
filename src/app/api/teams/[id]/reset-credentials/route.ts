@@ -50,21 +50,34 @@ export async function POST(
     let emailResult = { success: false, sentCount: 0, errors: [] as string[] };
     if (allMemberEmails.length > 0) {
       logger.info(`Resetting credentials for team ${team.teamName} and sending to ${allMemberEmails.length} recipient(s): ${allMemberEmails.join(', ')}`);
-      emailResult = await sendTeamCredentials(allMemberEmails, team.teamName, username, password, true);
+      try {
+        emailResult = await sendTeamCredentials(allMemberEmails, team.teamName, username, password, true);
+      } catch (error: any) {
+        // The credentials have already been saved. Report an email failure to the
+        // admin instead of turning a successful reset into a server error.
+        const message = error?.message || 'Unexpected error while sending credentials email';
+        logger.error(`Failed to send reset credentials email for team ${team._id}:`, error);
+        emailResult.errors.push(message);
+      }
     } else {
       emailResult.errors.push('No recipient email addresses found on this team record');
       logger.warn(`No email addresses found for team ${team._id} (${team.teamName}) during credential reset.`);
     }
 
     // Audit log
-    await AuditLog.create({
-      adminId: new mongoose.Types.ObjectId(payload.id),
-      action: 'RESET_CREDENTIALS',
-      targetCollection: 'Team',
-      targetId: team._id,
-      before: { credentials: 'REDACTED' },
-      after: { credentials: 'REDACTED' },
-    });
+    try {
+      await AuditLog.create({
+        adminId: new mongoose.Types.ObjectId(payload.id),
+        action: 'RESET_CREDENTIALS',
+        targetCollection: 'Team',
+        targetId: team._id,
+        before: { credentials: 'REDACTED' },
+        after: { credentials: 'REDACTED' },
+      });
+    } catch (error) {
+      // Auditing must not invalidate an already completed credential reset.
+      logger.error(`Failed to create reset credentials audit log for team ${team._id}:`, error);
+    }
     
     return NextResponse.json({
       success: true,
