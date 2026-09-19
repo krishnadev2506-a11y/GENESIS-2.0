@@ -1,0 +1,19 @@
+
+> oggenesis@0.1.0 dev
+> next dev --hostname 127.0.0.1 --port 3001
+
+▲ Next.js 16.2.9 (Turbopack)
+- Local:         http://127.0.0.1:3001
+- Network:       http://127.0.0.1:3001
+- Environments: .env.local
+✓ Ready in 1169ms
+- Experiments (use with caution):
+  ✓ optimizeCss
+  · optimizePackageImports
+
+ GET / 200 in 1271ms (next.js: 162ms, proxy.ts: 520ms, application-code: 589ms)
+ GET /api/test-email 200 in 26.7s (next.js: 1506ms, proxy.ts: 54ms, application-code: 25.2s)
+ POST /api/auth/login 404 in 1471ms (next.js: 1364ms, proxy.ts: 6ms, application-code: 102ms)
+ POST /api/auth/login 404 in 114ms (next.js: 27ms, proxy.ts: 12ms, application-code: 75ms)
+ POST /api/auth/login 404 in 89ms (next.js: 21ms, proxy.ts: 10ms, application-code: 59ms)
+✓ Compiled in 696ms

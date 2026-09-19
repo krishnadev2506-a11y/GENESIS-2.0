@@ -20,6 +20,9 @@ const LABELS = {
   situation: ['Adapt', 'Respond', 'Recover', 'Decide', 'Lead', 'Solve', 'Deliver', 'Improve'],
 };
 
+// Fallback labels if no entries are provided
+const FALLBACK_LABELS = LABELS;
+
 const COLORS = {
   feature: ['#7c3aed', '#2563eb', '#0891b2', '#4f46e5', '#9333ea', '#0d9488', '#6366f1', '#0284c7'],
   situation: ['#ea580c', '#dc2626', '#f59e0b', '#b91c1c', '#f97316', '#ef4444', '#d97706', '#c2410c'],
@@ -41,7 +44,8 @@ function slicePath(index: number, total: number) {
 export function ChallengeSpinWheel({ phase, disabled = false, entries, onSpinStart, onSpinComplete, prepareSpin }: ChallengeSpinWheelProps) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
-  const labels = entries?.length ? entries : LABELS[phase];
+  // Use server-provided entries if available, otherwise fall back to generic labels
+  const labels = entries?.length ? entries : FALLBACK_LABELS[phase];
   const colors = COLORS[phase];
   const accent = phase === 'feature' ? '#a855f7' : '#f97316';
 
