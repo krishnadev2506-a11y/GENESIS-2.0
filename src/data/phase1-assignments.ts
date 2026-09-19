@@ -195,9 +195,9 @@ const assignments: Record<string, Phase1Assignment> = {
     difficulty: 5,
   },
   'adhil and co': {
-    title: 'REMINDER SYSTEM',
-    project: 'Catalyst',
-    problem: 'Let users remember important tasks, dates, or actions.',
+    title: 'DUPLICATE REPORT DETECTION',
+    project: 'Disaster Resource Coordination',
+    problem: 'Warn users before a likely duplicate report gets created.',
     difficulty: 5,
   },
   'carbon': {
