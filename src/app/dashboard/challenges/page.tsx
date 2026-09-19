@@ -5,16 +5,21 @@ import { connectDB } from '@/lib/db';
 import Team from '@/models/Team';
 import { TeamChallengePanel } from '@/components/challenges/TeamChallengePanel';
 import Settings from '@/models/Settings';
-
+import ChallengeDefinition from '@/models/ChallengeDefinition';
+import { getPhase1WheelEntries } from '@/data/phase1-assignments';
 export const dynamic = 'force-dynamic';
 
 async function fetchWheelEntries(phase: 'feature' | 'situation') {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/challenges/wheel?phase=${phase}`, {
-    cache: 'no-store',
-  });
-  if (!response.ok) return [];
-  const data = await response.json();
-  return data.entries || [];
+  if (phase === 'feature') {
+    return getPhase1WheelEntries();
+  }
+  if (phase === 'situation') {
+    const definitions = await ChallengeDefinition.find({ phase, enabled: true }).lean();
+    return definitions.flatMap((item: any) => 
+      Array.from({ length: item.weight || 1 }, () => item.title)
+    );
+  }
+  return [];
 }
 
 export default async function TeamChallengesPage() {
