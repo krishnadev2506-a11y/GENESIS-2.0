@@ -200,6 +200,12 @@ const assignments: Record<string, Phase1Assignment> = {
     problem: 'Warn users before a likely duplicate report gets created.',
     difficulty: 5,
   },
+  'codestar': {
+    title: 'STATUS WORKFLOW',
+    project: 'Digital Hostel Gatepass',
+    problem: 'Add meaningful states to the existing approval process.',
+    difficulty: 5,
+  },
   'carbon': {
     title: 'PROGRESS TRACKER',
     project: 'Terminal Learning Platform',
