@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import { requireAuth } from '@/lib/auth';
 import ChallengeDefinition from '@/models/ChallengeDefinition';
+import { getPhase1WheelEntries } from '@/data/phase1-assignments';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,16 +16,14 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid phase' }, { status: 400 });
     }
 
-    const definitions = await ChallengeDefinition.find({ phase, enabled: true }).lean();
-    
     if (phase === 'feature') {
-      // For Phase 1, return all enabled challenge titles
-      const titles = definitions.map((d: any) => d.title);
-      return NextResponse.json({ entries: titles });
+      // Phase 1: return titles from the fixed assignment map
+      return NextResponse.json({ entries: getPhase1WheelEntries() });
     }
     
     if (phase === 'situation') {
       // For Phase 2, return weighted entries based on server catalogue
+      const definitions = await ChallengeDefinition.find({ phase, enabled: true }).lean();
       const weighted = definitions.flatMap((item: any) => 
         Array.from({ length: item.weight || 1 }, () => item.title)
       );

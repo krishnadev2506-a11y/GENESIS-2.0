@@ -4,6 +4,7 @@ import { requireAuth } from '@/lib/auth';
 import Team from '@/models/Team';
 import { type ChallengePhase } from '@/lib/challenge-distributor';
 import { drawFairChallenge } from '@/lib/challenge-catalog';
+import { getPhase1Assignment } from '@/data/phase1-assignments';
 import Settings from '@/models/Settings';
 
 const phaseToField = { feature: 'featureChallenge', situation: 'situationChallenge' } as const;
@@ -43,25 +44,46 @@ export async function POST(request: NextRequest) {
     const currentTeam = await Team.findById(auth.teamId, 'teamName projectIdea').lean();
     if (!currentTeam) return NextResponse.json({ error: 'Team not found' }, { status: 404 });
 
-    const selected = await drawFairChallenge(phase, currentTeam);
-    const challenge = {
-      id: selected._id.toString(),
-      title: selected.title,
-      problem: selected.problem,
-      mission: selected.mission,
-      specialRequirement: selected.specialRequirement,
-      oneLineSolution: selected.oneLineSolution,
-      judgeCheck: selected.judgeCheck,
-      difficulty: selected.difficulty,
-      logicalId: selected.logicalId,
-      before: selected.before,
-      solutionDirection: selected.solutionDirection,
-      after: selected.after,
-      metric: selected.metric,
-      metricExplanation: selected.metricExplanation,
-      category: selected.category,
-      assignedAt: new Date(),
-    };
+    let challenge: Record<string, any>;
+
+    if (phase === 'feature') {
+      // Phase 1: use the fixed team→challenge assignment map
+      const assigned = getPhase1Assignment(currentTeam.teamName);
+      if (!assigned) return NextResponse.json({ error: 'Assignment not found for this team.' }, { status: 404 });
+      challenge = {
+        id: `phase1-${currentTeam.teamName}`,
+        title: assigned.title,
+        problem: assigned.problem,
+        mission: '',
+        specialRequirement: '',
+        oneLineSolution: assigned.problem,
+        judgeCheck: '',
+        difficulty: assigned.difficulty,
+        assignedAt: new Date(),
+      };
+    } else {
+      // Phase 2: use existing fair-draw logic (unchanged)
+      const selected = await drawFairChallenge(phase, currentTeam);
+      challenge = {
+        id: selected._id.toString(),
+        title: selected.title,
+        problem: selected.problem,
+        mission: selected.mission,
+        specialRequirement: selected.specialRequirement,
+        oneLineSolution: selected.oneLineSolution,
+        judgeCheck: selected.judgeCheck,
+        difficulty: selected.difficulty,
+        logicalId: selected.logicalId,
+        before: selected.before,
+        solutionDirection: selected.solutionDirection,
+        after: selected.after,
+        metric: selected.metric,
+        metricExplanation: selected.metricExplanation,
+        category: selected.category,
+        assignedAt: new Date(),
+      };
+    }
+
     const team = await Team.findOneAndUpdate(
       { _id: auth.teamId, [field]: { $exists: false } },
       { $set: { [field]: challenge } },
