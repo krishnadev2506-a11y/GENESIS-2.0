@@ -4,7 +4,7 @@ import { featureChallenges, type DistributedChallenge } from '@/lib/challenge-di
 import { phase2Situations } from '@/data/phase2-situations';
 
 type TeamForAllocation = { _id: { toString(): string }; teamName: string; projectIdea?: string };
-const SITUATION_CATALOG_VERSION = 'phase2-recovery-v1';
+const SITUATION_CATALOG_VERSION = 'phase2-recovery-v2';
 
 function uniqueFeatureSeeds(items: DistributedChallenge[]) {
   const byTitle = new Map<string, DistributedChallenge>();
